@@ -2,15 +2,21 @@ package com.TyxApp.bangumi.mainpage.homecontent;
 
 import android.os.Bundle;
 
-import androidx.fragment.app.Fragment;
+import com.TyxApp.bangumi.base.BaseFragment;
+import com.TyxApp.bangumi.base.BasePresenter;
+import com.TyxApp.bangumi.base.RecyclerViewFragment;
 
-public class BangumiFragment extends Fragment {
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.RecyclerView;
+
+public class BangumiFragment extends RecyclerViewFragment {
     public static BangumiFragment newInstance() {
-        
-        Bundle args = new Bundle();
-        
-        BangumiFragment fragment = new BangumiFragment();
-        fragment.setArguments(args);
-        return fragment;
+        return new BangumiFragment();
     }
+
+    @Override
+    public BasePresenter getPresenter() {
+        return null;
+    }
+
 }

@@ -2,6 +2,7 @@ package com.TyxApp.bangumi.mainpage;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -9,16 +10,24 @@ import android.view.View;
 
 import com.TyxApp.bangumi.R;
 import com.TyxApp.bangumi.base.BaseActivity;
+import com.TyxApp.bangumi.data.Bangumi;
+import com.TyxApp.bangumi.data.source.ZzzFun;
 import com.TyxApp.bangumi.mainpage.homecontent.BangumiFragment;
+import com.TyxApp.bangumi.mainpage.search.SearchFragment;
 import com.TyxApp.bangumi.util.ActivityUtil;
 import com.TyxApp.bangumi.util.LogUtil;
 import com.google.android.material.navigation.NavigationView;
+
+import java.util.List;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import butterknife.BindView;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 
 public class MainActivity extends BaseActivity {
 
@@ -56,14 +65,14 @@ public class MainActivity extends BaseActivity {
         if (mBangumiFragment == null) {
             mBangumiFragment = BangumiFragment.newInstance();
         }
-        ActivityUtil.addFragmentToActivity(getSupportFragmentManager(),
-                mBangumiFragment, R.id.fl_content);
+//        ActivityUtil.addFragmentToActivity(getSupportFragmentManager(),
+//                mBangumiFragment, R.id.fl_content);
 
         //initToolBar
         setSupportActionBar(searchToolBar);
         getSupportActionBar().setTitle(getString(R.string.bangumi));
         searchToolBar.setNavigationOnClickListener(v -> {
-            Fragment f = getSupportFragmentManager().findFragmentByTag(BangumiFragment.class.getName());
+            Fragment f = getSupportFragmentManager().findFragmentByTag(SearchFragment.class.getName());
             if (f == null) {
                 mainDrawerlayout.openDrawer(Gravity.START);
             }
