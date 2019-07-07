@@ -2,20 +2,18 @@ package com.TyxApp.bangumi.data.source;
 
 import com.TyxApp.bangumi.data.Bangumi;
 import com.TyxApp.bangumi.util.HttpRequestUtil;
-import com.TyxApp.bangumi.util.LogUtil;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Observable;
-import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
-public class ZzzFun implements BaseBangumiParser{
+public class ZzzFun implements BaseBangumiParser {
     private String baseUrl = "http://api.xaaxhb.com/zapi";
 
     /**
@@ -27,23 +25,35 @@ public class ZzzFun implements BaseBangumiParser{
         return Observable.range(0, 5)
                 .map(integer -> {
                     if (integer == 0) {
-                        //zzzfun的第一栏数据url的t是42
                         integer = 42;
                     }
                     String url = baseUrl + "/type/home.php?t=" + integer;
-                    String jsonData = HttpRequestUtil.getGetRequestResponseBodyString(url);
-                    Gson gson = new Gson();
-                    JsonObject jsonObject = gson.fromJson(jsonData, JsonObject.class);
-                    Type type = new TypeToken<List<Bangumi>>(){}.getType();
-                    List<Bangumi> bangumis = gson.fromJson(jsonObject.get("result").toString(), type);
-                    return bangumis;
+                    return getBangumis(url);
                 })
                 .subscribeOn(Schedulers.io());
     }
 
+    private List<Bangumi> getBangumis(String url) throws IOException {
+        String jsonData = HttpRequestUtil.getGetRequestResponseBodyString(url);
+        Gson gson = new Gson();
+        //只要result字段的数据
+        JsonObject jsonObject = gson.fromJson(jsonData, JsonObject.class);
+        Type type = new TypeToken<List<Bangumi>>() {
+        }.getType();
+        List<Bangumi> bangumis = gson.fromJson(jsonObject.get("result").toString(), type);
+        return bangumis;
+    }
+
+    /**
+     * URL为 http://api.xaaxhb.com/zapi/type/home.php?t=9
+     */
     @Override
     public Observable<List<Bangumi>> getHomePageHeadeBangumiData() {
-        return null;
+        return Observable.create(emitter -> {
+            String url = baseUrl + "/type/home.php?t=9";
+            emitter.onNext(getBangumis(url));
+            emitter.onComplete();
+        });
     }
 
     @Override

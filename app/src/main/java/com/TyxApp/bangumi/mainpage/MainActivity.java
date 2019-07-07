@@ -2,6 +2,7 @@ package com.TyxApp.bangumi.mainpage;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.Menu;
@@ -26,6 +27,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import butterknife.BindView;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
@@ -61,12 +63,14 @@ public class MainActivity extends BaseActivity {
             }
         };
 
-        mBangumiFragment = (BangumiFragment) ActivityUtil.findFragment(getSupportFragmentManager(), BangumiFragment.class.getName());
+        mBangumiFragment = (BangumiFragment) ActivityUtil.findFragment(
+                getSupportFragmentManager(), BangumiFragment.class.getName());
+
         if (mBangumiFragment == null) {
             mBangumiFragment = BangumiFragment.newInstance();
         }
-//        ActivityUtil.addFragmentToActivity(getSupportFragmentManager(),
-//                mBangumiFragment, R.id.fl_content);
+        ActivityUtil.addFragmentToActivity(getSupportFragmentManager(),
+                mBangumiFragment, R.id.fl_content);
 
         //initToolBar
         setSupportActionBar(searchToolBar);

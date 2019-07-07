@@ -24,8 +24,11 @@ public abstract class BaseFragment extends Fragment {
         getLifecycle().addObserver(presenter);
         View view = inflater.inflate(getLayoutId(), container, false);
         mUnbinder = ButterKnife.bind(this, view);
+        initView();
         return view;
     }
+
+    protected abstract void initView();
 
 
     public abstract BasePresenter getPresenter();

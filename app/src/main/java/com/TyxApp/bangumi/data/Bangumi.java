@@ -9,11 +9,20 @@ public class Bangumi {
     private String name;
     @SerializedName(value = "pic")
     private String cover;
+    private String img;
     private String intro;
     private String hits;
     private String remarks;
     private String total;
     private String serial;
+
+    public String getImg() {
+        return img;
+    }
+
+    public void setImg(String img) {
+        this.img = img;
+    }
 
     public String getSerial() {
         return serial;
