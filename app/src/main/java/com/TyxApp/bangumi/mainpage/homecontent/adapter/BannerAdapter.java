@@ -1,4 +1,4 @@
-package com.TyxApp.bangumi.mainpage.homecontent;
+package com.TyxApp.bangumi.mainpage.homecontent.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -9,7 +9,6 @@ import android.widget.TextView;
 
 import com.TyxApp.bangumi.R;
 import com.TyxApp.bangumi.data.Bangumi;
-import com.TyxApp.bangumi.util.LogUtil;
 import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
@@ -48,7 +47,6 @@ public class BannerAdapter extends PagerAdapter {
     @Override
     public Object instantiateItem(@NonNull ViewGroup container, int position) {
         final int relposition = (position - 1 + mBangumiList.size()) % mBangumiList.size();
-        LogUtil.i(relposition + "asdfasdf");
         View view = LayoutInflater.from(mContext).inflate(R.layout.layout_zzzfun_banner, null);
         ImageView imageView = view.findViewById(R.id.iv_zzzfun_banner);
         TextView textView = view.findViewById(R.id.tv_zzzfun_banner_name);

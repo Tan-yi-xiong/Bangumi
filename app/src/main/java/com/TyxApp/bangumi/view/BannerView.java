@@ -70,17 +70,7 @@ public class BannerView extends ViewPager {
         bannerSwitch = true;
         bannerTime = time;
         if (bannerHandler == null) {
-            addOnPageChangeListener(new OnPageChangeListener() {
-                @Override
-                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
-                }
-
-                @Override
-                public void onPageSelected(int position) {
-
-                }
-
+            addOnPageChangeListener(new MOnPageChangeListener() {
                 @Override
                 public void onPageScrollStateChanged(int state) {
                     if (SCROLL_STATE_IDLE == state) {
@@ -125,6 +115,28 @@ public class BannerView extends ViewPager {
         this.mDuration = mDuration;
     }
 
+    public static class MOnPageChangeListener implements OnPageChangeListener {
+
+        @Override
+        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+        }
+
+        @Override
+        public void onPageSelected(int position) {
+
+        }
+
+        @Override
+        public void onPageScrollStateChanged(int state) {
+
+        }
+    }
+
+    /**
+     * 自定义Scroller控制轮播图速度
+     *
+     */
     class CoustomViewPagerScroller extends Scroller {
 
         public CoustomViewPagerScroller(Context context) {

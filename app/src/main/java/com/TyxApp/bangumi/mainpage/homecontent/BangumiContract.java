@@ -9,14 +9,16 @@ import java.util.List;
 
 public interface BangumiContract {
     interface View {
-        void showHeaderData(List<Bangumi> headerBangumis);
+        void showHomeBangumis(List<List<Bangumi>> homeBangumis);
 
-        void showHomeBangumi(List<List<Bangumi>> homeBangumis);
+        void showBangumiLoadingError(Throwable throwable);
 
-        void showBangumiLoadingError();
+        void showNewHomeBangumis(List<List<Bangumi>> newHomeBangumis);
     }
 
     interface Presenter extends BasePresenter {
         void populaterBangumi();
+
+        void refreshHomeData();
     }
 }

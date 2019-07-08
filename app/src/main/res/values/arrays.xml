@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="zzfun_title">
+        <item>最近更新</item>
+        <item>日本动漫</item>
+        <item>国产动漫</item>
+        <item>剧场版</item>
+        <item>影视剧</item>
+    </array>
+</resources>

@@ -17,15 +17,18 @@ public class ZzzFun implements BaseBangumiParser {
     private String baseUrl = "http://api.xaaxhb.com/zapi";
 
     /**
-     * zzzfun主页分为5部分, URL为 http://api.xaaxhb.com/zapi/type/home.php?t=1
-     * t的值分别为42, 1-4
+     * zzzfun主页分为6部分, URL为 http://api.xaaxhb.com/zapi/type/home.php?t=1
+     * t的值分别为9(头部轮播), 42, 1-4,
      */
     @Override
     public Observable<List<Bangumi>> getHomePageBangumiData() {
-        return Observable.range(0, 5)
+        return Observable.range(0, 6)
                 .map(integer -> {
                     if (integer == 0) {
                         integer = 42;
+                    }
+                    if (integer == 5) {
+                        integer = 9;
                     }
                     String url = baseUrl + "/type/home.php?t=" + integer;
                     return getBangumis(url);
@@ -44,17 +47,6 @@ public class ZzzFun implements BaseBangumiParser {
         return bangumis;
     }
 
-    /**
-     * URL为 http://api.xaaxhb.com/zapi/type/home.php?t=9
-     */
-    @Override
-    public Observable<List<Bangumi>> getHomePageHeadeBangumiData() {
-        return Observable.create(emitter -> {
-            String url = baseUrl + "/type/home.php?t=9";
-            emitter.onNext(getBangumis(url));
-            emitter.onComplete();
-        });
-    }
 
     @Override
     public Observable<List<Bangumi>> getSearchResult(String word) {

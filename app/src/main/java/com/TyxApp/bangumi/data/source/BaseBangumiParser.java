@@ -12,11 +12,6 @@ public interface BaseBangumiParser {
      */
     Observable<List<Bangumi>> getHomePageBangumiData();
 
-    /**
-     * 获取网站主页头部(一般为轮播图)番剧信息
-     *
-     */
-    Observable<List<Bangumi>> getHomePageHeadeBangumiData();
 
     /**
      * 获取网站搜索结果
