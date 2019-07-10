@@ -1,4 +1,6 @@
-package com.TyxApp.bangumi.data.source;
+package com.TyxApp.bangumi.data.source.remote;
+
+import android.text.TextUtils;
 
 import com.TyxApp.bangumi.data.Bangumi;
 import com.TyxApp.bangumi.util.HttpRequestUtil;

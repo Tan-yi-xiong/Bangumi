@@ -1,4 +1,4 @@
-package com.TyxApp.bangumi.mainpage.homecontent.adapter;
+package com.TyxApp.bangumi.mainpage.homecontent.adapter.zzzfun;
 
 import android.content.Context;
 import android.view.LayoutInflater;

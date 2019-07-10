@@ -1,23 +1,20 @@
-package com.TyxApp.bangumi.mainpage.homecontent.adapter;
+package com.TyxApp.bangumi.mainpage.homecontent.adapter.zzzfun;
 
 import android.content.Context;
 import android.graphics.Rect;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
+import android.widget.TextView;
 
 import com.TyxApp.bangumi.R;
-import com.TyxApp.bangumi.base.BaseAdapter;
 import com.TyxApp.bangumi.base.BaseViewHolder;
 import com.TyxApp.bangumi.data.Bangumi;
-import com.TyxApp.bangumi.mainpage.homecontent.adapter.BannerAdapter;
+import com.TyxApp.bangumi.mainpage.homecontent.adapter.BaseHomeBangumiAdapter;
 import com.TyxApp.bangumi.util.AnimationUtil;
-import com.TyxApp.bangumi.util.LogUtil;
 import com.TyxApp.bangumi.view.BannerIndicator;
 import com.TyxApp.bangumi.view.BannerView;
 
-import java.util.Collection;
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -26,16 +23,17 @@ import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.OnLifecycleEvent;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager.widget.ViewPager;
 
-public class HomeBangumiAdapter extends BaseHomeBangumiAdapter<List<Bangumi>, BaseViewHolder> implements LifecycleObserver {
+public class ZzzFunHomeBangumiAdapter extends BaseHomeBangumiAdapter<List<Bangumi>, BaseViewHolder> implements LifecycleObserver {
     private final static int HEADE = 0;
     private final static int BODY = 1;
     private final static int TITLE = 2;
     private BannerView mBannerView;
     private String[] titles;
+    private OnMoreBangumiClickListener mMoreBangumiClickListener;
+    private OnBangumiItemClick mOnBangumiItemClick;
 
-    public HomeBangumiAdapter(Context context) {
+    public ZzzFunHomeBangumiAdapter(Context context) {
         super(context);
         titles = getContext().getResources().getStringArray(R.array.zzfun_title);
     }
@@ -48,6 +46,7 @@ public class HomeBangumiAdapter extends BaseHomeBangumiAdapter<List<Bangumi>, Ba
 
     @Override
     public void populaterNewBangumis(List<List<Bangumi>> newBangumis) {
+        getDataList().clear();
         getDataList().addAll(newBangumis);
         if (mBannerView != null) {
             BannerAdapter adapter = (BannerAdapter) mBannerView.getAdapter();
@@ -74,6 +73,7 @@ public class HomeBangumiAdapter extends BaseHomeBangumiAdapter<List<Bangumi>, Ba
     @NonNull
     @Override
     public BaseViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+
         if (viewType == HEADE) {
             return BaseViewHolder.get(getContext(), parent, R.layout.layout_zzzfun_homeheader);
         } else if (viewType == TITLE) {
@@ -104,10 +104,11 @@ public class HomeBangumiAdapter extends BaseHomeBangumiAdapter<List<Bangumi>, Ba
 
     private void bindBody(int position, BaseViewHolder holder) {
         //计算真正的下标
-        int group = getWichGroup(position);
-        int gropChildCount = getDataList().get(group).size();
+        final int group = getWichGroup(position);
+        final int gropChildCount = getDataList().get(group).size();
         position = ((gropChildCount + 1) * (group + 1) - position) - 5;
         position = Math.abs(position);
+        final int pos = position;
         Bangumi bangumi = getDataList().get(group).get(position);
         holder.setImageRes(R.id.iv_bangumi_cover, bangumi.getCover());
         holder.setText(R.id.tv_bangumi_name, bangumi.getName());
@@ -120,6 +121,11 @@ public class HomeBangumiAdapter extends BaseHomeBangumiAdapter<List<Bangumi>, Ba
                 ji = "全" + bangumi.getTotal() + "话";
             }
         }
+        holder.getView(R.id.home_bangumi_item_parent).setOnClickListener(v -> {
+            if (mOnBangumiItemClick != null) {
+                mOnBangumiItemClick.onClick(group, pos);
+            }
+        });
         holder.setText(R.id.tv_bangumi_ji, ji);
     }
 
@@ -143,11 +149,17 @@ public class HomeBangumiAdapter extends BaseHomeBangumiAdapter<List<Bangumi>, Ba
         //获取对应标题下标
         position = position % 6 - 1;
         holder.setText(R.id.zzzfun_home_title, titles[position]);
-        ImageButton imageButton = holder.getView(R.id.home_bangumi_more);
+        TextView moreTextView = holder.getView(R.id.home_bangumi_more);
+        final int pos = position;
+        moreTextView.setOnClickListener(v -> {
+            if (mMoreBangumiClickListener != null) {
+                mMoreBangumiClickListener.onClick(pos);
+            }
+        });
         if (position == 0) {
-            imageButton.setVisibility(View.GONE);
+            moreTextView.setVisibility(View.GONE);
         } else {
-            imageButton.setVisibility(View.VISIBLE);
+            moreTextView.setVisibility(View.VISIBLE);
         }
     }
 
@@ -211,12 +223,30 @@ public class HomeBangumiAdapter extends BaseHomeBangumiAdapter<List<Bangumi>, Ba
             });
         }
     }
+
+    public void setOnMoreBangumiClickListener(OnMoreBangumiClickListener clickListener) {
+        mMoreBangumiClickListener = clickListener;
+    }
+
+    public void setOnBangumiItemClick(OnBangumiItemClick onBangumiItemClick) {
+        mOnBangumiItemClick = onBangumiItemClick;
+    }
+
+    public interface OnBangumiItemClick {
+        void onClick(int group, int pos);
+    }
+
+    public interface OnMoreBangumiClickListener {
+        void onClick(int pos);
+    }
+
     public static class ItemDecoration extends RecyclerView.ItemDecoration {
         @Override
         public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
             int viewType = parent.getChildViewHolder(view).getItemViewType();
             if (viewType == BODY) {
                 outRect.bottom = AnimationUtil.dp2px(view.getContext(), 10);
+                outRect.left = AnimationUtil.dp2px(view.getContext(), 8);
             }
         }
     }

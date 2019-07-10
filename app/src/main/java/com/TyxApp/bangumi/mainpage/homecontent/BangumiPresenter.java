@@ -2,9 +2,8 @@ package com.TyxApp.bangumi.mainpage.homecontent;
 
 
 import com.TyxApp.bangumi.data.Bangumi;
-import com.TyxApp.bangumi.data.source.BaseBangumiParser;
+import com.TyxApp.bangumi.data.source.remote.BaseBangumiParser;
 import com.TyxApp.bangumi.util.ExceptionUtil;
-import com.TyxApp.bangumi.util.LogUtil;
 
 import java.util.ArrayList;
 import java.util.List;

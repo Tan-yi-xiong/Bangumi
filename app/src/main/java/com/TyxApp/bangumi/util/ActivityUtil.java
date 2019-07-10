@@ -10,14 +10,20 @@ public class ActivityUtil {
                 .commit();
     }
 
+    public static void replaceFragment(FragmentManager manager, Fragment fragment, int contentId) {
+        manager.beginTransaction()
+                .replace(contentId, fragment, fragment.getClass().getName())
+                .commit();
+    }
+
     public static Fragment findFragment(FragmentManager manager, String tag) {
         return manager.findFragmentByTag(tag);
     }
 
     public static void addFragmentToActivity(FragmentManager manager, Fragment fragment, int contentId, int transition) {
         manager.beginTransaction()
-                .add(contentId, fragment, fragment.getClass().getName())
                 .setTransition(transition)
+                .add(contentId, fragment, fragment.getClass().getName())
                 .commit();
     }
 

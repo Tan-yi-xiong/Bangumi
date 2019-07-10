@@ -1,13 +1,17 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_centerHorizontal="true"
     android:gravity="center_vertical"
     android:layout_width="fill_parent"
+    android:layout_marginStart="8dp"
+    android:layout_marginEnd="8dp"
     android:layout_height="44dp"
     android:orientation="horizontal">
 
     <ImageView
-        android:src="@drawable/ic_item_title"
+
+        app:srcCompat="@drawable/ic_item_title"
         android:layout_marginEnd="2dp"
         android:layout_width="20dp"
         android:layout_height="20dp"/>
@@ -23,12 +27,11 @@
         android:layout_height="wrap_content"
         android:text="最近更新"/>
 
-    <ImageButton
+    <TextView
+        android:text="@string/more"
         android:id="@+id/home_bangumi_more"
-        android:src="@drawable/left"
-        android:tint="@color/grey_500"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="?android:attr/selectableItemBackgroundBorderless"/>
+        android:background="?attr/selectableItemBackgroundBorderless"/>
 
 </LinearLayout>

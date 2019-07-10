@@ -1,4 +1,4 @@
-package com.TyxApp.bangumi.data.source;
+package com.TyxApp.bangumi.data.source.remote;
 
 import com.TyxApp.bangumi.data.Bangumi;
 

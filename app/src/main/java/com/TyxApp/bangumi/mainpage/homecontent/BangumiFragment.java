@@ -6,10 +6,12 @@ import com.TyxApp.bangumi.R;
 import com.TyxApp.bangumi.base.BasePresenter;
 import com.TyxApp.bangumi.base.RecyclerViewFragment;
 import com.TyxApp.bangumi.data.Bangumi;
-import com.TyxApp.bangumi.data.source.ZzzFun;
+import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
+import com.TyxApp.bangumi.data.source.remote.ZzzFun;
 import com.TyxApp.bangumi.mainpage.homecontent.adapter.BaseHomeBangumiAdapter;
-import com.TyxApp.bangumi.mainpage.homecontent.adapter.HomeBangumiAdapter;
+import com.TyxApp.bangumi.mainpage.homecontent.adapter.zzzfun.ZzzFunHomeBangumiAdapter;
 import com.TyxApp.bangumi.util.LogUtil;
+import com.TyxApp.bangumi.util.PreferenceUtil;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.List;
@@ -26,18 +28,29 @@ public class BangumiFragment extends RecyclerViewFragment implements BangumiCont
 
     @Override
     protected void initView() {
+
         getRefreshLayout().setRefreshing(true);
         getRefreshLayout().setColorSchemeColors(ContextCompat.getColor(getContext(), R.color.colorPrimary));
         getRefreshLayout().setOnRefreshListener(() -> mPresenter.refreshHomeData());
 
         getRecyclerview().setVisibility(View.GONE);//刚开始不显示, 等加载完数据在显示
         getRecyclerview().setLayoutManager(new GridLayoutManager(getActivity(), 2));
-        //未加切换逻辑
-        mHomeBangumiAdapter = new HomeBangumiAdapter(getContext());
-        getLifecycle().addObserver((HomeBangumiAdapter)mHomeBangumiAdapter);
 
+        String honeAdapterSourch = PreferenceUtil.getString(PreferenceUtil.HOME_SOURCE,
+                BangumiPresistenceContract.BangumiSource.ZZZFUN);
+
+        switch (honeAdapterSourch) {
+            case BangumiPresistenceContract.BangumiSource.ZZZFUN:
+                mHomeBangumiAdapter = new ZzzFunHomeBangumiAdapter(getContext());
+                ZzzFunHomeBangumiAdapter adapter = (ZzzFunHomeBangumiAdapter) mHomeBangumiAdapter;
+                getLifecycle().addObserver(adapter);
+                adapter.setOnBangumiItemClick((group, pos) -> LogUtil.i(adapter.getData(group).get(pos).getName()));
+                adapter.setOnMoreBangumiClickListener(pos -> LogUtil.i("asdfasdf" + pos));
+                break;
+        }
         getRecyclerview().setAdapter(mHomeBangumiAdapter);
-        getRecyclerview().addItemDecoration(new HomeBangumiAdapter.ItemDecoration());
+        getRecyclerview().addItemDecoration(new ZzzFunHomeBangumiAdapter.ItemDecoration());
+
     }
 
     @Override
@@ -57,6 +70,7 @@ public class BangumiFragment extends RecyclerViewFragment implements BangumiCont
     @Override
     public void showBangumiLoadingError(Throwable throwable) {
         LogUtil.i(throwable.toString());
+        getRefreshLayout().setRefreshing(false);
         Snackbar.make(getRecyclerview(), throwable.toString(), Snackbar.LENGTH_LONG).show();
     }
 

@@ -7,4 +7,11 @@
         <item>剧场版</item>
         <item>影视剧</item>
     </array>
+
+    <array name="search_result_tab_text">
+        <item>Zzzfun</item>
+        <item>nico</item>
+        <item>樱花动漫</item>
+        <item>dilidili</item>
+    </array>
 </resources>
