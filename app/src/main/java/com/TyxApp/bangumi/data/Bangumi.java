@@ -1,20 +1,62 @@
 package com.TyxApp.bangumi.data;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.SerializedName;
 
-public class Bangumi {
-    @SerializedName(value = "id")
+public class Bangumi implements Parcelable {
+    @SerializedName(value = "id", alternate = {"vod_id"})
     private int vod_id;
-    private String soure;
+
+    private String soure;//来源
+
+    @SerializedName(value = "name", alternate = {"vod_name"})
     private String name;
-    @SerializedName(value = "pic")
+
+    @SerializedName(value = "pic", alternate = {"vod_pic"})
     private String cover;
+
     private String img;
-    private String intro;
-    private String hits;
+
+    private String intro;//简介
+
+    @SerializedName(value = "hits", alternate = {"vod_hits"})
+    private String hits;//热度
+
+    @SerializedName(value = "remarks", alternate = {"vod_remarks"})
     private String remarks;
-    private String total;
-    private String serial;
+
+    @SerializedName(value = "total", alternate = {"vod_total"})
+    private String total;//总集数
+
+    @SerializedName(value = "serial", alternate = {"vod_serial"})
+    private String serial;//更新至
+
+    protected Bangumi(Parcel in) {
+        vod_id = in.readInt();
+        soure = in.readString();
+        name = in.readString();
+        cover = in.readString();
+        img = in.readString();
+        intro = in.readString();
+        hits = in.readString();
+        remarks = in.readString();
+        total = in.readString();
+        serial = in.readString();
+    }
+
+    public static final Creator<Bangumi> CREATOR = new Creator<Bangumi>() {
+        @Override
+        public Bangumi createFromParcel(Parcel in) {
+            return new Bangumi(in);
+        }
+
+        @Override
+        public Bangumi[] newArray(int size) {
+            return new Bangumi[size];
+        }
+    };
 
     public String getImg() {
         return img;
@@ -56,6 +98,8 @@ public class Bangumi {
         this.remarks = remarks;
     }
 
+    public Bangumi() {
+    }
 
     public Bangumi(int vod_id, String soure, String name, String cover) {
         this.vod_id = vod_id;
@@ -104,4 +148,22 @@ public class Bangumi {
         this.intro = intro;
     }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(vod_id);
+        dest.writeString(soure);
+        dest.writeString(name);
+        dest.writeString(cover);
+        dest.writeString(img);
+        dest.writeString(intro);
+        dest.writeString(hits);
+        dest.writeString(remarks);
+        dest.writeString(total);
+        dest.writeString(serial);
+    }
 }

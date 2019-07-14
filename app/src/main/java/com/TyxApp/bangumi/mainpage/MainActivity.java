@@ -7,7 +7,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.TyxApp.bangumi.R;
-import com.TyxApp.bangumi.base.BaseActivity;
+import com.TyxApp.bangumi.base.BaseMvpActivity;
 import com.TyxApp.bangumi.mainpage.homecontent.BangumiFragment;
 import com.TyxApp.bangumi.mainpage.search.SearchFragment;
 import com.TyxApp.bangumi.util.ActivityUtil;
@@ -17,11 +17,10 @@ import com.google.android.material.navigation.NavigationView;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import butterknife.BindView;
 
-public class MainActivity extends BaseActivity {
+public class MainActivity extends BaseMvpActivity {
     @BindView(R.id.tb_main_search)
     Toolbar searchToolBar;
     @BindView(R.id.main_navigationview)
@@ -42,6 +41,16 @@ public class MainActivity extends BaseActivity {
 
     @Override
     protected void initView(Bundle savedInstanceState) {
+        //Fragmet返回栈空时恢复主界面ToolBar原样
+        getSupportFragmentManager().addOnBackStackChangedListener(() -> {
+            if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
+                if (!searchMenu.isVisible()) {
+                    searchMenu.setVisible(true);
+                    AnimationUtil.ActionBarDrawerToggleAnimation(toggle, false);
+                }
+            }
+        });
+
         toggle = new ActionBarDrawerToggle(this, mainDrawerlayout, searchToolBar, R.string.opendrawer, R.string.closedrawer) {
             @Override
             public void onDrawerOpened(View drawerView) {
@@ -67,7 +76,8 @@ public class MainActivity extends BaseActivity {
         setSupportActionBar(searchToolBar);
         getSupportActionBar().setTitle(getString(R.string.bangumi));
         searchToolBar.setNavigationOnClickListener(v -> {
-            if (searchMenu.isVisible()) {
+            //Fragmet返回栈空时当侧栏开关, 反则当返回按钮
+            if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
                 mainDrawerlayout.openDrawer(Gravity.START);
             } else {
                 onBackPressed();
@@ -99,20 +109,4 @@ public class MainActivity extends BaseActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onBackPressed() {
-        SearchFragment searchFragment = (SearchFragment) ActivityUtil.findFragment(getSupportFragmentManager(),
-                SearchFragment.class.getName());
-
-        if (searchFragment != null) {
-            if (searchFragment.hasChildPop()) {
-                searchFragment.childPop();
-                return;
-            } else {
-                AnimationUtil.ActionBarDrawerToggleAnimation(toggle, false);
-                searchMenu.setVisible(true);
-            }
-        }
-        super.onBackPressed();
-    }
 }

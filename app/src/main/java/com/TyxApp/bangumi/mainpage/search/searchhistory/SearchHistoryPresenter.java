@@ -22,7 +22,6 @@ import io.reactivex.schedulers.Schedulers;
 public class SearchHistoryPresenter implements SearchHistoryContract.Presenter {
     private SearchHistoryContract.View mView;
     private DBHelper mDBHelper;
-    private boolean isFristToLoading;
     private CompositeDisposable mCompositeDisposable;
     private static final String SQL_BASE_QUERY_WORDS =
             "SELECT " + SearchHistoryWordPresistenceContract.COLUMN_NAME_WORD +
@@ -32,7 +31,6 @@ public class SearchHistoryPresenter implements SearchHistoryContract.Presenter {
         mView = view;
         mDBHelper = DBHelper.getInstance();
         mCompositeDisposable = new CompositeDisposable();
-        isFristToLoading = true;
     }
 
     @Override
@@ -45,7 +43,6 @@ public class SearchHistoryPresenter implements SearchHistoryContract.Presenter {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(words -> {
-                    isFristToLoading = false;
                     if (words.isEmpty()) {
                         mView.showWordsEmpty();
                     } else {
@@ -87,9 +84,7 @@ public class SearchHistoryPresenter implements SearchHistoryContract.Presenter {
 
     @Override
     public void onResume() {
-        if (isFristToLoading) {
-            getWords();
-        }
+
     }
 
     @Override

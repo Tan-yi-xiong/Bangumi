@@ -13,7 +13,7 @@ import androidx.fragment.app.Fragment;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 
-public abstract class BaseFragment extends Fragment {
+public abstract class BaseMvpFragment extends Fragment {
     private Unbinder mUnbinder;
 
     @Nullable

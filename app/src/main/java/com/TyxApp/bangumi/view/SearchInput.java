@@ -111,6 +111,10 @@ public class SearchInput extends RelativeLayout {
         mEditText.setText(text);
     }
 
+    public String getText() {
+        return mEditText.getText().toString();
+    }
+
     public AppCompatEditText getEditText() {
         return mEditText;
     }

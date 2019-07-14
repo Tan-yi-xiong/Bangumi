@@ -10,6 +10,7 @@ import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
 import com.TyxApp.bangumi.data.source.remote.ZzzFun;
 import com.TyxApp.bangumi.mainpage.homecontent.adapter.BaseHomeBangumiAdapter;
 import com.TyxApp.bangumi.mainpage.homecontent.adapter.zzzfun.ZzzFunHomeBangumiAdapter;
+import com.TyxApp.bangumi.player.PlayerActivity;
 import com.TyxApp.bangumi.util.LogUtil;
 import com.TyxApp.bangumi.util.PreferenceUtil;
 import com.google.android.material.snackbar.Snackbar;
@@ -44,7 +45,10 @@ public class BangumiFragment extends RecyclerViewFragment implements BangumiCont
                 mHomeBangumiAdapter = new ZzzFunHomeBangumiAdapter(getContext());
                 ZzzFunHomeBangumiAdapter adapter = (ZzzFunHomeBangumiAdapter) mHomeBangumiAdapter;
                 getLifecycle().addObserver(adapter);
-                adapter.setOnBangumiItemClick((group, pos) -> LogUtil.i(adapter.getData(group).get(pos).getName()));
+                adapter.setOnBangumiItemClick((group, pos) -> PlayerActivity.startPlayerActivity(
+                                requireActivity(),
+                                adapter.getData(group).get(pos)));
+
                 adapter.setOnMoreBangumiClickListener(pos -> LogUtil.i("asdfasdf" + pos));
                 break;
         }

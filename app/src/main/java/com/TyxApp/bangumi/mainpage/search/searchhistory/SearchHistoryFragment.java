@@ -3,10 +3,9 @@ package com.TyxApp.bangumi.mainpage.search.searchhistory;
 import android.graphics.Color;
 
 import com.TyxApp.bangumi.R;
-import com.TyxApp.bangumi.base.BaseAdapter;
 import com.TyxApp.bangumi.base.BasePresenter;
 import com.TyxApp.bangumi.base.RecyclerViewFragment;
-import com.TyxApp.bangumi.util.LogUtil;
+import com.TyxApp.bangumi.mainpage.search.searchhistory.adapter.SearchHistoryAdapter;
 import com.TyxApp.bangumi.view.SearchInput;
 
 import java.util.List;
@@ -29,7 +28,7 @@ public class SearchHistoryFragment extends RecyclerViewFragment implements Searc
         getRecyclerview().setHasFixedSize(true);
         getRecyclerview().setLayoutManager(new LinearLayoutManager(getActivity(), RecyclerView.VERTICAL, false));
 
-        mSearchInput = getActivity().findViewById(R.id.search_input);
+        mSearchInput = requireActivity().findViewById(R.id.search_input);
         mSearchInput.setOnTextChangeListener(text -> mSearchHistoryPresenter.getCorrelationWords(text));
 
         if (mOnSearchWordItemClickListener != null) {
@@ -40,6 +39,8 @@ public class SearchHistoryFragment extends RecyclerViewFragment implements Searc
                 }
             });
         }
+
+        mSearchHistoryPresenter.getWords();
     }
 
     public void setOnSearchWordItemClickListener(OnSearchWordItemClickListener onSearchWordItemClickListener) {

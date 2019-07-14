@@ -36,14 +36,10 @@ public class BangumiPresenter<T extends BaseBangumiParser> implements BangumiCon
         }
     }
 
-    @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-    public void onPause() {
-        mCompositeDisposable.dispose();
-    }
-
     @Override
     public void onDestory() {
         mView = null;
+        mCompositeDisposable.dispose();
     }
 
     @Override

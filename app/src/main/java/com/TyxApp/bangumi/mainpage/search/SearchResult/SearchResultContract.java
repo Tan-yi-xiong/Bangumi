@@ -13,10 +13,12 @@ public interface SearchResultContract {
     }
 
     interface View {
-        void showSearchResultLoadingError();
+        void showSearchResultLoadingError(Throwable throwable);
 
         void showSearchResult(List<Bangumi> bangumis);
 
         void showMoreSearchResult(List<Bangumi> moreBangumis);
+
+        void showSearchResultEmpty();
     }
 }

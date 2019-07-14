@@ -1,4 +1,4 @@
-package com.TyxApp.bangumi.mainpage.search.searchhistory;
+package com.TyxApp.bangumi.mainpage.search.searchhistory.adapter;
 
 import android.content.Context;
 import android.view.ViewGroup;

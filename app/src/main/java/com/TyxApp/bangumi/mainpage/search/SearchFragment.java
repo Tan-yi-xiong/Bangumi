@@ -1,44 +1,83 @@
 package com.TyxApp.bangumi.mainpage.search;
 
-import android.graphics.Color;
-import android.os.Bundle;
+import android.content.Context;
 import android.text.TextUtils;
-import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.widget.FrameLayout;
-import android.widget.TextView;
 
 import com.TyxApp.bangumi.R;
-import com.TyxApp.bangumi.base.BaseFragment;
+import com.TyxApp.bangumi.base.BaseMvpFragment;
 import com.TyxApp.bangumi.base.BasePresenter;
 import com.TyxApp.bangumi.mainpage.search.SearchResult.SearchResultFragmetnContainer;
 import com.TyxApp.bangumi.mainpage.search.searchhistory.SearchHistoryFragment;
 import com.TyxApp.bangumi.util.ActivityUtil;
-import com.TyxApp.bangumi.util.LogUtil;
 import com.TyxApp.bangumi.view.SearchInput;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Lifecycle;
 
-public class SearchFragment extends BaseFragment {
+public class SearchFragment extends BaseMvpFragment {
     private SearchInput mSearchInput;
     private static final String SHF_NAME = "SearchHistoryFragmentName";
     private SearchPresenter mPresenter;
+    private String lastInPutWord;
 
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        //处理返回按键事件
+        OnBackPressedCallback backPressedCallback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (getChildFragmentManager().getBackStackEntryCount() != 0) {
+                    getChildFragmentManager().popBackStack();
+                    if (!mSearchInput.getText().equals(lastInPutWord)) {
+                        mSearchInput.setText(lastInPutWord);
+                    }
+                    mSearchInput.clearFocus();
+                } else {
+                    requireActivity().getSupportFragmentManager().popBackStack();
+                }
+            }
+        };
+
+        requireActivity().getOnBackPressedDispatcher().addCallback(
+                this,
+                backPressedCallback);
+
+        getChildFragmentManager().addOnBackStackChangedListener(() -> {
+            if (getChildFragmentManager().getBackStackEntryCount() == 0) {
+                setSearchResultFragmetLifecycle(Lifecycle.State.RESUMED);
+            } else if (getChildFragmentManager().getBackStackEntryCount() == 1) {
+                setSearchResultFragmetLifecycle(Lifecycle.State.STARTED);
+            }
+        });
+    }
+
+    private void setSearchResultFragmetLifecycle(Lifecycle.State state) {
+        SearchResultFragmetnContainer resultFragmetnContainer = (SearchResultFragmetnContainer) ActivityUtil.findFragment(
+                getChildFragmentManager(), SearchResultFragmetnContainer.class.getName());
+
+        getChildFragmentManager().beginTransaction()
+                .setMaxLifecycle(resultFragmetnContainer, state)
+                .commit();
+    }
 
     public void initView() {
-        mSearchInput = getActivity().findViewById(R.id.search_input);
+        mSearchInput = requireActivity().findViewById(R.id.search_input);
+        mSearchInput.setVisibility(View.VISIBLE);
+
         mSearchInput.setOnFocusChangeListener((SearchInput.OnFocusChangeListener) (view, hasFocus) -> {
             if (hasFocus) {
-                Fragment fragment = ActivityUtil.findFragment(getChildFragmentManager(),
-                        SearchHistoryFragment.class.getName());
+                SearchResultFragmetnContainer resultFragmetnContainer = (SearchResultFragmetnContainer) ActivityUtil.findFragment(
+                        getChildFragmentManager(), SearchResultFragmetnContainer.class.getName());
+                //搜索历史页面不是在最底部, 就是搜索结果页面在底部, 如输入框再次获取焦点搜索历史界面应该再次显示出来
+                if (resultFragmetnContainer != null) {
+                    getChildFragmentManager().beginTransaction()
+                            .setMaxLifecycle(resultFragmetnContainer, Lifecycle.State.STARTED)
+                            .commit();
 
-                //搜索历史页面不是在最底部, 就是搜索结果页面在底部, 如输入框再次获取焦点搜索历史界面应该再次显示出来, 否则替换为搜索结果
-                if (fragment == null) {
                     ActivityUtil.addFragmentToBackTask(getChildFragmentManager(),
                             getSearchHistoryFragmentInstance(),
                             R.id.fl_search_content, SHF_NAME);
@@ -52,14 +91,17 @@ public class SearchFragment extends BaseFragment {
                 if (!TextUtils.isEmpty(word)) {
                     mSearchInput.editTextClearFocus();
                     mPresenter.saveWord(word);
-                    replaceOrSearch(word);
+                    replaceOrSearch();
                     return false;
                 }
             }
             return true;
         });
 
-        ActivityUtil.replaceFragment(getChildFragmentManager(), getSearchHistoryFragmentInstance(), R.id.fl_search_content);
+        ActivityUtil.replaceFragment(
+                getChildFragmentManager(),
+                getSearchHistoryFragmentInstance(),
+                R.id.fl_search_content);
     }
 
     private SearchHistoryFragment getSearchHistoryFragmentInstance() {
@@ -67,21 +109,21 @@ public class SearchFragment extends BaseFragment {
         searchHistoryFragment.setOnSearchWordItemClickListener(word -> {
             mSearchInput.setText(word);
             mSearchInput.clearFocus();
-            replaceOrSearch(word);
+            mPresenter.saveWord(word);
+            replaceOrSearch();
         });
         return searchHistoryFragment;
     }
 
-    private void replaceOrSearch(String word) {
+    private void replaceOrSearch() {
         SearchResultFragmetnContainer resultFragmetnContainer = (SearchResultFragmetnContainer) ActivityUtil.findFragment(
                 getChildFragmentManager(), SearchResultFragmetnContainer.class.getName());
-
+        lastInPutWord = mSearchInput.getText();
         if (resultFragmetnContainer == null) {
             ActivityUtil.replaceFragment(getChildFragmentManager(),
                     SearchResultFragmetnContainer.newInstance(), R.id.fl_search_content);
         } else {
             getChildFragmentManager().popBackStack();
-            resultFragmetnContainer.search(word);
         }
     }
 
@@ -96,22 +138,9 @@ public class SearchFragment extends BaseFragment {
         return R.layout.fragment_search;
     }
 
-    @Override
-    public void onResume() {
-        mSearchInput.setVisibility(View.VISIBLE);
-        super.onResume();
-    }
 
     public static SearchFragment newInstance() {
         return new SearchFragment();
-    }
-
-    public boolean hasChildPop() {
-        return getChildFragmentManager().getBackStackEntryCount() != 0;
-    }
-
-    public void childPop() {
-        getChildFragmentManager().popBackStack();
     }
 
     @Override

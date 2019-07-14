@@ -1,6 +1,7 @@
 package com.TyxApp.bangumi.base;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.TyxApp.bangumi.util.LogUtil;
 
@@ -17,8 +18,7 @@ public abstract class BaseAdapter<T, VH extends RecyclerView.ViewHolder> extends
     public OnItemClickListener mOnItemClickListener;
 
     public BaseAdapter(Context context) {
-        dataList = new ArrayList<>();
-        mContext = context;
+        this(new ArrayList<>(), context);
     }
 
     protected List<T> getDataList() {
@@ -40,9 +40,16 @@ public abstract class BaseAdapter<T, VH extends RecyclerView.ViewHolder> extends
     }
 
     public void clearAddAll(Collection<T> collection) {
-        dataList.clear();
-        dataList.addAll(collection);
-        notifyDataSetChanged();
+        if (!dataList.isEmpty()) {
+            notifyItemRangeRemoved(0, dataList.size());
+            dataList.clear();
+        }
+        addAllInserted(collection);
+    }
+
+    public void remove(int position) {
+        dataList.remove(position);
+        notifyItemRemoved(position);
     }
 
     public void addAllInserted(Collection<T> collection) {
@@ -70,4 +77,5 @@ public abstract class BaseAdapter<T, VH extends RecyclerView.ViewHolder> extends
     public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
         mOnItemClickListener = onItemClickListener;
     }
+
 }

@@ -79,7 +79,7 @@ public class ZzzFunHomeBangumiAdapter extends BaseHomeBangumiAdapter<List<Bangum
         } else if (viewType == TITLE) {
             return BaseViewHolder.get(getContext(), parent, R.layout.layout_zzzfuntitle);
         } else if (viewType == BODY) {
-            return BaseViewHolder.get(getContext(), parent, R.layout.layout_home_bangumi_item);
+            return BaseViewHolder.get(getContext(), parent, R.layout.item_home_bangumi);
         }
         return null;
     }
@@ -115,10 +115,12 @@ public class ZzzFunHomeBangumiAdapter extends BaseHomeBangumiAdapter<List<Bangum
         holder.setText(R.id.tv_bangumi_hit, bangumi.getHits());
         String ji = bangumi.getRemarks();
         if (TextUtils.isEmpty(ji)) {
-            if (Integer.valueOf(bangumi.getTotal()) == 0) {
-                ji = "更新至" + bangumi.getSerial() + "话";
-            } else {
-                ji = "全" + bangumi.getTotal() + "话";
+            if (!TextUtils.isEmpty(bangumi.getTotal())){
+                if (Integer.valueOf(bangumi.getTotal()) == 0) {
+                    ji = "更新至" + bangumi.getSerial() + "话";
+                } else {
+                    ji = "全" + bangumi.getTotal() + "话";
+                }
             }
         }
         holder.getView(R.id.home_bangumi_item_parent).setOnClickListener(v -> {

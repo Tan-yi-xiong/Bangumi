@@ -1,6 +1,7 @@
 package com.TyxApp.bangumi.data.source.remote;
 
 import com.TyxApp.bangumi.data.Bangumi;
+import com.TyxApp.bangumi.data.TextItemSelectBean;
 
 import java.util.List;
 
@@ -15,7 +16,7 @@ public interface BaseBangumiParser {
 
     /**
      * 获取网站搜索结果
-     *
+     *规定: 如果有下一页搜索结果的话在集合最后添加一个null值, 表示可以分批加载
      */
     Observable<List<Bangumi>> getSearchResult(String word);
 
@@ -31,18 +32,20 @@ public interface BaseBangumiParser {
      * 根据id获取番剧的简介, 播放页面使用。
      *
      */
-    Observable<String> getDescribe(int id);
+    Observable<String> getIntor(int id);
 
     /**
      * 根据id获取该番剧所有集的标题名字, 一般网站为第一集, 第二集....。
      * 有的网站在获取集数是时候能同时获取到对应集数视频的url, 这时应该把url按顺序存起来, 这样点击对应集数就不用再去请求解析视频url。
      *
      */
-    Observable<List<String>> getJiTitle(int id);
+    Observable<List<TextItemSelectBean>> getJiList(int id);
 
     /**
      * 根据传进来的集去获取该id番剧该集的播放地址
      *
      */
     Observable<String> getplayerUrl(int id, int ji);
+
+    Observable<List<Bangumi>> getRecommendBangumis(int id);
 }
