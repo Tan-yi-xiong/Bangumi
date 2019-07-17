@@ -27,11 +27,21 @@ public class Bangumi implements Parcelable {
     @SerializedName(value = "remarks", alternate = {"vod_remarks"})
     private String remarks;
 
+    public int getJitotal() {
+        return Jitotal;
+    }
+
+    public void setJitotal(int jitotal) {
+        Jitotal = jitotal;
+    }
+
     @SerializedName(value = "total", alternate = {"vod_total"})
     private String total;//总集数
 
     @SerializedName(value = "serial", alternate = {"vod_serial"})
     private String serial;//更新至
+
+    private int Jitotal;//实际解析得到的集数
 
     protected Bangumi(Parcel in) {
         vod_id = in.readInt();

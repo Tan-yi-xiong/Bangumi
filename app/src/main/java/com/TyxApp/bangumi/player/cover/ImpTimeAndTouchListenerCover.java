@@ -9,9 +9,9 @@ import com.kk.taurus.playerbase.player.OnTimerUpdateListener;
 import com.kk.taurus.playerbase.receiver.BaseCover;
 import com.kk.taurus.playerbase.touch.OnTouchGestureListener;
 
-public abstract class ImpTimeAndTouchCover extends BaseCover implements OnTimerUpdateListener, OnTouchGestureListener {
+public abstract class ImpTimeAndTouchListenerCover extends BaseCover implements OnTimerUpdateListener, OnTouchGestureListener {
 
-    public ImpTimeAndTouchCover(Context context) {
+    public ImpTimeAndTouchListenerCover(Context context) {
         super(context);
     }
 

@@ -14,4 +14,18 @@
         <item>樱花动漫</item>
         <item>dilidili</item>
     </array>
+
+    <array name="main_bottomsheet_item">
+        <item>重播</item>
+        <item>视频速度</item>
+        <item>下载这个视频</item>
+    </array>
+
+    <array name="video_speed_bottomsheet_item">
+        <item>0.5x</item>
+        <item>0.7x</item>
+        <item>1.0x</item>
+        <item>1.5x</item>
+        <item>2.0x</item>
+    </array>
 </resources>

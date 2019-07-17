@@ -13,13 +13,13 @@ import androidx.lifecycle.OnLifecycleEvent;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 
-public class BangumiPresenter<T extends BaseBangumiParser> implements BangumiContract.Presenter {
-    private T banghumiParser;
+public class BangumiPresenter implements BangumiContract.Presenter {
+    private BaseBangumiParser banghumiParser;
     private BangumiContract.View mView;
     private CompositeDisposable mCompositeDisposable;
     private boolean isFristLoadingData;
 
-    public BangumiPresenter(T banghumiParser, BangumiContract.View view) {
+    public BangumiPresenter(BaseBangumiParser banghumiParser, BangumiContract.View view) {
         ExceptionUtil.checkNull(banghumiParser, "BangumiPresenter modle解析不能为空");
         ExceptionUtil.checkNull(view, "BangumiPresenter view不能为空");
 
@@ -38,6 +38,7 @@ public class BangumiPresenter<T extends BaseBangumiParser> implements BangumiCon
 
     @Override
     public void onDestory() {
+        banghumiParser.onDestroy();
         mView = null;
         mCompositeDisposable.dispose();
     }

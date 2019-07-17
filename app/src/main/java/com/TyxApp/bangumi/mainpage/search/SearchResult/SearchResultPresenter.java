@@ -2,6 +2,7 @@ package com.TyxApp.bangumi.mainpage.search.SearchResult;
 
 import com.TyxApp.bangumi.data.source.remote.BaseBangumiParser;
 import com.TyxApp.bangumi.util.ExceptionUtil;
+import com.TyxApp.bangumi.util.LogUtil;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -51,6 +52,7 @@ public class SearchResultPresenter implements SearchResultContract.Presenter {
     @Override
     public void onDestory() {
         mCompositeDisposable.dispose();
+        bangumiParser.onDestroy();
         mView = null;
     }
 }

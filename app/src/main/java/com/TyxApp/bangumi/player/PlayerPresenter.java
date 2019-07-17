@@ -1,6 +1,5 @@
 package com.TyxApp.bangumi.player;
 
-import com.TyxApp.bangumi.base.BasePresenter;
 import com.TyxApp.bangumi.data.source.remote.BaseBangumiParser;
 import com.TyxApp.bangumi.util.ExceptionUtil;
 import com.TyxApp.bangumi.util.LogUtil;
@@ -27,7 +26,7 @@ public class PlayerPresenter implements PlayContract.Presenter {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         intro -> mView.showBangumiIntro(intro),
-                        throwable -> LogUtil.i(throwable.toString())));
+                        throwable -> mView.showError(throwable)));
     }
 
     @Override
@@ -36,7 +35,7 @@ public class PlayerPresenter implements PlayContract.Presenter {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         jiList -> mView.showBangumiJiList(jiList),
-                        throwable -> LogUtil.i(throwable.toString())));
+                        throwable -> mView.showError(throwable)));
     }
 
     @Override
@@ -45,7 +44,7 @@ public class PlayerPresenter implements PlayContract.Presenter {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         playerUrl -> mView.setPlayerUrl(playerUrl),
-                        throwable -> LogUtil.i(throwable.toString())));
+                        throwable -> mView.showError(throwable)));
     }
 
     @Override
@@ -54,7 +53,7 @@ public class PlayerPresenter implements PlayContract.Presenter {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         bangumis -> mView.showRecommendBangumis(bangumis),
-                        throwable -> LogUtil.i(throwable.toString())));
+                        throwable -> mView.showError(throwable)));
     }
 
     @Override
@@ -64,6 +63,8 @@ public class PlayerPresenter implements PlayContract.Presenter {
 
     @Override
     public void onDestory() {
-
+        mView = null;
+        mDisposable.dispose();
+        mBangumiParser.onDestroy();
     }
 }

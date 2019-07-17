@@ -4,6 +4,7 @@ import com.TyxApp.bangumi.data.Bangumi;
 import com.TyxApp.bangumi.data.TextItemSelectBean;
 import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
 import com.TyxApp.bangumi.util.HttpRequestUtil;
+import com.TyxApp.bangumi.util.LogUtil;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
@@ -15,6 +16,7 @@ import java.lang.reflect.Type;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
@@ -23,6 +25,26 @@ import io.reactivex.schedulers.Schedulers;
 public class ZzzFun implements BaseBangumiParser {
     private String baseUrl = "http://api.xaaxhb.com/zapi";
     private List<String> playerUrls;
+    private static ZzzFun INSTANCE;
+    private static AtomicInteger INSTANCECOUNTER = new AtomicInteger();
+
+    private ZzzFun(){}
+
+    public static ZzzFun getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new ZzzFun();
+        }
+        INSTANCECOUNTER.getAndIncrement();
+        return INSTANCE;
+    }
+
+    @Override
+    public void onDestroy() {
+        if (INSTANCECOUNTER.getAndDecrement() == 1) {
+            INSTANCE = null;
+        }
+    }
+
 
     /**
      * zzzfun主页分为6部分, URL为 http://api.xaaxhb.com/zapi/type/home.php?t=1

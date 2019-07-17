@@ -9,9 +9,12 @@ import com.TyxApp.bangumi.base.RecyclerViewFragment;
 import com.TyxApp.bangumi.data.Bangumi;
 import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
 import com.TyxApp.bangumi.data.source.remote.BaseBangumiParser;
+import com.TyxApp.bangumi.data.source.remote.Dilidili;
 import com.TyxApp.bangumi.data.source.remote.Nico;
+import com.TyxApp.bangumi.data.source.remote.Sakura;
 import com.TyxApp.bangumi.data.source.remote.ZzzFun;
 import com.TyxApp.bangumi.mainpage.search.SearchResult.adapter.SearchResultFragmentRVAdapter;
+import com.TyxApp.bangumi.player.PlayerActivity;
 import com.TyxApp.bangumi.util.ExceptionUtil;
 import com.TyxApp.bangumi.util.LogUtil;
 import com.TyxApp.bangumi.view.SearchInput;
@@ -47,6 +50,10 @@ public class SearchResultFragmetn extends RecyclerViewFragment implements Search
         mAdapter = new SearchResultFragmentRVAdapter(requireContext());
         getRecyclerview().setLayoutManager(new LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false));
         getRecyclerview().setAdapter(mAdapter);
+        mAdapter.setOnItemClickListener(pos -> {
+            Bangumi bangumi = mAdapter.getData(pos);
+            PlayerActivity.startPlayerActivity(requireActivity(), bangumi);
+        });
     }
 
     @Override
@@ -57,15 +64,23 @@ public class SearchResultFragmetn extends RecyclerViewFragment implements Search
         switch (type) {
             case BangumiPresistenceContract
                     .BangumiSource.ZZZFUN:
-                parser = new ZzzFun();
-                break;
-            case BangumiPresistenceContract
-                    .BangumiSource.NiICO:
-                parser = new Nico();
+                parser = ZzzFun.getInstance();
                 break;
 
-            default:
-                parser = new ZzzFun();
+            case BangumiPresistenceContract
+                    .BangumiSource.NiICO:
+                parser = Nico.getInstance();
+                break;
+
+            case BangumiPresistenceContract
+                    .BangumiSource.SAKURA:
+                parser = Sakura.getInstance();
+                break;
+
+            case BangumiPresistenceContract
+                    .BangumiSource.DILIDLI:
+                parser = Dilidili.getInstance();
+            break;
         }
         mPresenter = new SearchResultPresenter(parser, this);
         return mPresenter;

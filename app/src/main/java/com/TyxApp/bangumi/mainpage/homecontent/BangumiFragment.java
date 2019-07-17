@@ -7,6 +7,7 @@ import com.TyxApp.bangumi.base.BasePresenter;
 import com.TyxApp.bangumi.base.RecyclerViewFragment;
 import com.TyxApp.bangumi.data.Bangumi;
 import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
+import com.TyxApp.bangumi.data.source.remote.BaseBangumiParser;
 import com.TyxApp.bangumi.data.source.remote.ZzzFun;
 import com.TyxApp.bangumi.mainpage.homecontent.adapter.BaseHomeBangumiAdapter;
 import com.TyxApp.bangumi.mainpage.homecontent.adapter.zzzfun.ZzzFunHomeBangumiAdapter;
@@ -29,6 +30,10 @@ public class BangumiFragment extends RecyclerViewFragment implements BangumiCont
 
     @Override
     protected void initView() {
+        getErrorPageView().setOnClickListener(v -> {
+            getRefreshLayout().setRefreshing(true);
+            mPresenter.refreshHomeData();
+        });
 
         getRefreshLayout().setRefreshing(true);
         getRefreshLayout().setColorSchemeColors(ContextCompat.getColor(getContext(), R.color.colorPrimary));
@@ -59,7 +64,7 @@ public class BangumiFragment extends RecyclerViewFragment implements BangumiCont
 
     @Override
     public BasePresenter getPresenter() {
-        mPresenter = new BangumiPresenter<ZzzFun>(new ZzzFun(), this);
+        mPresenter = new BangumiPresenter(ZzzFun.getInstance(), this);
         return mPresenter;
     }
 
@@ -68,6 +73,7 @@ public class BangumiFragment extends RecyclerViewFragment implements BangumiCont
     public void showHomeBangumis(List<List<Bangumi>> homeBangumis) {
         getRefreshLayout().setRefreshing(false);
         getRecyclerview().setVisibility(View.VISIBLE);
+        showRecyclerView();
         mHomeBangumiAdapter.populaterBangumis(homeBangumis);
     }
 
@@ -75,6 +81,7 @@ public class BangumiFragment extends RecyclerViewFragment implements BangumiCont
     public void showBangumiLoadingError(Throwable throwable) {
         LogUtil.i(throwable.toString());
         getRefreshLayout().setRefreshing(false);
+        showErrorPage();
         Snackbar.make(getRecyclerview(), throwable.toString(), Snackbar.LENGTH_LONG).show();
     }
 
@@ -82,5 +89,6 @@ public class BangumiFragment extends RecyclerViewFragment implements BangumiCont
     public void showNewHomeBangumis(List<List<Bangumi>> newHomeBangumis) {
         getRefreshLayout().setRefreshing(false);
         mHomeBangumiAdapter.populaterNewBangumis(newHomeBangumis);
+        showRecyclerView();
     }
 }

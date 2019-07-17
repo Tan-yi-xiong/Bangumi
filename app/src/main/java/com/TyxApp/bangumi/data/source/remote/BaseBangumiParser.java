@@ -4,6 +4,7 @@ import com.TyxApp.bangumi.data.Bangumi;
 import com.TyxApp.bangumi.data.TextItemSelectBean;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import io.reactivex.Observable;
 
@@ -48,4 +49,6 @@ public interface BaseBangumiParser {
     Observable<String> getplayerUrl(int id, int ji);
 
     Observable<List<Bangumi>> getRecommendBangumis(int id);
+
+    void onDestroy();
 }

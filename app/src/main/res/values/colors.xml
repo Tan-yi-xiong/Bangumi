@@ -76,13 +76,13 @@
     <color name="chip_default_icon_background_color">#517fa4</color>
     <color name="chip_default_text_color">#de000000</color>
     <color name="chips_opened_bg">#009688</color>
-    <color name="colorAccent">#FF9800</color>
+    <color name="colorAccent">@color/pink_500</color>
     <color name="colorAccentDark">#f50057</color>
     <color name="colorAccentLight">#ff80ab</color>
     <color name="colorChipViewBackground">#e0e0e0</color>
     <color name="colorCloseChip">#ababab</color>
-    <color name="colorPrimary">#009688</color>
-    <color name="colorPrimaryDark">#009688</color>
+    <color name="colorPrimary">@color/teal_500</color>
+    <color name="colorPrimaryDark">@color/teal_500</color>
     <color name="colorPrimaryLight">#1e88e5</color>
     <color name="common_google_signin_btn_text_dark_disabled">#1f000000</color>
 

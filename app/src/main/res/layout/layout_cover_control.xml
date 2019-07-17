@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:visibility="gone"
     android:layout_width="match_parent"
@@ -25,27 +26,26 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.26"
             app:srcCompat="@drawable/ic_player_control_back" />
 
         <ImageButton
             android:id="@+id/video_player_more"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
-            android:layout_marginBottom="8dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:tint="@color/mdtp_white"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toBottomOf="@+id/video_player_title"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/video_player_title"
             app:srcCompat="@drawable/ic_player_control_more_vert" />
 
         <TextView
             android:id="@+id/video_player_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
             android:textColor="@color/mdtp_white"
             app:layout_constraintBottom_toBottomOf="@+id/video_player_back"
@@ -65,7 +65,7 @@
             android:id="@+id/player_control_seekBar"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:progressDrawable="@drawable/sb_control_drawable"
+            android:progressDrawable="@drawable/seekbar_drawable"
             app:layout_constraintBottom_toBottomOf="@+id/tv_current_time"
             app:layout_constraintEnd_toStartOf="@+id/tv_total_time"
             app:layout_constraintStart_toEndOf="@+id/tv_current_time"
@@ -75,7 +75,7 @@
             android:id="@+id/player_puase_start_control"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
             android:background="?attr/selectableItemBackgroundBorderless"

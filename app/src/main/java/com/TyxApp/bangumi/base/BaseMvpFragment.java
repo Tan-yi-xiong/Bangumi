@@ -19,8 +19,8 @@ public abstract class BaseMvpFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        ExceptionUtil.checkNull(getPresenter(), "presenter不能为空");
         BasePresenter presenter = getPresenter();
+        ExceptionUtil.checkNull(presenter, "presenter不能为空");
         getLifecycle().addObserver(presenter);
         View view = inflater.inflate(getLayoutId(), container, false);
         mUnbinder = ButterKnife.bind(this, view);

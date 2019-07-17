@@ -1,7 +1,6 @@
 package com.TyxApp.bangumi.base;
 
 import android.view.View;
-import android.widget.ProgressBar;
 
 import com.TyxApp.bangumi.R;
 
@@ -16,7 +15,9 @@ public abstract class RecyclerViewFragment extends BaseMvpFragment {
     @BindView(R.id.refresh)
     SwipeRefreshLayout mRefreshLayout;
     @BindView(R.id.pb_data_loading)
-    ProgressBar dataLoadingView;
+    View dataLoadingView;
+    @BindView(R.id.error_page)
+    View errorPageView;
 
     @Override
     public int getLayoutId() {
@@ -28,6 +29,7 @@ public abstract class RecyclerViewFragment extends BaseMvpFragment {
     }
 
     public void showDataLodaing() {
+        errorPageView.setVisibility(View.GONE);
         recyclerview.setVisibility(View.GONE);
         dataLoadingView.setVisibility(View.VISIBLE);
     }
@@ -35,9 +37,20 @@ public abstract class RecyclerViewFragment extends BaseMvpFragment {
     public void showRecyclerView() {
         recyclerview.setVisibility(View.VISIBLE);
         dataLoadingView.setVisibility(View.GONE);
+        errorPageView.setVisibility(View.GONE);
     }
 
     public SwipeRefreshLayout getRefreshLayout() {
         return mRefreshLayout;
+    }
+
+    public void showErrorPage() {
+        recyclerview.setVisibility(View.GONE);
+        dataLoadingView.setVisibility(View.GONE);
+        errorPageView.setVisibility(View.VISIBLE);
+    }
+
+    public View getErrorPageView() {
+        return errorPageView;
     }
 }

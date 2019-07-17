@@ -5,6 +5,7 @@ import android.util.SparseArray;
 import com.TyxApp.bangumi.data.Bangumi;
 import com.TyxApp.bangumi.data.TextItemSelectBean;
 import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
+import com.TyxApp.bangumi.util.LogUtil;
 import com.TyxApp.bangumi.util.ParseUtil;
 
 import org.jsoup.nodes.Document;
@@ -13,6 +14,7 @@ import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
@@ -22,6 +24,25 @@ public class Nico implements BaseBangumiParser {
     private SparseArray<String> playerUrls = new SparseArray<>();
     private List<String> jiHtml = new ArrayList<>();
     private List<String> searchMoreHtml = new ArrayList<>();
+    private static Nico INSTANCE;
+    private static AtomicInteger INSTANCECOUNTER = new AtomicInteger();
+
+    private Nico(){}
+
+    public static Nico getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new Nico();
+        }
+        INSTANCECOUNTER.getAndIncrement();
+        return INSTANCE;
+    }
+
+    @Override
+    public void onDestroy() {
+        if (INSTANCECOUNTER.getAndDecrement() == 1) {
+            INSTANCE = null;
+        }
+    }
 
     @Override
     public Observable<List<Bangumi>> getHomePageBangumiData() {

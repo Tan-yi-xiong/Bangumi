@@ -25,5 +25,7 @@ public interface PlayContract {
         void setPlayerUrl(String url);
 
         void showRecommendBangumis(List<Bangumi> recommendBangumis);
+
+        void showError(Throwable throwable);
     }
 }

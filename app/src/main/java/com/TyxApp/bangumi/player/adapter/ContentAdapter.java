@@ -26,13 +26,13 @@ public class ContentAdapter extends RecyclerView.Adapter<BaseViewHolder> {
 
     private Context mContext;
     private JiAdapter mJiAdapter;
-    private int lastSelectPosition;
-    private BaseAdapter.OnItemClickListener mOnItemClickListener;
+    private OnItemSelectListener mOnItemSelectListener;
 
     private static final int BANGUMI_INTRO = 0;//简介部分
     private static final int JI_SELECT = 1;//选集部分
     private static final int TITLE = 2;//更多推荐标题
     private static final int RECOMMENBANGUMI = 3;//更多推荐
+    private RecyclerView mJiRecyclerView;
 
     public ContentAdapter(Bangumi bangumi, Context context) {
         mBangumi = bangumi;
@@ -82,34 +82,49 @@ public class ContentAdapter extends RecyclerView.Adapter<BaseViewHolder> {
             }
         }
         holder.setText(R.id.ji_total, ji);
+
+        holder.itemView.setOnClickListener(v -> {
+            if (mOnItemSelectListener != null) {
+                mOnItemSelectListener.onBangumiSelect(bangumi);
+            }
+        });
     }
 
     private void bindJiSelect(BaseViewHolder holder) {
         if (mJiAdapter == null) {
-            RecyclerView recyclerView = holder.getView(R.id.ji_select_recyclerView);
+            mJiRecyclerView = holder.getView(R.id.ji_select_recyclerView);
             mJiAdapter = new JiAdapter(mContext);
             mJiAdapter.setOnItemClickListener(pos -> {
-                if (lastSelectPosition != pos) {
-                    mJiAdapter.getData(pos).setSelect(true);
-                    RecyclerView.ViewHolder jiViewHolder = recyclerView.findViewHolderForLayoutPosition(pos);
-                    RecyclerView.ViewHolder laseSelectViewHolder = recyclerView.findViewHolderForLayoutPosition(lastSelectPosition);
-                    if (jiViewHolder != null) {
-                        jiViewHolder.itemView.setSelected(true);
-                    }
-                    if (laseSelectViewHolder != null) {
-                        laseSelectViewHolder.itemView.setSelected(false);
-                    }
-                    mJiAdapter.getData(pos).setSelect(true);
-                    mJiAdapter.getData(lastSelectPosition).setSelect(false);
-                    lastSelectPosition = pos;
-                }
-                if (mOnItemClickListener != null) {
-                    mOnItemClickListener.onItemClick(pos);
+                setJiSelect(pos);
+                if (mOnItemSelectListener != null) {
+                    mOnItemSelectListener.onJiSelect(pos);
                 }
             });
-            recyclerView.addItemDecoration(new JiAdapter.ItemDecoration());
-            recyclerView.setAdapter(mJiAdapter);
-            recyclerView.setLayoutManager(new LinearLayoutManager(mContext, RecyclerView.HORIZONTAL, false));
+            mJiRecyclerView.addItemDecoration(new JiAdapter.ItemDecoration());
+            mJiRecyclerView.setAdapter(mJiAdapter);
+            mJiRecyclerView.setLayoutManager(new LinearLayoutManager(mContext, RecyclerView.HORIZONTAL, false));
+        }
+    }
+
+    public void setJiSelect(int pos) {
+        int lastSelectPosition = 0;
+        for (int i = 0; i < mJiAdapter.getItemCount(); i++) {
+            if (mJiAdapter.getData(i).isSelect()) {
+                lastSelectPosition = i;
+            }
+        }
+        if (lastSelectPosition != pos) {
+            mJiAdapter.getData(pos).setSelect(true);
+            RecyclerView.ViewHolder jiViewHolder = mJiRecyclerView.findViewHolderForLayoutPosition(pos);
+            RecyclerView.ViewHolder laseSelectViewHolder = mJiRecyclerView.findViewHolderForLayoutPosition(lastSelectPosition);
+            if (jiViewHolder != null) {
+                jiViewHolder.itemView.setSelected(true);
+            }
+            if (laseSelectViewHolder != null) {
+                laseSelectViewHolder.itemView.setSelected(false);
+            }
+            mJiAdapter.getData(pos).setSelect(true);
+            mJiAdapter.getData(lastSelectPosition).setSelect(false);
         }
     }
 
@@ -125,6 +140,8 @@ public class ContentAdapter extends RecyclerView.Adapter<BaseViewHolder> {
                 } else {
                     ji = "全" + mBangumi.getTotal() + "话";
                 }
+            } else {
+                ji = "暂无信息";
             }
         }
         holder.setText(R.id.ji_total, ji);
@@ -132,9 +149,6 @@ public class ContentAdapter extends RecyclerView.Adapter<BaseViewHolder> {
         holder.setText(R.id.intro, mBangumi.getIntro());
     }
 
-    public TextItemSelectBean getJiData(int position) {
-        return mJiAdapter.getData(position);
-    }
 
     @Override
     public int getItemCount() {
@@ -160,12 +174,9 @@ public class ContentAdapter extends RecyclerView.Adapter<BaseViewHolder> {
         notifyItemChanged(0);
     }
 
-    public void notifiBangumiChange() {
-        notifyItemChanged(0);
-    }
 
     public void notifijiListChange(List<TextItemSelectBean> jiList) {
-        mJiAdapter.addAllInserted(jiList);
+        mJiAdapter.clearAddAll(jiList);
     }
 
     public void notifiRecommendBangumisChange(List<Bangumi> recommendBangumis) {
@@ -177,7 +188,13 @@ public class ContentAdapter extends RecyclerView.Adapter<BaseViewHolder> {
         notifyItemRangeChanged(3, mRecommendBangumis.size());
     }
 
-    public void setOnJiSelectListener(BaseAdapter.OnItemClickListener itemClickListener) {
-        mOnItemClickListener = itemClickListener;
+    public interface OnItemSelectListener {
+        void onJiSelect(int pos);
+
+        void onBangumiSelect(Bangumi bangumi);
+    }
+
+    public void setOnItemSelectListener(OnItemSelectListener onItemSelectListener) {
+        mOnItemSelectListener = onItemSelectListener;
     }
 }

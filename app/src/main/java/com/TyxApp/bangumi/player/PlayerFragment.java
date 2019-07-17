@@ -2,27 +2,41 @@ package com.TyxApp.bangumi.player;
 
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import com.TyxApp.bangumi.R;
 import com.TyxApp.bangumi.base.BaseMvpFragment;
 import com.TyxApp.bangumi.base.BasePresenter;
 import com.TyxApp.bangumi.data.Bangumi;
+import com.TyxApp.bangumi.data.StackBangumi;
 import com.TyxApp.bangumi.data.TextItemSelectBean;
 import com.TyxApp.bangumi.data.VideoPlayerEvent;
+import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
+import com.TyxApp.bangumi.data.source.remote.BaseBangumiParser;
 import com.TyxApp.bangumi.data.source.remote.ZzzFun;
 import com.TyxApp.bangumi.player.adapter.ContentAdapter;
-import com.TyxApp.bangumi.player.cover.ControlCover;
+import com.TyxApp.bangumi.player.cover.ErrorCover;
+import com.TyxApp.bangumi.player.cover.GestureCover;
+import com.TyxApp.bangumi.player.cover.LoadingCover;
+import com.TyxApp.bangumi.player.cover.PlayerControlCover;
+import com.TyxApp.bangumi.util.LogUtil;
 import com.google.android.material.snackbar.Snackbar;
 import com.kk.taurus.playerbase.assist.OnVideoViewEventHandler;
+import com.kk.taurus.playerbase.config.PConst;
 import com.kk.taurus.playerbase.entity.DataSource;
+import com.kk.taurus.playerbase.event.EventKey;
 import com.kk.taurus.playerbase.receiver.ReceiverGroup;
+import com.kk.taurus.playerbase.utils.NetworkUtils;
 import com.kk.taurus.playerbase.widget.BaseVideoView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import androidx.activity.OnBackPressedCallback;
@@ -41,6 +55,7 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
     RecyclerView contentRecyclerView;
 
     private ContentAdapter mContentAdapter;
+    private List<StackBangumi> mStackBangumis;//存放点击了的更多番剧, 模拟一个栈。
     private PlayerPresenter mPlayerPresenter;
     private Bangumi mBangumi;
     private int videoViewPortraitHeighe;
@@ -68,6 +83,12 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
                 }
 
                 @Override
+                public void requestRetry(BaseVideoView videoView, Bundle bundle) {
+                    LoadingPageData();
+                    super.requestRetry(videoView, bundle);
+                }
+
+                @Override
                 public void onAssistHandle(BaseVideoView assist, int eventCode, Bundle bundle) {
                     super.onAssistHandle(assist, eventCode, bundle);
                     switch (eventCode) {
@@ -78,7 +99,47 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
                             break;
 
                         case VideoPlayerEvent.Code.CODE_BACK:
-                            onBackPressed();
+                            if (isFullScreen()) {
+                                requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                            } else {
+                                requireActivity().finish();
+                            }
+                            break;
+
+                        case VideoPlayerEvent.Code.CODE_SPEED_CHANGE:
+                            float speed = bundle.getFloat(VideoPlayerEvent.Key.SPEED_DATA_KEY);
+                            assist.setSpeed(speed);
+                            break;
+
+                        case VideoPlayerEvent.Code.CODE_DOWNLOAD:
+
+                            break;
+
+                        case VideoPlayerEvent.Code.CODE_BRIGHTNESS_ADJUST:
+                            int brightness = bundle.getInt(EventKey.INT_DATA);
+                            Window window = requireActivity().getWindow();
+                            WindowManager.LayoutParams params = window.getAttributes();
+                            params.screenBrightness = brightness / 255.0f;
+                            window.setAttributes(params);
+                            break;
+
+                        case VideoPlayerEvent.Code.CODE_NEXT:
+                            if (currentJi == mBangumi.getJitotal() - 1) {
+                                Toast.makeText(getContext(), "已经是最后一集啦", Toast.LENGTH_SHORT).show();
+                            } else {
+                                currentJi++;
+                                mPlayerPresenter.getPlayerUrl(mBangumi.getVod_id(), currentJi);
+                                mContentAdapter.setJiSelect(currentJi);
+                            }
+                            break;
+
+                        case VideoPlayerEvent.Code.CODE_ERROR_COVER_SHOW:
+                            boolean isShow = bundle.getBoolean(EventKey.BOOL_DATA);
+                            if (isShow) {
+                                mPlayerVideoview.getSuperContainer().setGestureEnable(false);
+                            } else {
+                                mPlayerVideoview.getSuperContainer().setGestureEnable(true);
+                            }
                             break;
                     }
                 }
@@ -100,27 +161,53 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
         if (isFullScreen()) {
             requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         } else {
-            requireActivity().finish();
+            if (mStackBangumis.size() == 1) {
+                requireActivity().finish();
+            } else {
+                mStackBangumis.remove(mStackBangumis.size() - 1);
+                StackBangumi stackBangumi = mStackBangumis.get(mStackBangumis.size() - 1);
+                mBangumi = stackBangumi.getBangumi();
+                currentJi = stackBangumi.getPlayedJi();
+                LoadingPageData();
+            }
+
         }
     }
 
     @Override
     protected void initView() {
-        mBangumi = requireActivity().getIntent().getParcelableExtra(PlayerActivity.INTENT_KEY);
+        mStackBangumis = new ArrayList<>();
+        mStackBangumis.add(new StackBangumi(currentJi, mBangumi));
+
         mContentAdapter = new ContentAdapter(mBangumi, requireContext());
-        mContentAdapter.setOnJiSelectListener((int pos) -> {
-            mPlayerPresenter.getPlayerUrl(mBangumi.getVod_id(), pos);
-            currentJi = pos;
+        mContentAdapter.setOnItemSelectListener(new ContentAdapter.OnItemSelectListener() {
+            @Override
+            public void onJiSelect(int pos) {
+                mPlayerPresenter.getPlayerUrl(mBangumi.getVod_id(), pos);
+                currentJi = pos;
+            }
+
+            @Override
+            public void onBangumiSelect(Bangumi bangumi) {
+                contentRecyclerView.scrollToPosition(0);
+                addNewBangumiToList(bangumi);
+                mBangumi = bangumi;
+                currentJi = 0;
+                LoadingPageData();
+            }
         });
         contentRecyclerView.setAdapter(mContentAdapter);
         contentRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false));
 
-        mPlayerPresenter.getRecommendBangumis(mBangumi.getVod_id());
-        mPlayerPresenter.getBangumiIntro(mBangumi.getVod_id());
-        mPlayerPresenter.getBangumiJiList(mBangumi.getVod_id());
+        LoadingPageData();
 
         mReceiverGroup = new ReceiverGroup();
-        mReceiverGroup.addReceiver(ControlCover.class.getName(), new ControlCover(requireContext()));
+        mReceiverGroup.addReceiver(
+                PlayerControlCover.class.getName(),
+                new PlayerControlCover(requireContext(), getChildFragmentManager()));
+        mReceiverGroup.addReceiver(LoadingCover.class.getName(), new LoadingCover(requireContext()));
+        mReceiverGroup.addReceiver(GestureCover.class.getName(), new GestureCover(requireContext()));
+        mReceiverGroup.addReceiver(ErrorCover.class.getName(), new ErrorCover(requireContext()));
         mPlayerVideoview.setReceiverGroup(mReceiverGroup);
         mPlayerVideoview.setEventHandler(mViewEventHandler);
         mPlayerVideoview.post(() -> videoViewPortraitHeighe = mPlayerVideoview.getHeight());
@@ -129,6 +216,17 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
                 .setStatusBarColor(ContextCompat.getColor(requireContext(), R.color.primary_text_disabled_material_light));
 
         hindStateBar();
+    }
+
+    private void LoadingPageData() {
+        mPlayerPresenter.getRecommendBangumis(mBangumi.getVod_id());
+        mPlayerPresenter.getBangumiIntro(mBangumi.getVod_id());
+        mPlayerPresenter.getBangumiJiList(mBangumi.getVod_id());
+    }
+
+    private void addNewBangumiToList(Bangumi bangumi) {
+        mStackBangumis.get(mStackBangumis.size() - 1).setPlayedJi(currentJi);
+        mStackBangumis.add(new StackBangumi(0, bangumi));
     }
 
     private void hindStateBar() {
@@ -148,7 +246,7 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
 
     private boolean isFullScreen() {
         return mReceiverGroup.getGroupValue()
-                .getBoolean(VideoPlayerEvent.Key.ISFULLSCREENKEY, false);
+                .getBoolean(VideoPlayerEvent.Key.IS_FULLSCREEN_KEY, false);
     }
 
     private void showStateBar() {
@@ -179,7 +277,7 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
         mPlayerVideoview.requestLayout();
 
         mReceiverGroup.getGroupValue().putBoolean(
-                VideoPlayerEvent.Key.ISFULLSCREENKEY,
+                VideoPlayerEvent.Key.IS_FULLSCREEN_KEY,
                 isLandscape,
                 true);
         hindStateBar();
@@ -187,7 +285,15 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
 
     @Override
     public BasePresenter getPresenter() {
-        mPlayerPresenter = new PlayerPresenter(this, new ZzzFun());
+        mBangumi = requireActivity().getIntent().getParcelableExtra(PlayerActivity.INTENT_KEY);
+        BaseBangumiParser parser = null;
+        switch (mBangumi.getSoure()) {
+            case BangumiPresistenceContract
+                    .BangumiSource.ZZZFUN:
+                parser = ZzzFun.getInstance();
+                break;
+        }
+        mPlayerPresenter = new PlayerPresenter(this, parser);
         return mPlayerPresenter;
     }
 
@@ -203,12 +309,13 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
     @Override
     public void showBangumiIntro(String intor) {
         mBangumi.setIntro(intor);
-        mContentAdapter.notifiBangumiChange();
+        mContentAdapter.notifiBangumiChange(mBangumi);
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        requireActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         if (!isuserPuase) {
             mPlayerVideoview.resume();
         }
@@ -217,32 +324,53 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
     @Override
     public void onPause() {
         super.onPause();
+        requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         mPlayerVideoview.pause();
     }
 
     @Override
     public void showBangumiJiList(List<TextItemSelectBean> jiList) {
         if (!jiList.isEmpty()) {
-            jiList.get(0).setSelect(true);
+            jiList.get(currentJi).setSelect(true);
+            mContentAdapter.notifijiListChange(jiList);
+            mPlayerPresenter.getPlayerUrl(mBangumi.getVod_id(), currentJi);
+            mBangumi.setJitotal(jiList.size());
         } else {
             Snackbar.make(contentRecyclerView, "解析失败", Snackbar.LENGTH_LONG).show();
         }
-        mContentAdapter.notifijiListChange(jiList);
-        mPlayerPresenter.getPlayerUrl(mBangumi.getVod_id(), 0);
     }
 
     @Override
     public void setPlayerUrl(String url) {
         DataSource dataSource = new DataSource(url);
-        dataSource.setTitle(mBangumi.getName() + " " + mContentAdapter.getJiData(currentJi).getText());
+        dataSource.setTitle(mBangumi.getName() + " 第" + (currentJi + 1) + "集");
         mPlayerVideoview.setDataSource(dataSource);
-        mPlayerVideoview.start();
+        int newState = NetworkUtils.getNetworkState(requireContext());
+        if (newState == PConst.NETWORK_STATE_WIFI) {
+            mPlayerVideoview.start();
+        } else {
+            mReceiverGroup.getGroupValue().putBoolean(VideoPlayerEvent.Key.NOTIFI_ERROR_COVER_SHOW, true, true);
+        }
+
     }
 
     @Override
     public void showRecommendBangumis(List<Bangumi> recommendBangumis) {
         mContentAdapter.notifiRecommendBangumisChange(recommendBangumis);
     }
+
+    @Override
+    public void showError(Throwable throwable) {
+        int netState = NetworkUtils.getNetworkState(requireContext());
+        String text;
+        if (netState == -1) {
+            text = "请联网后重试";
+        } else {
+            text = throwable.toString();
+        }
+        Snackbar.make(mPlayerVideoview, text, Snackbar.LENGTH_LONG).show();
+    }
+
 
     @Override
     public void onDestroyView() {
