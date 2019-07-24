@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group
+        android:id="@+id/home"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_bangumi"
+            android:icon="@drawable/ic_nav_bangumi"
+            android:title="番剧"/>
+        <item
+            android:id="@+id/nav_category"
+            android:icon="@drawable/ic_nav_category"
+            android:title="分类"/>
+    </group>
+
+    <group
+        android:id="@+id/local"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_like"
+            android:icon="@drawable/ic_nav_like"
+            android:title="我的追番"/>
+        <item
+            android:id="@+id/nav_download"
+            android:icon="@drawable/ic_nav_download"
+            android:title="下载缓存"/>
+        <item
+            android:id="@+id/nav_history"
+            android:icon="@drawable/ic_nav_history"
+            android:title="历史记录"/>
+
+        <item
+            android:id="@+id/nav_setting"
+            android:icon="@drawable/ic_nav_setting"
+            android:title="设置"/>
+
+        <item
+            android:id="@+id/nav_about"
+            android:icon="@drawable/ic_nav_about"
+            android:title="关于"/>
+
+    </group>
+
+</menu>

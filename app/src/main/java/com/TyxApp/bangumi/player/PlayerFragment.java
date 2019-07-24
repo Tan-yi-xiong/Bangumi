@@ -1,10 +1,15 @@
 package com.TyxApp.bangumi.player;
 
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.graphics.drawable.GradientDrawable;
+import android.net.Uri;
 import android.os.Bundle;
-import android.view.Gravity;
+import android.os.IBinder;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -14,18 +19,21 @@ import android.widget.Toast;
 import com.TyxApp.bangumi.R;
 import com.TyxApp.bangumi.base.BaseMvpFragment;
 import com.TyxApp.bangumi.base.BasePresenter;
-import com.TyxApp.bangumi.data.Bangumi;
-import com.TyxApp.bangumi.data.StackBangumi;
-import com.TyxApp.bangumi.data.TextItemSelectBean;
-import com.TyxApp.bangumi.data.VideoPlayerEvent;
+import com.TyxApp.bangumi.data.bean.Bangumi;
+import com.TyxApp.bangumi.data.bean.StackBangumi;
+import com.TyxApp.bangumi.data.bean.TextItemSelectBean;
 import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
 import com.TyxApp.bangumi.data.source.remote.BaseBangumiParser;
+import com.TyxApp.bangumi.data.source.remote.Nico;
 import com.TyxApp.bangumi.data.source.remote.ZzzFun;
 import com.TyxApp.bangumi.player.adapter.ContentAdapter;
 import com.TyxApp.bangumi.player.cover.ErrorCover;
 import com.TyxApp.bangumi.player.cover.GestureCover;
 import com.TyxApp.bangumi.player.cover.LoadingCover;
 import com.TyxApp.bangumi.player.cover.PlayerControlCover;
+import com.TyxApp.bangumi.player.cover.VideoPlayerEvent;
+import com.TyxApp.bangumi.server.Download;
+import com.TyxApp.bangumi.server.DownloadServer;
 import com.TyxApp.bangumi.util.LogUtil;
 import com.google.android.material.snackbar.Snackbar;
 import com.kk.taurus.playerbase.assist.OnVideoViewEventHandler;
@@ -42,6 +50,7 @@ import java.util.List;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -55,13 +64,125 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
     RecyclerView contentRecyclerView;
 
     private ContentAdapter mContentAdapter;
+    private Snackbar mSnackbar;
     private List<StackBangumi> mStackBangumis;//存放点击了的更多番剧, 模拟一个栈。
     private PlayerPresenter mPlayerPresenter;
-    private Bangumi mBangumi;
+    private StackBangumi mStackBangumi;
     private int videoViewPortraitHeighe;
     private ReceiverGroup mReceiverGroup;
-    private int currentJi;
     private boolean isuserPuase;
+
+    private Download mDownload;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        requireActivity().getOnBackPressedDispatcher()
+                .addCallback(new OnBackPressedCallback(true) {
+                    @Override
+                    public void handleOnBackPressed() {
+                        onBackPressed();
+                    }
+                });
+    }
+
+    private void onBackPressed() {
+        if (isFullScreen()) {
+            requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        } else {
+            if (mStackBangumis.size() == 1) {
+                requireActivity().finish();
+            } else {
+                removeBangumiFromList();
+            }
+        }
+    }
+
+    private void removeBangumiFromList() {
+        mStackBangumis.remove(mStackBangumis.size() - 1);
+        mStackBangumi = mStackBangumis.get(mStackBangumis.size() - 1);
+        showBangumiJiList(mStackBangumi.getPlayedJi());
+        showRecommendBangumis(mStackBangumi.getRecommendBangumis());
+        mContentAdapter.notifiBangumiChange(mStackBangumi.getBangumi());
+    }
+
+    private void addBangumiToList(Bangumi bangumi) {
+        StackBangumi stackBangumi = new StackBangumi(bangumi);
+        bangumi.setTime(System.currentTimeMillis());
+        mPlayerPresenter.setTime(bangumi);
+        mStackBangumi = stackBangumi;
+        mStackBangumis.add(stackBangumi);
+    }
+
+    @Override
+    public BasePresenter getPresenter() {
+        Bangumi bangumi = requireActivity().getIntent().getParcelableExtra(PlayerActivity.INTENT_KEY);
+        mStackBangumis = new ArrayList<>();
+        BaseBangumiParser parser = null;
+        switch (bangumi.getVideoSoure()) {
+            case BangumiPresistenceContract.BangumiSource.NiICO:
+                parser = Nico.getInstance();
+                break;
+
+            case BangumiPresistenceContract.BangumiSource.ZZZFUN:
+                parser = ZzzFun.getInstance();
+                break;
+        }
+        mPlayerPresenter = new PlayerPresenter(this, parser);
+        addBangumiToList(bangumi);
+        return mPlayerPresenter;
+    }
+
+    @Override
+    protected void initView() {
+
+        mContentAdapter = new ContentAdapter(mStackBangumi.getBangumi(), requireContext());
+        mContentAdapter.setOnItemSelectListener(new ContentAdapter.OnItemSelectListener() {
+            @Override
+            public void onJiSelect(int pos) {
+                if (mStackBangumi.getCurrentJi() == pos) {
+                    return;
+                }
+                mPlayerPresenter.getPlayerUrl(mStackBangumi.getBangumiId(), pos);
+                mStackBangumi.setCurrentJi(pos);
+            }
+
+            @Override
+            public void onBangumiSelect(Bangumi bangumi) {
+                addBangumiToList(bangumi);
+                LoadingPageData();
+            }
+
+            @Override
+            public void onFavoriteButtonClick(boolean isSelect) {
+                mStackBangumi.getBangumi().setFavorite(!isSelect);
+                mPlayerPresenter.setFavorite(mStackBangumi.getBangumi());
+            }
+        });
+
+        contentRecyclerView.setAdapter(mContentAdapter);
+        contentRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false));
+
+
+        mReceiverGroup = new ReceiverGroup();
+        mReceiverGroup.addReceiver(
+                PlayerControlCover.class.getName(),
+                new PlayerControlCover(requireContext(), getChildFragmentManager()));
+        mReceiverGroup.addReceiver(LoadingCover.class.getName(), new LoadingCover(requireContext()));
+        mReceiverGroup.addReceiver(GestureCover.class.getName(), new GestureCover(requireContext()));
+        mReceiverGroup.addReceiver(ErrorCover.class.getName(), new ErrorCover(requireContext()));
+        mPlayerVideoview.setReceiverGroup(mReceiverGroup);
+        mPlayerVideoview.setEventHandler(mViewEventHandler);
+        mPlayerVideoview.post(() -> videoViewPortraitHeighe = mPlayerVideoview.getHeight());
+
+        requireActivity().getWindow()
+                .setStatusBarColor(ContextCompat.getColor(requireContext(), R.color.primary_text_disabled_material_light));
+
+        hindStateBar();
+
+        LoadingPageData();
+    }
+
     private OnVideoViewEventHandler mViewEventHandler =
             new OnVideoViewEventHandler() {
                 @Override
@@ -91,143 +212,109 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
                 @Override
                 public void onAssistHandle(BaseVideoView assist, int eventCode, Bundle bundle) {
                     super.onAssistHandle(assist, eventCode, bundle);
-                    switch (eventCode) {
-                        case VideoPlayerEvent.Code.CODE_FULL_SCREEN:
-                            requireActivity().setRequestedOrientation(isFullScreen() ?
-                                    ActivityInfo.SCREEN_ORIENTATION_PORTRAIT :
-                                    ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-                            break;
-
-                        case VideoPlayerEvent.Code.CODE_BACK:
-                            if (isFullScreen()) {
-                                requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-                            } else {
-                                requireActivity().finish();
-                            }
-                            break;
-
-                        case VideoPlayerEvent.Code.CODE_SPEED_CHANGE:
-                            float speed = bundle.getFloat(VideoPlayerEvent.Key.SPEED_DATA_KEY);
-                            assist.setSpeed(speed);
-                            break;
-
-                        case VideoPlayerEvent.Code.CODE_DOWNLOAD:
-
-                            break;
-
-                        case VideoPlayerEvent.Code.CODE_BRIGHTNESS_ADJUST:
-                            int brightness = bundle.getInt(EventKey.INT_DATA);
-                            Window window = requireActivity().getWindow();
-                            WindowManager.LayoutParams params = window.getAttributes();
-                            params.screenBrightness = brightness / 255.0f;
-                            window.setAttributes(params);
-                            break;
-
-                        case VideoPlayerEvent.Code.CODE_NEXT:
-                            if (currentJi == mBangumi.getJitotal() - 1) {
-                                Toast.makeText(getContext(), "已经是最后一集啦", Toast.LENGTH_SHORT).show();
-                            } else {
-                                currentJi++;
-                                mPlayerPresenter.getPlayerUrl(mBangumi.getVod_id(), currentJi);
-                                mContentAdapter.setJiSelect(currentJi);
-                            }
-                            break;
-
-                        case VideoPlayerEvent.Code.CODE_ERROR_COVER_SHOW:
-                            boolean isShow = bundle.getBoolean(EventKey.BOOL_DATA);
-                            if (isShow) {
-                                mPlayerVideoview.getSuperContainer().setGestureEnable(false);
-                            } else {
-                                mPlayerVideoview.getSuperContainer().setGestureEnable(true);
-                            }
-                            break;
-                    }
+                    coverEventHandle(assist, eventCode, bundle);
                 }
             };
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        requireActivity().getOnBackPressedDispatcher()
-                .addCallback(new OnBackPressedCallback(true) {
-                    @Override
-                    public void handleOnBackPressed() {
-                        onBackPressed();
-                    }
-                });
-    }
+    private void coverEventHandle(BaseVideoView assist, int eventCode, Bundle bundle) {
+        switch (eventCode) {
+            case VideoPlayerEvent.Code.CODE_FULL_SCREEN://屏幕旋转
+                requireActivity().setRequestedOrientation(isFullScreen() ?
+                        ActivityInfo.SCREEN_ORIENTATION_PORTRAIT :
+                        ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                break;
 
-    private void onBackPressed() {
-        if (isFullScreen()) {
-            requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        } else {
-            if (mStackBangumis.size() == 1) {
-                requireActivity().finish();
-            } else {
-                mStackBangumis.remove(mStackBangumis.size() - 1);
-                StackBangumi stackBangumi = mStackBangumis.get(mStackBangumis.size() - 1);
-                mBangumi = stackBangumi.getBangumi();
-                currentJi = stackBangumi.getPlayedJi();
-                LoadingPageData();
-            }
+            case VideoPlayerEvent.Code.CODE_BACK://返回图标按下
+                if (isFullScreen()) {
+                    requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                } else {
+                    requireActivity().finish();
+                }
+                break;
 
+            case VideoPlayerEvent.Code.CODE_SPEED_CHANGE://速度调节
+                float speed = bundle.getFloat(VideoPlayerEvent.Key.SPEED_DATA_KEY);
+                assist.setSpeed(speed);
+                break;
+
+            case VideoPlayerEvent.Code.CODE_DOWNLOAD://下载
+                mStackBangumi.getBangumi().setDownLoad(true);
+                mPlayerPresenter.setDownload(mStackBangumi.getBangumi());
+                if (TextUtils.isEmpty(mStackBangumi.getPlayingUrl()) && NetworkUtils.getNetworkState(requireContext()) < 0) {
+                    mPlayerVideoview.getState();
+                    Snackbar.make(mPlayerVideoview, "请等下重试", Snackbar.LENGTH_LONG);
+                    break;
+                }
+                downLoadVideo();
+                break;
+
+            case VideoPlayerEvent.Code.CODE_BRIGHTNESS_ADJUST://亮度调节
+                int brightness = bundle.getInt(EventKey.INT_DATA);
+                Window window = requireActivity().getWindow();
+                WindowManager.LayoutParams params = window.getAttributes();
+                params.screenBrightness = brightness / 255.0f;
+                window.setAttributes(params);
+                break;
+
+            case VideoPlayerEvent.Code.CODE_NEXT://下一集
+                if (mStackBangumi.isLastJi()) {
+                    Toast.makeText(getContext(), "已经是最后一集啦", Toast.LENGTH_SHORT).show();
+                } else {
+                    mStackBangumi.nextJi();
+                    mPlayerPresenter.getPlayerUrl(mStackBangumi.getBangumi().getVodId(), mStackBangumi.getCurrentJi());
+                    mContentAdapter.setJiSelect(mStackBangumi.getCurrentJi());
+                }
+                break;
+
+            case VideoPlayerEvent.Code.CODE_ERROR_COVER_SHOW:
+                boolean isShow = bundle.getBoolean(EventKey.BOOL_DATA);
+                if (isShow) {
+                    mPlayerVideoview.getSuperContainer().setGestureEnable(false);
+                } else {
+                    mPlayerVideoview.getSuperContainer().setGestureEnable(true);
+                }
+                break;
         }
     }
 
-    @Override
-    protected void initView() {
-        mStackBangumis = new ArrayList<>();
-        mStackBangumis.add(new StackBangumi(currentJi, mBangumi));
 
-        mContentAdapter = new ContentAdapter(mBangumi, requireContext());
-        mContentAdapter.setOnItemSelectListener(new ContentAdapter.OnItemSelectListener() {
-            @Override
-            public void onJiSelect(int pos) {
-                mPlayerPresenter.getPlayerUrl(mBangumi.getVod_id(), pos);
-                currentJi = pos;
-            }
+    private void downLoadVideo() {
+        if (mDownload != null) {
+            String fileName = mContentAdapter.getJiList().get(mStackBangumi.getCurrentJi()).getText();
+            mDownload.addStack(mStackBangumi.getBangumi(), mStackBangumi.getPlayingUrl(), fileName);
+        } else {
+            Intent intent = new Intent(requireActivity(), DownloadServer.class);
+            requireActivity().startService(intent);
+            requireActivity().bindService(intent, new ServiceConnection() {
+                @Override
+                public void onServiceConnected(ComponentName name, IBinder service) {
+                    mDownload = (Download) service;
+                    String fileName = mContentAdapter.getJiList().get(mStackBangumi.getCurrentJi()).getText();
+                    mDownload.addStack(mStackBangumi.getBangumi(), mStackBangumi.getPlayingUrl(), fileName);
+                }
 
-            @Override
-            public void onBangumiSelect(Bangumi bangumi) {
-                contentRecyclerView.scrollToPosition(0);
-                addNewBangumiToList(bangumi);
-                mBangumi = bangumi;
-                currentJi = 0;
-                LoadingPageData();
-            }
-        });
-        contentRecyclerView.setAdapter(mContentAdapter);
-        contentRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false));
+                @Override
+                public void onServiceDisconnected(ComponentName name) {
 
-        LoadingPageData();
-
-        mReceiverGroup = new ReceiverGroup();
-        mReceiverGroup.addReceiver(
-                PlayerControlCover.class.getName(),
-                new PlayerControlCover(requireContext(), getChildFragmentManager()));
-        mReceiverGroup.addReceiver(LoadingCover.class.getName(), new LoadingCover(requireContext()));
-        mReceiverGroup.addReceiver(GestureCover.class.getName(), new GestureCover(requireContext()));
-        mReceiverGroup.addReceiver(ErrorCover.class.getName(), new ErrorCover(requireContext()));
-        mPlayerVideoview.setReceiverGroup(mReceiverGroup);
-        mPlayerVideoview.setEventHandler(mViewEventHandler);
-        mPlayerVideoview.post(() -> videoViewPortraitHeighe = mPlayerVideoview.getHeight());
-
-        requireActivity().getWindow()
-                .setStatusBarColor(ContextCompat.getColor(requireContext(), R.color.primary_text_disabled_material_light));
-
-        hindStateBar();
+                }
+            }, Context.BIND_AUTO_CREATE);
+        }
     }
 
     private void LoadingPageData() {
-        mPlayerPresenter.getRecommendBangumis(mBangumi.getVod_id());
-        mPlayerPresenter.getBangumiIntro(mBangumi.getVod_id());
-        mPlayerPresenter.getBangumiJiList(mBangumi.getVod_id());
+        //推荐为空才去获取
+        if (mStackBangumi.getRecommendBangumis() == null) {
+            mPlayerPresenter.getRecommendBangumis(mStackBangumi.getBangumiId());
+        }
+        //简介为空才去获取
+        if (TextUtils.isEmpty(mStackBangumi.getBangumi().getIntro())) {
+            mPlayerPresenter.getBangumiIntro(mStackBangumi.getBangumiId());
+        }
+        mPlayerPresenter.getBangumiJiList(mStackBangumi.getBangumiId());
+        mPlayerPresenter.isFavorite(mStackBangumi.getBangumiId(), mStackBangumi.getBanhumiSourch());
     }
 
-    private void addNewBangumiToList(Bangumi bangumi) {
-        mStackBangumis.get(mStackBangumis.size() - 1).setPlayedJi(currentJi);
-        mStackBangumis.add(new StackBangumi(0, bangumi));
-    }
+
 
     private void hindStateBar() {
         int uiFlage = View.SYSTEM_UI_FLAG_LOW_PROFILE
@@ -284,20 +371,6 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
     }
 
     @Override
-    public BasePresenter getPresenter() {
-        mBangumi = requireActivity().getIntent().getParcelableExtra(PlayerActivity.INTENT_KEY);
-        BaseBangumiParser parser = null;
-        switch (mBangumi.getSoure()) {
-            case BangumiPresistenceContract
-                    .BangumiSource.ZZZFUN:
-                parser = ZzzFun.getInstance();
-                break;
-        }
-        mPlayerPresenter = new PlayerPresenter(this, parser);
-        return mPlayerPresenter;
-    }
-
-    @Override
     public int getLayoutId() {
         return R.layout.fragment_player;
     }
@@ -308,8 +381,8 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
 
     @Override
     public void showBangumiIntro(String intor) {
-        mBangumi.setIntro(intor);
-        mContentAdapter.notifiBangumiChange(mBangumi);
+        mStackBangumi.getBangumi().setIntro(intor);
+        mContentAdapter.notifiBangumiChange(mStackBangumi.getBangumi());
     }
 
     @Override
@@ -330,11 +403,14 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
 
     @Override
     public void showBangumiJiList(List<TextItemSelectBean> jiList) {
-        if (!jiList.isEmpty()) {
-            jiList.get(currentJi).setSelect(true);
+        if (jiList != null && !jiList.isEmpty()) {
+            if (mStackBangumi.getPlayedJi() == null) {
+                mStackBangumi.setPlayedJi(jiList);
+                mStackBangumi.setJiTotal(jiList.size());
+            }
+            jiList.get(mStackBangumi.getCurrentJi()).setSelect(true);
             mContentAdapter.notifijiListChange(jiList);
-            mPlayerPresenter.getPlayerUrl(mBangumi.getVod_id(), currentJi);
-            mBangumi.setJitotal(jiList.size());
+            mPlayerPresenter.getPlayerUrl(mStackBangumi.getBangumiId(), mStackBangumi.getCurrentJi());
         } else {
             Snackbar.make(contentRecyclerView, "解析失败", Snackbar.LENGTH_LONG).show();
         }
@@ -343,9 +419,14 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
     @Override
     public void setPlayerUrl(String url) {
         DataSource dataSource = new DataSource(url);
-        dataSource.setTitle(mBangumi.getName() + " 第" + (currentJi + 1) + "集");
+        String title = mStackBangumi.getBangumiName() + " " +
+                mContentAdapter.getJiList().get(mStackBangumi.getCurrentJi()).getText();
+
+        dataSource.setTitle(title);
         mPlayerVideoview.setDataSource(dataSource);
         int newState = NetworkUtils.getNetworkState(requireContext());
+        mStackBangumi.setPlayingUrl(url);
+        //WiFi情况下才开始播放, 不是Wifi情况下通知相应Cover显示
         if (newState == PConst.NETWORK_STATE_WIFI) {
             mPlayerVideoview.start();
         } else {
@@ -356,25 +437,61 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
 
     @Override
     public void showRecommendBangumis(List<Bangumi> recommendBangumis) {
+        if (mStackBangumi.getRecommendBangumis() == null) {
+            mStackBangumi.setRecommendBangumis(recommendBangumis);
+        }
         mContentAdapter.notifiRecommendBangumisChange(recommendBangumis);
     }
 
     @Override
-    public void showError(Throwable throwable) {
-        int netState = NetworkUtils.getNetworkState(requireContext());
-        String text;
-        if (netState == -1) {
-            text = "请联网后重试";
-        } else {
-            text = throwable.toString();
-        }
-        Snackbar.make(mPlayerVideoview, text, Snackbar.LENGTH_LONG).show();
+    public void changeFavoriteButtonState(boolean isFavourite) {
+        mStackBangumi.getBangumi().setFavorite(isFavourite);
+        mContentAdapter.notifiBangumiChange();
     }
 
+    @Override
+    public void showSkipDialog(String url) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity())
+                .setTitle("无法解析")
+                .setMessage("是否跳转到解析源")
+                .setNegativeButton("取消", (dialog, which) -> {
+                    dialog.dismiss();
+                    onBackPressed();
+                })
+                .setPositiveButton("确认", (dialog, which) -> {
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    requireActivity().startActivity(intent);
+                    onBackPressed();
+                });
+        builder.show();
+    }
 
     @Override
     public void onDestroyView() {
         mPlayerVideoview.stopPlayback();
         super.onDestroyView();
+    }
+
+    @Override
+    public void showResultError(Throwable throwable) {
+        int netState = NetworkUtils.getNetworkState(requireContext());
+        String text = throwable.toString();
+        mReceiverGroup.getGroupValue().putBoolean(VideoPlayerEvent.Key.NOTIFI_ERROR_COVER_SHOW, true, true);
+        if (netState == -1) {
+            text = "请联网后重试";
+        }
+        if (mSnackbar == null) {
+            mSnackbar = Snackbar.make(mPlayerVideoview, text, Snackbar.LENGTH_LONG);
+            mSnackbar.show();
+        } else {
+            if (!mSnackbar.isShown()) {
+                mSnackbar.setText(text).show();
+            }
+        }
+    }
+
+    @Override
+    public void showResultEmpty() {
+
     }
 }

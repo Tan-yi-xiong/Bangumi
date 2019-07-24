@@ -19,7 +19,8 @@
             android:foreground="?attr/selectableItemBackground">
 
             <ImageView
-                android:id="@+id/result_cover"
+                android:transitionName="@string/transitionName"
+                android:id="@+id/bangumi_cover"
                 android:layout_width="78.75dp"
                 android:layout_height="0dp"
                 android:scaleType="centerCrop"
@@ -29,7 +30,7 @@
                 tools:srcCompat="@tools:sample/backgrounds/scenic[1]" />
 
             <TextView
-                android:id="@+id/result_name"
+                android:id="@+id/bangumi_name"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
@@ -37,22 +38,20 @@
                 android:layout_marginEnd="8dp"
                 android:ellipsize="end"
                 android:maxLines="2"
-                android:text="TextView"
                 android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toEndOf="@+id/result_cover"
+                app:layout_constraintStart_toEndOf="@+id/bangumi_cover"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/result_ji_toatal"
+                android:id="@+id/bangumi_ji_total"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
-                android:text="TextView"
-                app:layout_constraintStart_toEndOf="@+id/result_cover"
-                app:layout_constraintTop_toBottomOf="@+id/result_name" />
+                app:layout_constraintStart_toEndOf="@+id/bangumi_cover"
+                app:layout_constraintTop_toBottomOf="@+id/bangumi_name" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 </RelativeLayout>

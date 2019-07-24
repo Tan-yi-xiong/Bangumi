@@ -5,16 +5,16 @@
     android:id="@+id/main_drawerlayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".mainpage.MainActivity">
+    tools:context=".main.MainActivity">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/main_appbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:elevation="0dp"
             tools:ignore="MissingConstraints">
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/tb_main_search"
@@ -45,6 +45,8 @@
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     <com.google.android.material.navigation.NavigationView
+        app:menu="@menu/nav_menu"
+        app:headerLayout="@layout/layout_nav_heade"
         android:id="@+id/main_navigationview"
         android:layout_gravity="start"
         android:layout_width="wrap_content"

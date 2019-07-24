@@ -15,8 +15,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.TyxApp.bangumi.R;
-import com.TyxApp.bangumi.data.VideoPlayerEvent;
-import com.TyxApp.bangumi.util.LogUtil;
 import com.kk.taurus.playerbase.event.EventKey;
 import com.kk.taurus.playerbase.player.IPlayer;
 import com.kk.taurus.playerbase.receiver.PlayerStateGetter;
@@ -53,6 +51,9 @@ public class GestureCover extends ImpTouchListenerCover {
 
     private static final int SEEK_SCOPE = 30;
 
+    private float stateBarHeight;
+    private boolean isDownOnStateBarRegion;
+
     private int adjustState = -1;
     private static final int STATE_VIDEO_FAST_FORWARD = 0;
     private static final int STATE_VOLUME_ADJUST = 1;
@@ -76,6 +77,9 @@ public class GestureCover extends ImpTouchListenerCover {
         ContentResolver resolver = context.getContentResolver();
         mBrightness = Settings.System.getInt(resolver,
                 Settings.System.SCREEN_BRIGHTNESS, 125);
+
+        int resId = context.getResources().getIdentifier("status_bar_height", "dimen", "android");
+        stateBarHeight = context.getResources().getDimensionPixelSize(resId);
 
         mBundle = new Bundle();
     }
@@ -107,13 +111,15 @@ public class GestureCover extends ImpTouchListenerCover {
     @Override
     public void onDown(MotionEvent event) {
         startY = event.getY();
+        //如果按下的点在状态栏区域默认用户想拉下状态栏, 滚动事件不响应
+        isDownOnStateBarRegion = startY < stateBarHeight + 10;
     }
 
     @Override
     public void onScroll(MotionEvent downPoint, MotionEvent endPoint) {
         float distanceX = endPoint.getX() - downPoint.getX();
         float distanceY = endPoint.getY() - downPoint.getY();
-        if (Math.abs(distanceX) < 10 && Math.abs(distanceY) < 10) {
+        if (Math.abs(distanceX) < 10 && Math.abs(distanceY) < 10 || isDownOnStateBarRegion) {
             return;
         }
         //X滑动距离大于Y表示调节进度

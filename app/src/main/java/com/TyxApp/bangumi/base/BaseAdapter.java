@@ -3,6 +3,7 @@ package com.TyxApp.bangumi.base;
 import android.content.Context;
 import android.util.Log;
 
+import com.TyxApp.bangumi.data.bean.Bangumi;
 import com.TyxApp.bangumi.util.LogUtil;
 
 import java.util.ArrayList;
@@ -16,12 +17,13 @@ public abstract class BaseAdapter<T, VH extends RecyclerView.ViewHolder> extends
     private List<T> dataList;
     private Context mContext;
     public OnItemClickListener mOnItemClickListener;
+    public onItemLongClickLisener mOnItemLongClickLisener;
 
     public BaseAdapter(Context context) {
         this(new ArrayList<>(), context);
     }
 
-    protected List<T> getDataList() {
+    public List<T> getDataList() {
         return dataList;
     }
 
@@ -34,10 +36,12 @@ public abstract class BaseAdapter<T, VH extends RecyclerView.ViewHolder> extends
         return dataList.isEmpty();
     }
 
-    public void addInserted(T t) {
-        dataList.add(t);
-        notifyItemInserted(dataList.size() - 1);
+    public void addInserted(T t, int index) {
+        dataList.add(index, t);
+        notifyItemInserted(index);
     }
+
+
 
     public void clearAddAll(Collection<T> collection) {
         if (!dataList.isEmpty()) {
@@ -76,6 +80,14 @@ public abstract class BaseAdapter<T, VH extends RecyclerView.ViewHolder> extends
 
     public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
         mOnItemClickListener = onItemClickListener;
+    }
+
+    public interface onItemLongClickLisener {
+        boolean onItemLongClick(Bangumi bangumi);
+    }
+
+    public void setOnItemLongClickLisener(onItemLongClickLisener onItemLongClickLisener) {
+        mOnItemLongClickLisener = onItemLongClickLisener;
     }
 
 }

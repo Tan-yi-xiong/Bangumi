@@ -1,8 +1,9 @@
 package com.TyxApp.bangumi.player;
 
 import com.TyxApp.bangumi.base.BasePresenter;
-import com.TyxApp.bangumi.data.Bangumi;
-import com.TyxApp.bangumi.data.TextItemSelectBean;
+import com.TyxApp.bangumi.base.BaseView;
+import com.TyxApp.bangumi.data.bean.Bangumi;
+import com.TyxApp.bangumi.data.bean.TextItemSelectBean;
 
 import java.util.List;
 
@@ -15,9 +16,17 @@ public interface PlayContract {
         void getPlayerUrl(int id, int ji);
 
         void getRecommendBangumis(int id);
+
+        void isFavorite(int id, String sourch);
+
+        void setFavorite (Bangumi bangumi);
+
+        void setTime(Bangumi bangumi);
+
+        void setDownload(Bangumi bangumi);
     }
 
-    interface View {
+    interface View extends BaseView {
         void showBangumiIntro(String intor);
 
         void showBangumiJiList(List<TextItemSelectBean> jiList);
@@ -26,6 +35,9 @@ public interface PlayContract {
 
         void showRecommendBangumis(List<Bangumi> recommendBangumis);
 
-        void showError(Throwable throwable);
+
+        void changeFavoriteButtonState(boolean isFavourite);
+
+        void showSkipDialog(String url);
     }
 }

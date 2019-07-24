@@ -1,20 +1,16 @@
 package com.TyxApp.bangumi.player;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
 import com.TyxApp.bangumi.R;
 import com.TyxApp.bangumi.base.BaseMvpActivity;
-import com.TyxApp.bangumi.data.Bangumi;
+import com.TyxApp.bangumi.data.bean.Bangumi;
 import com.TyxApp.bangumi.util.ActivityUtil;
-import com.TyxApp.bangumi.util.LogUtil;
-import com.kk.taurus.playerbase.entity.DataSource;
-import com.kk.taurus.playerbase.widget.BaseVideoView;
 
-import androidx.recyclerview.widget.RecyclerView;
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import androidx.core.app.ActivityOptionsCompat;
 
 public class PlayerActivity extends BaseMvpActivity {
 
@@ -45,5 +41,11 @@ public class PlayerActivity extends BaseMvpActivity {
         Intent intent = new Intent(context, PlayerActivity.class);
         intent.putExtra(INTENT_KEY, bangumi);
         context.startActivity(intent);
+    }
+
+    public static void startPlayerActivityWithTransition(Activity activity, Bangumi bangumi, ActivityOptionsCompat compat) {
+        Intent intent = new Intent(activity, PlayerActivity.class);
+        intent.putExtra(INTENT_KEY, bangumi);
+        activity.startActivity(intent, compat.toBundle());
     }
 }

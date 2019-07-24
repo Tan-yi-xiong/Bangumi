@@ -29,7 +29,7 @@ public class BannerIndicator extends LinearLayout{
             ImageView iv = new ImageView(getContext());
             LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(15, 15);
             p.setMargins(10, 10, 10, 10);
-            iv.setImageResource(R.drawable.indicator_dot);
+            iv.setImageResource(R.drawable.banner_indicator_dot);
             iv.setLayoutParams(p);
             if (i == 0) iv.setColorFilter(getResources().getColor(R.color.colorPrimary), PorterDuff.Mode.SRC_IN);
             ivList.add(iv);

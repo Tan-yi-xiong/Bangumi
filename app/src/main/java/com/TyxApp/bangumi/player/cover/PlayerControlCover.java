@@ -13,7 +13,6 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.TyxApp.bangumi.R;
-import com.TyxApp.bangumi.data.VideoPlayerEvent;
 import com.TyxApp.bangumi.player.bottomsheet.MainBottomSheet;
 import com.TyxApp.bangumi.player.bottomsheet.VideoSpeedBottomSheet;
 import com.TyxApp.bangumi.util.AnimationUtil;
@@ -201,7 +200,7 @@ public class PlayerControlCover extends ImpTimeAndTouchListenerCover {
                 case 1://调速
                     showVideoSpeedBottomSheet();
                     break;
-                case 3://下载
+                case 2://下载
                     notifyReceiverEvent(VideoPlayerEvent.Code.CODE_DOWNLOAD, null);
                     break;
             }

@@ -3,19 +3,17 @@ package com.TyxApp.bangumi.player.adapter;
 import android.content.Context;
 import android.text.TextUtils;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import com.TyxApp.bangumi.R;
-import com.TyxApp.bangumi.base.BaseAdapter;
 import com.TyxApp.bangumi.base.BaseViewHolder;
-import com.TyxApp.bangumi.data.Bangumi;
-import com.TyxApp.bangumi.data.TextItemSelectBean;
+import com.TyxApp.bangumi.data.bean.Bangumi;
+import com.TyxApp.bangumi.data.bean.TextItemSelectBean;
 import com.TyxApp.bangumi.util.AnimationUtil;
-import com.TyxApp.bangumi.util.LogUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -140,20 +138,28 @@ public class ContentAdapter extends RecyclerView.Adapter<BaseViewHolder> {
                 } else {
                     ji = "全" + mBangumi.getTotal() + "话";
                 }
-            } else {
-                ji = "暂无信息";
             }
         }
         holder.setText(R.id.ji_total, ji);
 
         holder.setText(R.id.intro, mBangumi.getIntro());
+
+        Button favoriteButton = holder.getView(R.id.collect_button);
+        if (mBangumi.isFavorite()) {
+            favoriteButton.setSelected(true);
+            favoriteButton.setText("已追番");
+        } else {
+            favoriteButton.setSelected(false);
+            favoriteButton.setText("追番");
+        }
+        favoriteButton.setOnClickListener(v -> {
+            if (mOnItemSelectListener != null) {
+                mOnItemSelectListener.onFavoriteButtonClick(v.isSelected());
+            }
+                
+        });
     }
 
-
-    @Override
-    public int getItemCount() {
-        return mRecommendBangumis.size() + 3;
-    }
 
     @Override
     public int getItemViewType(int position) {
@@ -168,6 +174,15 @@ public class ContentAdapter extends RecyclerView.Adapter<BaseViewHolder> {
         }
     }
 
+    @Override
+    public int getItemCount() {
+        return mRecommendBangumis.size() + 3;
+    }
+
+
+    public List<TextItemSelectBean> getJiList() {
+        return mJiAdapter.getDataList();
+    }
 
     public void notifiBangumiChange(Bangumi bangumi) {
         mBangumi = bangumi;
@@ -175,14 +190,19 @@ public class ContentAdapter extends RecyclerView.Adapter<BaseViewHolder> {
     }
 
 
+    public void notifiBangumiChange() {
+        notifyItemChanged(0);
+    }
+
     public void notifijiListChange(List<TextItemSelectBean> jiList) {
         mJiAdapter.clearAddAll(jiList);
     }
 
     public void notifiRecommendBangumisChange(List<Bangumi> recommendBangumis) {
         if (!mRecommendBangumis.isEmpty()) {
-            notifyItemMoved(3, mRecommendBangumis.size());
+            int size = mRecommendBangumis.size();
             mRecommendBangumis.clear();
+            notifyItemRangeRemoved(3, size);
         }
         mRecommendBangumis.addAll(recommendBangumis);
         notifyItemRangeChanged(3, mRecommendBangumis.size());
@@ -192,6 +212,8 @@ public class ContentAdapter extends RecyclerView.Adapter<BaseViewHolder> {
         void onJiSelect(int pos);
 
         void onBangumiSelect(Bangumi bangumi);
+
+        void onFavoriteButtonClick(boolean isCollect);
     }
 
     public void setOnItemSelectListener(OnItemSelectListener onItemSelectListener) {

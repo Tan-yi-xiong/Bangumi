@@ -1,12 +1,19 @@
 package com.TyxApp.bangumi.util;
 
+import android.content.ContentValues;
+
 import java.io.IOException;
 
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
 
 public class HttpRequestUtil {
     private static OkHttpClient client;
+    public static final MediaType JSON
+            = MediaType.parse("application/json; charset=utf-8");
 
     public static void init() {
         if (client == null) {
@@ -18,8 +25,12 @@ public class HttpRequestUtil {
         }
     }
 
+    public static OkHttpClient getClient() {
+        return client;
+    }
+
     public static String getGetRequestResponseBodyString(String url) throws IOException {
-        ExceptionUtil.checkNull(client, "HttpRequestUti未初始化");
+        checkNull(client);
         Request request = new Request.Builder()
                 .url(url)
                 .build();
@@ -27,6 +38,41 @@ public class HttpRequestUtil {
                 .execute()
                 .body()
                 .string();
+    }
+
+    public static String postJosonResult(String url, ContentValues values) throws IOException {
+        checkNull(client);
+        StringBuilder jsonBuilder = new StringBuilder();
+        jsonBuilder.append("{");
+        for (String key : values.keySet()) {
+            jsonBuilder.append("\"");
+            jsonBuilder.append(key);
+            jsonBuilder.append("\":");
+            Object value = values.get(key);
+            if (value instanceof String) {
+                jsonBuilder.append("\"");
+                jsonBuilder.append(value.toString());
+                jsonBuilder.append("\"");
+            } else {
+                jsonBuilder.append(value.toString());
+            }
+            jsonBuilder.append(",");
+        }
+        jsonBuilder.deleteCharAt(jsonBuilder.length() - 1);//删除最后一个逗号
+        jsonBuilder.append("}");
+        RequestBody requestBody = RequestBody.create(JSON, jsonBuilder.toString());
+        Request request = new Request.Builder()
+                .url(url)
+                .post(requestBody)
+                .build();
+        return client.newCall(request)
+                .execute()
+                .body()
+                .string();
+    }
+
+    private static void checkNull(OkHttpClient client) {
+        ExceptionUtil.checkNull(client, "HttpRequestUti未初始化");
     }
 
 }

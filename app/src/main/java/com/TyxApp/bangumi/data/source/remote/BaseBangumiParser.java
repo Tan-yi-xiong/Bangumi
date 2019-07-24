@@ -1,10 +1,10 @@
 package com.TyxApp.bangumi.data.source.remote;
 
-import com.TyxApp.bangumi.data.Bangumi;
-import com.TyxApp.bangumi.data.TextItemSelectBean;
+import com.TyxApp.bangumi.data.bean.Bangumi;
+import com.TyxApp.bangumi.data.bean.TextItemSelectBean;
+import com.TyxApp.bangumi.data.bean.VideoUrl;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import io.reactivex.Observable;
 
@@ -17,7 +17,7 @@ public interface BaseBangumiParser {
 
     /**
      * 获取网站搜索结果
-     *规定: 如果有下一页搜索结果的话在集合最后添加一个null值, 表示可以分批加载
+     *
      */
     Observable<List<Bangumi>> getSearchResult(String word);
 
@@ -26,6 +26,7 @@ public interface BaseBangumiParser {
      * 一般逻辑为先调用getSearchResult()方法, 在getSearchResult()方法里同时记录页面所有的下一页url(也可以遍历所有url把所有数据一次加载完, 但是不推荐)按顺序保存 ,
      * 然后按顺序取出加载返回包装好的数据。
      *
+     *规定: 如果没有下一页搜索结果的话要发送onCompleted(), 代表加载完结果
      */
     Observable<List<Bangumi>> nextSearchResult();
 
@@ -46,9 +47,17 @@ public interface BaseBangumiParser {
      * 根据传进来的集去获取该id番剧该集的播放地址
      *
      */
-    Observable<String> getplayerUrl(int id, int ji);
+    Observable<VideoUrl> getplayerUrl(int id, int ji);
 
     Observable<List<Bangumi>> getRecommendBangumis(int id);
+
+    /**
+     *获取分类结果和下一页结果的方法, 逻辑与搜索结果一样
+     *
+     */
+    Observable<List<Bangumi>> getCategoryBangumis(String category);
+
+    Observable<List<Bangumi>> getNextCategoryBangumis();
 
     void onDestroy();
 }

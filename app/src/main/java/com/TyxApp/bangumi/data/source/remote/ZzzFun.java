@@ -1,10 +1,13 @@
 package com.TyxApp.bangumi.data.source.remote;
 
-import com.TyxApp.bangumi.data.Bangumi;
-import com.TyxApp.bangumi.data.TextItemSelectBean;
+import android.content.ContentValues;
+import android.util.SparseArray;
+
+import com.TyxApp.bangumi.data.bean.Bangumi;
+import com.TyxApp.bangumi.data.bean.TextItemSelectBean;
+import com.TyxApp.bangumi.data.bean.VideoUrl;
 import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
 import com.TyxApp.bangumi.util.HttpRequestUtil;
-import com.TyxApp.bangumi.util.LogUtil;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
@@ -23,12 +26,16 @@ import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.schedulers.Schedulers;
 
 public class ZzzFun implements BaseBangumiParser {
-    private String baseUrl = "http://api.xaaxhb.com/zapi";
-    private List<String> playerUrls;
+    private String baseUrl = "http://111.230.89.165:8089/zapi";
     private static ZzzFun INSTANCE;
+    private SparseArray<List<VideoUrl>> mPlayerUrlsCollect;
     private static AtomicInteger INSTANCECOUNTER = new AtomicInteger();
+    private int categoryPage;
+    private String mCategoryWord;
 
-    private ZzzFun(){}
+    private ZzzFun() {
+        mPlayerUrlsCollect = new SparseArray<>();
+    }
 
     public static ZzzFun getInstance() {
         if (INSTANCE == null) {
@@ -40,6 +47,9 @@ public class ZzzFun implements BaseBangumiParser {
 
     @Override
     public void onDestroy() {
+        if (mPlayerUrlsCollect.size() > 0) {
+            mPlayerUrlsCollect.clear();
+        }
         if (INSTANCECOUNTER.getAndDecrement() == 1) {
             INSTANCE = null;
         }
@@ -61,20 +71,22 @@ public class ZzzFun implements BaseBangumiParser {
                         integer = 9;
                     }
                     String url = baseUrl + "/type/home.php?t=" + integer;
-                    return getBangumis(url);
+                    String jsonData = HttpRequestUtil.getGetRequestResponseBodyString(url);
+                    return getBangumis(jsonData);
                 })
                 .subscribeOn(Schedulers.io());
     }
 
-    private List<Bangumi> getBangumis(String url) throws IOException {
-        String jsonData = HttpRequestUtil.getGetRequestResponseBodyString(url);
+    private List<Bangumi> getBangumis(String jsonData) {
         Gson gson = new Gson();
         //只要result字段的数据
         JsonObject jsonObject = gson.fromJson(jsonData, JsonObject.class);
-        Type type = new TypeToken<List<Bangumi>>(){}.getType();
+        Type type = new TypeToken<List<Bangumi>>() {}.getType();
         List<Bangumi> bangumis = gson.fromJson(jsonObject.get("result").toString(), type);
-        for (Bangumi bangumi : bangumis) {
-            bangumi.setSoure(BangumiPresistenceContract.BangumiSource.ZZZFUN);
+        if (bangumis != null) {
+            for (Bangumi bangumi : bangumis) {
+                bangumi.setVideoSoure(BangumiPresistenceContract.BangumiSource.ZZZFUN);
+            }
         }
         return bangumis;
     }
@@ -90,19 +102,19 @@ public class ZzzFun implements BaseBangumiParser {
             String jsonResultData = HttpRequestUtil.getGetRequestResponseBodyString(searchUrl);
             Gson gson = new Gson();
             JsonObject jsonObject = gson.fromJson(jsonResultData, JsonObject.class);
-            Type type = new TypeToken<List<Bangumi>>() {}.getType();
+            Type type = new TypeToken<List<Bangumi>>() {
+            }.getType();
             List<Bangumi> bangumis = gson.fromJson(jsonObject.get("list").toString(), type);
             for (Bangumi bangumi : bangumis) {
-                bangumi.setSoure(BangumiPresistenceContract.BangumiSource.ZZZFUN);
+                bangumi.setVideoSoure(BangumiPresistenceContract.BangumiSource.ZZZFUN);
             }
             emitter.onNext(bangumis);
-            emitter.onComplete();
         }).subscribeOn(Schedulers.io());
     }
 
     @Override
     public Observable<List<Bangumi>> nextSearchResult() {
-        return null;
+        return Observable.empty();
     }
 
     @Override
@@ -116,7 +128,7 @@ public class ZzzFun implements BaseBangumiParser {
             while (reader.hasNext()) {
                 if ("neirong".equals(reader.nextName())) {
                     intor = reader.nextString();
-                    intor = intor.replaceAll("</?[a-zA-Z]+/?>", "");
+                    intor = intor.replaceAll("<.*?>", "");
                 } else {
                     reader.skipValue();
                 }
@@ -127,43 +139,87 @@ public class ZzzFun implements BaseBangumiParser {
 
     @Override
     public Observable<List<TextItemSelectBean>> getJiList(int id) {
-        if (playerUrls != null) {
-            if (!playerUrls.isEmpty()) {
-                playerUrls.clear();
-            }
-        } else {
-            playerUrls = new ArrayList<>();
-        }
         return Observable.create((ObservableOnSubscribe<List<TextItemSelectBean>>) emitter -> {
             String url = baseUrl + "/list.php?id=" + id;
             String jiListData = HttpRequestUtil.getGetRequestResponseBodyString(url);
             Gson gson = new Gson();
             JsonObject jsonObject = gson.fromJson(jiListData, JsonObject.class);
-            Type type = new TypeToken<List<ZzzFunJi>>(){}.getType();
+            Type type = new TypeToken<List<ZzzFunJi>>() {
+            }.getType();
             List<ZzzFunJi> jiDataList = gson.fromJson(jsonObject.get("result").toString(), type);
             List<TextItemSelectBean> jiList = new ArrayList<>();
+            List<VideoUrl> playUrls = new ArrayList<>();
             for (ZzzFunJi zzzFunJi : jiDataList) {
                 TextItemSelectBean itemSelectBean = new TextItemSelectBean(zzzFunJi.ji);
                 jiList.add(itemSelectBean);
-                playerUrls.add(baseUrl + "/play.php?url=" + zzzFunJi.id);
+                VideoUrl videoUrl = new VideoUrl(baseUrl + "/play.php?url=" + zzzFunJi.id);
+                videoUrl.setHtml(false);
+                playUrls.add(videoUrl);
             }
+            mPlayerUrlsCollect.append(id, playUrls);
             emitter.onNext(jiList);
         }).subscribeOn(Schedulers.io());
     }
 
     @Override
-    public Observable<String> getplayerUrl(int id, int ji) {
-        if (playerUrls == null || playerUrls.isEmpty()) {
-            throw new IllegalArgumentException("逻辑错误了");
+    public Observable<VideoUrl> getplayerUrl(int id, int ji) {
+        List<VideoUrl> playUrls = mPlayerUrlsCollect.get(id);
+        if (playUrls != null) {
+            return Observable.just(playUrls.get(ji));
         }
-        return Observable.just(playerUrls.get(ji));
+        return getJiList(id).map(textItemSelectBeans -> mPlayerUrlsCollect.get(id).get(ji));
     }
 
     @Override
     public Observable<List<Bangumi>> getRecommendBangumis(int id) {
         String url = baseUrl + "/type/rnd.php";
         return Observable.just(url)
+                .map(s -> {
+                    String jsonData = HttpRequestUtil.getGetRequestResponseBodyString(s);
+                    return getBangumis(jsonData);
+                })
+                .subscribeOn(Schedulers.io());
+    }
+
+    @Override
+    public Observable<List<Bangumi>> getCategoryBangumis(String category) {
+        String url = baseUrl + "/type/list.php";
+        categoryPage = 1;
+        mCategoryWord = category;
+        return Observable.just(url)
+                .map(this::parseCategoryBangumi)
                 .map(this::getBangumis)
+                .subscribeOn(Schedulers.io());
+    }
+
+    private String parseCategoryBangumi(String url) throws IOException {
+        if ("最近更新".equals(mCategoryWord)) {
+            String seasonNewBangumiUrl = baseUrl + "/type/hot2.php?page=" + categoryPage;
+            return HttpRequestUtil.getGetRequestResponseBodyString(seasonNewBangumiUrl);
+        } else if ("日本动漫".equals(mCategoryWord)) {
+            mCategoryWord = "1";
+        }
+        ContentValues values = new ContentValues();
+        values.put("pageNow", categoryPage);
+        values.put("tagNames", mCategoryWord);
+        String jsonData = HttpRequestUtil.postJosonResult(url, values);
+        jsonData = jsonData.substring(jsonData.indexOf("{"), jsonData.lastIndexOf("}") + 1);
+        return jsonData;
+    }
+
+    @Override
+    public Observable<List<Bangumi>> getNextCategoryBangumis() {
+        categoryPage++;
+        String url = baseUrl + "/type/list.php";
+        return Observable.just(url)
+                .map(this::parseCategoryBangumi)
+                .flatMap(jsonData -> {
+                    List<Bangumi> bangumis = getBangumis(jsonData);
+                    if (bangumis == null) {
+                        return Observable.empty();
+                    }
+                    return Observable.create((ObservableOnSubscribe<List<Bangumi>>)emitter -> emitter.onNext(bangumis));
+                })
                 .subscribeOn(Schedulers.io());
     }
 

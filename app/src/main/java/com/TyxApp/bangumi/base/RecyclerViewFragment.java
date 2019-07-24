@@ -18,6 +18,10 @@ public abstract class RecyclerViewFragment extends BaseMvpFragment {
     View dataLoadingView;
     @BindView(R.id.error_page)
     View errorPageView;
+    @BindView(R.id.no_result_view)
+    View noResultView;
+
+    private boolean isFristLoading = true;
 
     @Override
     public int getLayoutId() {
@@ -29,12 +33,14 @@ public abstract class RecyclerViewFragment extends BaseMvpFragment {
     }
 
     public void showDataLodaing() {
+        noResultView.setVisibility(View.GONE);
         errorPageView.setVisibility(View.GONE);
         recyclerview.setVisibility(View.GONE);
         dataLoadingView.setVisibility(View.VISIBLE);
     }
 
     public void showRecyclerView() {
+        noResultView.setVisibility(View.GONE);
         recyclerview.setVisibility(View.VISIBLE);
         dataLoadingView.setVisibility(View.GONE);
         errorPageView.setVisibility(View.GONE);
@@ -45,6 +51,7 @@ public abstract class RecyclerViewFragment extends BaseMvpFragment {
     }
 
     public void showErrorPage() {
+        noResultView.setVisibility(View.GONE);
         recyclerview.setVisibility(View.GONE);
         dataLoadingView.setVisibility(View.GONE);
         errorPageView.setVisibility(View.VISIBLE);
@@ -52,5 +59,25 @@ public abstract class RecyclerViewFragment extends BaseMvpFragment {
 
     public View getErrorPageView() {
         return errorPageView;
+    }
+
+    public void showNoResult() {
+        noResultView.setVisibility(View.VISIBLE);
+        recyclerview.setVisibility(View.GONE);
+        dataLoadingView.setVisibility(View.GONE);
+        errorPageView.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (isFristLoading) {
+            FristLoading();
+            isFristLoading = false;
+        }
+    }
+
+    public void FristLoading() {
+
     }
 }

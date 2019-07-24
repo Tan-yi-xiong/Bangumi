@@ -42,6 +42,7 @@
             app:srcCompat="@drawable/ic_player_control_more_vert" />
 
         <TextView
+            android:textStyle="bold"
             android:id="@+id/video_player_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -114,6 +115,7 @@
             app:srcCompat="@drawable/player_control_fullscreen" />
 
         <TextView
+            android:textStyle="bold"
             android:id="@+id/tv_total_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -126,6 +128,7 @@
             app:layout_constraintTop_toTopOf="@+id/tv_current_time" />
 
         <TextView
+            android:textStyle="bold"
             android:id="@+id/tv_current_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

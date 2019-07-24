@@ -3,6 +3,7 @@ package com.TyxApp.bangumi;
 import android.app.Application;
 import android.content.Context;
 
+import com.TyxApp.bangumi.data.source.local.AppDatabase;
 import com.TyxApp.bangumi.util.HttpRequestUtil;
 import com.kk.taurus.ijkplayer.IjkPlayer;
 import com.kk.taurus.playerbase.config.PlayerConfig;
@@ -15,6 +16,7 @@ public class BanghumiApp extends Application {
     public void onCreate() {
         super.onCreate();
         HttpRequestUtil.init();
+        AppDatabase.init(getApplicationContext());
         appContext = getApplicationContext();
 
         //playerbaseInit

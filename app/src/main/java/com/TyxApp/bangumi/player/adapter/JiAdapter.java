@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import com.TyxApp.bangumi.R;
 import com.TyxApp.bangumi.base.BaseAdapter;
 import com.TyxApp.bangumi.base.BaseViewHolder;
-import com.TyxApp.bangumi.data.TextItemSelectBean;
+import com.TyxApp.bangumi.data.bean.TextItemSelectBean;
 import com.TyxApp.bangumi.util.AnimationUtil;
 
 import androidx.annotation.NonNull;

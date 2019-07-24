@@ -8,8 +8,6 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.TyxApp.bangumi.R;
-import com.TyxApp.bangumi.data.VideoPlayerEvent;
-import com.TyxApp.bangumi.util.LogUtil;
 import com.kk.taurus.playerbase.config.PConst;
 import com.kk.taurus.playerbase.event.EventKey;
 import com.kk.taurus.playerbase.event.OnPlayerEventListener;
@@ -74,6 +72,9 @@ public class ErrorCover extends BaseCover {
 
     private void handleUI(int networkState) {
         if (networkState == PConst.NETWORK_STATE_WIFI) {
+            if (getView().getVisibility() == View.VISIBLE) {
+                hideUI();
+            }
             return;
         }
         if (networkState < 0) {
@@ -109,6 +110,10 @@ public class ErrorCover extends BaseCover {
         } else {
             requestResume(null);
         }
+        hideUI();
+    }
+
+    private void hideUI() {
         getView().setVisibility(View.GONE);
         Bundle bundle = new Bundle();
         bundle.putBoolean(EventKey.BOOL_DATA, false);
@@ -131,7 +136,6 @@ public class ErrorCover extends BaseCover {
     public void onErrorEvent(int eventCode, Bundle bundle) {
         mState = STATE_ERROR;
         showUI();
-        LogUtil.i("fasdf");
     }
 
     @Override

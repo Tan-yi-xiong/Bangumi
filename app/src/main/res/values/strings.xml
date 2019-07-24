@@ -4,5 +4,9 @@
     <string name="opendrawer">open drawer</string>
     <string name="closedrawer">close drawer</string>
     <string name="more">更多</string>
-    <string name="error_tips">加载出错了 (ノ｀Д)ノ</string>
+    <string name="error_tips">加载出错了</string>
+    <string name="no_result">暂无结果</string>
+    <string name="transitionName">transitionName</string>
+    <string name="myfavorite">我的追番</string>
+    <string name="history">历史记录</string>
 </resources>
