@@ -44,7 +44,7 @@ public class SearchResultFragmetn extends RecyclerViewFragment implements Search
     };
 
     @Override
-    protected void initView() {
+    protected void initView(Bundle savedInstanceState) {
         getRefreshLayout().setEnabled(false);
         mSearchInput = requireActivity().findViewById(R.id.search_input);
         mAdapter = new SearchResultFragmentRVAdapter(requireActivity());
@@ -100,10 +100,12 @@ public class SearchResultFragmetn extends RecyclerViewFragment implements Search
     public void showSearchResult(List<Bangumi> bangumis) {
         showRecyclerView();
         isLoading = false;
+        getRecyclerview().scrollToPosition(0);
         getRecyclerview().clearOnScrollListeners();
         getRecyclerview().addOnScrollListener(mScrollListener);
         mAdapter.clearAddAll(bangumis);
     }
+
 
     @Override
     public void showMoreSearchResult(List<Bangumi> moreBangumis) {
@@ -113,7 +115,6 @@ public class SearchResultFragmetn extends RecyclerViewFragment implements Search
 
     @Override
     public void noNextSearchResult() {
-        mAdapter.remove(mAdapter.getDataList().size());
         Toast.makeText(getContext(), "没有更多了", Toast.LENGTH_SHORT).show();
         getRecyclerview().removeOnScrollListener(mScrollListener);
     }

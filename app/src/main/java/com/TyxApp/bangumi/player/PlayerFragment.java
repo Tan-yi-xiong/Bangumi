@@ -34,7 +34,6 @@ import com.TyxApp.bangumi.player.cover.PlayerControlCover;
 import com.TyxApp.bangumi.player.cover.VideoPlayerEvent;
 import com.TyxApp.bangumi.server.Download;
 import com.TyxApp.bangumi.server.DownloadServer;
-import com.TyxApp.bangumi.util.LogUtil;
 import com.google.android.material.snackbar.Snackbar;
 import com.kk.taurus.playerbase.assist.OnVideoViewEventHandler;
 import com.kk.taurus.playerbase.config.PConst;
@@ -65,14 +64,17 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
 
     private ContentAdapter mContentAdapter;
     private Snackbar mSnackbar;
-    private List<StackBangumi> mStackBangumis;//存放点击了的更多番剧, 模拟一个栈。
+    private List<StackBangumi> mStackBangumiList;//存放点击了的更多番剧, 模拟一个栈。
     private PlayerPresenter mPlayerPresenter;
     private StackBangumi mStackBangumi;
     private int videoViewPortraitHeighe;
     private ReceiverGroup mReceiverGroup;
     private boolean isuserPuase;
+    private static final String SCREEN_STATE_KEY = "S_S_K";
+    private static final String STACK_BANGUM_KEY = "S_B_K";
 
     private Download mDownload;
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -90,7 +92,7 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
         if (isFullScreen()) {
             requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         } else {
-            if (mStackBangumis.size() == 1) {
+            if (mStackBangumiList.size() == 1) {
                 requireActivity().finish();
             } else {
                 removeBangumiFromList();
@@ -99,25 +101,22 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
     }
 
     private void removeBangumiFromList() {
-        mStackBangumis.remove(mStackBangumis.size() - 1);
-        mStackBangumi = mStackBangumis.get(mStackBangumis.size() - 1);
-        showBangumiJiList(mStackBangumi.getPlayedJi());
-        showRecommendBangumis(mStackBangumi.getRecommendBangumis());
-        mContentAdapter.notifiBangumiChange(mStackBangumi.getBangumi());
+        mStackBangumiList.remove(mStackBangumiList.size() - 1);
+        mStackBangumi = mStackBangumiList.get(mStackBangumiList.size() - 1);
+        LoadingPageData();
     }
 
     private void addBangumiToList(Bangumi bangumi) {
         StackBangumi stackBangumi = new StackBangumi(bangumi);
-        bangumi.setTime(System.currentTimeMillis());
+        bangumi.setHistoryTime(System.currentTimeMillis());
         mPlayerPresenter.setTime(bangumi);
         mStackBangumi = stackBangumi;
-        mStackBangumis.add(stackBangumi);
+        mStackBangumiList.add(stackBangumi);
     }
 
     @Override
     public BasePresenter getPresenter() {
         Bangumi bangumi = requireActivity().getIntent().getParcelableExtra(PlayerActivity.INTENT_KEY);
-        mStackBangumis = new ArrayList<>();
         BaseBangumiParser parser = null;
         switch (bangumi.getVideoSoure()) {
             case BangumiPresistenceContract.BangumiSource.NiICO:
@@ -129,12 +128,33 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
                 break;
         }
         mPlayerPresenter = new PlayerPresenter(this, parser);
-        addBangumiToList(bangumi);
         return mPlayerPresenter;
     }
 
     @Override
-    protected void initView() {
+    protected void initView(Bundle savedInstanceState) {
+        mStackBangumiList = new ArrayList<>();
+        if (savedInstanceState != null) {
+            mStackBangumi = savedInstanceState.getParcelable(STACK_BANGUM_KEY);
+            mPlayerVideoview.post(() -> {
+                if (savedInstanceState != null) {
+                    boolean isFullScreen = savedInstanceState.getBoolean(SCREEN_STATE_KEY, false);
+                    mReceiverGroup.getGroupValue().putBoolean(VideoPlayerEvent.Key.IS_FULLSCREEN_KEY, isFullScreen, true);
+                    if (isFullScreen) {
+                        Configuration configuration = new Configuration();
+                        configuration.orientation = Configuration.ORIENTATION_LANDSCAPE;
+                        onConfigurationChanged(configuration);
+                    }
+                }
+            });
+        }
+
+        if (mStackBangumi == null) {
+            Bangumi bangumi = requireActivity().getIntent().getParcelableExtra(PlayerActivity.INTENT_KEY);
+            addBangumiToList(bangumi);
+        } else {
+            mStackBangumiList.add(mStackBangumi);
+        }
 
         mContentAdapter = new ContentAdapter(mStackBangumi.getBangumi(), requireContext());
         mContentAdapter.setOnItemSelectListener(new ContentAdapter.OnItemSelectListener() {
@@ -181,7 +201,9 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
         hindStateBar();
 
         LoadingPageData();
+
     }
+
 
     private OnVideoViewEventHandler mViewEventHandler =
             new OnVideoViewEventHandler() {
@@ -219,14 +241,18 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
     private void coverEventHandle(BaseVideoView assist, int eventCode, Bundle bundle) {
         switch (eventCode) {
             case VideoPlayerEvent.Code.CODE_FULL_SCREEN://屏幕旋转
-                requireActivity().setRequestedOrientation(isFullScreen() ?
-                        ActivityInfo.SCREEN_ORIENTATION_PORTRAIT :
-                        ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                if (isFullScreen()) {
+                    requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                } else {
+                    requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                }
+                mReceiverGroup.getGroupValue().putBoolean(VideoPlayerEvent.Key.IS_FULLSCREEN_KEY, !isFullScreen(), true);
                 break;
 
             case VideoPlayerEvent.Code.CODE_BACK://返回图标按下
                 if (isFullScreen()) {
                     requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                    mReceiverGroup.getGroupValue().putBoolean(VideoPlayerEvent.Key.IS_FULLSCREEN_KEY, !isFullScreen(), true);
                 } else {
                     requireActivity().finish();
                 }
@@ -305,15 +331,23 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
         //推荐为空才去获取
         if (mStackBangumi.getRecommendBangumis() == null) {
             mPlayerPresenter.getRecommendBangumis(mStackBangumi.getBangumiId());
+        } else {
+            showRecommendBangumis(mStackBangumi.getRecommendBangumis());
         }
-        //简介为空才去获取
+
+        if (mStackBangumi.getPlayedJi() == null) {
+            mPlayerPresenter.getBangumiJiList(mStackBangumi.getBangumiId());
+        } else {
+            showBangumiJiList(mStackBangumi.getPlayedJi());
+        }
         if (TextUtils.isEmpty(mStackBangumi.getBangumi().getIntro())) {
             mPlayerPresenter.getBangumiIntro(mStackBangumi.getBangumiId());
+        } else {
+            mContentAdapter.notifiBangumiChange(mStackBangumi.getBangumi());
         }
-        mPlayerPresenter.getBangumiJiList(mStackBangumi.getBangumiId());
+
         mPlayerPresenter.isFavorite(mStackBangumi.getBangumiId(), mStackBangumi.getBanhumiSourch());
     }
-
 
 
     private void hindStateBar() {
@@ -358,15 +392,10 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
             isLandscape = false;
             videoViewHeight = videoViewPortraitHeighe;
         }
-
         ViewGroup.LayoutParams layoutParams = mPlayerVideoview.getLayoutParams();
         layoutParams.height = videoViewHeight;
         mPlayerVideoview.requestLayout();
 
-        mReceiverGroup.getGroupValue().putBoolean(
-                VideoPlayerEvent.Key.IS_FULLSCREEN_KEY,
-                isLandscape,
-                true);
         hindStateBar();
     }
 
@@ -493,5 +522,12 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
     @Override
     public void showResultEmpty() {
 
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putBoolean(SCREEN_STATE_KEY, isFullScreen());
+        outState.putParcelable(STACK_BANGUM_KEY, mStackBangumi);
+        super.onSaveInstanceState(outState);
     }
 }

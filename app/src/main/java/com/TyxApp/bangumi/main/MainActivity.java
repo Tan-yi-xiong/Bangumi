@@ -11,11 +11,13 @@ import android.view.View;
 import com.TyxApp.bangumi.R;
 import com.TyxApp.bangumi.base.BaseMvpActivity;
 import com.TyxApp.bangumi.main.bangumi.BangumiFragment;
-import com.TyxApp.bangumi.main.history.HistoryFragment;
-import com.TyxApp.bangumi.main.myfavorite.MyFavoriteFragment;
+import com.TyxApp.bangumi.main.category.CategoryFragment;
+import com.TyxApp.bangumi.main.favoriteandhistory.FavoriteAndHistoryFragment;
 import com.TyxApp.bangumi.main.search.SearchFragment;
+import com.TyxApp.bangumi.main.timetable.TimeTableFragment;
 import com.TyxApp.bangumi.util.ActivityUtil;
 import com.TyxApp.bangumi.util.AnimationUtil;
+import com.TyxApp.bangumi.util.LogUtil;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -25,6 +27,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentTransaction;
 import butterknife.BindView;
+import io.reactivex.Observable;
 
 public class MainActivity extends BaseMvpActivity implements NavigationView.OnNavigationItemSelectedListener {
     @BindView(R.id.tb_main_search)
@@ -116,42 +119,51 @@ public class MainActivity extends BaseMvpActivity implements NavigationView.OnNa
                 replaceFragment(BangumiFragment.class.getName());
                 break;
             case R.id.nav_category:
-
+                replaceFragment(CategoryFragment.class.getName());
                 break;
             case R.id.nav_like:
-                replaceFragment(MyFavoriteFragment.class.getName());
+                replaceFragment(menuItem.getTitle().toString());
                 break;
             case R.id.nav_history:
-                replaceFragment(HistoryFragment.class.getName());
+                replaceFragment(menuItem.getTitle().toString());
                 break;
             case R.id.nav_download:
-
-                break;
-            case R.id.nav_about:
 
                 break;
 
             case R.id.nav_setting:
 
                 break;
+
+            case R.id.nav_timetable:
+                replaceFragment(TimeTableFragment.class.getName());
+                break;
         }
         return true;
     }
 
-    private void replaceFragment(String fragmentName) {
-        currentFragmentName = fragmentName;
-        if (fragmentName.equals(BangumiFragment.class.getName())) {
+    private void replaceFragment(String tagName) {
+        currentFragmentName = tagName;
+        if (tagName.equals(BangumiFragment.class.getName())) {
             mainNavigationview.getMenu().getItem(0).setChecked(true);
             getSupportActionBar().setTitle(getString(R.string.bangumi));
             ActivityUtil.replaceFragment(getSupportFragmentManager(), BangumiFragment.newInstance(), R.id.fl_content);
-        } else if (fragmentName.equals(MyFavoriteFragment.class.getName())) {
+        } else if (tagName.equals(getString(R.string.myfavorite)) || tagName.equals(getString(R.string.history))) {
+            if (tagName.equals(getString(R.string.history))) {
+                mainNavigationview.getMenu().findItem(R.id.nav_history).setChecked(true);
+            } else {
+                mainNavigationview.getMenu().findItem(R.id.nav_like).setChecked(true);
+            }
+            getSupportActionBar().setTitle(tagName);
+            ActivityUtil.replaceFragment(getSupportFragmentManager(), FavoriteAndHistoryFragment.newInstance(tagName), R.id.fl_content);
+        } else if (tagName.equals(CategoryFragment.class.getName())) {
+            mainNavigationview.getMenu().getItem(1).setChecked(true);
+            getSupportActionBar().setTitle(getString(R.string.category));
+            ActivityUtil.replaceFragment(getSupportFragmentManager(), CategoryFragment.newInstance(), R.id.fl_content);
+        } else if (tagName.equals(TimeTableFragment.class.getName())) {
             mainNavigationview.getMenu().getItem(2).setChecked(true);
-            getSupportActionBar().setTitle(getString(R.string.myfavorite));
-            ActivityUtil.replaceFragment(getSupportFragmentManager(), MyFavoriteFragment.newInstance(), R.id.fl_content);
-        } else if(fragmentName.equals(HistoryFragment.class.getName())) {
-            mainNavigationview.getMenu().getItem(4).setChecked(true);
-            getSupportActionBar().setTitle(getString(R.string.history));
-            ActivityUtil.replaceFragment(getSupportFragmentManager(), HistoryFragment.newInstance(), R.id.fl_content);
+            getSupportActionBar().setTitle(getString(R.string.timetable));
+            ActivityUtil.replaceFragment(getSupportFragmentManager(), TimeTableFragment.newInstance(), R.id.fl_content);
         }
     }
 
@@ -177,20 +189,21 @@ public class MainActivity extends BaseMvpActivity implements NavigationView.OnNa
 
     @Override
     public void onBackPressed() {
-        if (!BangumiFragment.class.getName().equals(currentFragmentName)) {
-            replaceFragment(BangumiFragment.class.getName());
-            return;
-        }
+
 
         if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
-            if (!isFinish) {
+            if (!BangumiFragment.class.getName().equals(currentFragmentName)) {
+                replaceFragment(BangumiFragment.class.getName());
+            } else if (!isFinish) {
                 isFinish = true;
                 doubleBackPressed.sendEmptyMessageDelayed(0, DELAYTIME);
                 Snackbar.make(mainDrawerlayout, "再按一次退出", Snackbar.LENGTH_SHORT).show();
-                return;
+            } else if (isFinish) {
+                super.onBackPressed();
             }
+        } else {
+            super.onBackPressed();
         }
-        super.onBackPressed();
     }
 
     @Override

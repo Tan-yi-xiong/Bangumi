@@ -1,4 +1,4 @@
-package com.TyxApp.bangumi.category;
+package com.TyxApp.bangumi.categoryresult;
 
 import android.content.Context;
 import android.content.Intent;
@@ -12,7 +12,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import butterknife.BindView;
 
-public class CategoryActivity extends BaseMvpActivity {
+public class CategoryResultActivity extends BaseMvpActivity {
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -25,11 +25,11 @@ public class CategoryActivity extends BaseMvpActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         toolbar.setNavigationOnClickListener(v -> finish());
-        getSupportActionBar().setTitle(getIntent().getStringExtra(CategoryActivity.CATEGORYWORD_KEY));
+        getSupportActionBar().setTitle(getIntent().getStringExtra(CategoryResultActivity.CATEGORYWORD_KEY));
 
-        mContentFragment = ActivityUtil.findFragment(getSupportFragmentManager(), CategoryFragment.class.getName());
+        mContentFragment = ActivityUtil.findFragment(getSupportFragmentManager(), CategoryResultFragment.class.getName());
         if (mContentFragment == null) {
-            mContentFragment = CategoryFragment.newInstance();
+            mContentFragment = CategoryResultFragment.newInstance();
         }
         ActivityUtil.replaceFragment(getSupportFragmentManager(), mContentFragment, R.id.content_frame);
     }
@@ -40,7 +40,7 @@ public class CategoryActivity extends BaseMvpActivity {
     }
 
     public static void startCategoryActivity(Context context, String categoryWord) {
-        Intent intent = new Intent(context, CategoryActivity.class);
+        Intent intent = new Intent(context, CategoryResultActivity.class);
         intent.putExtra(CATEGORYWORD_KEY, categoryWord);
         context.startActivity(intent);
     }

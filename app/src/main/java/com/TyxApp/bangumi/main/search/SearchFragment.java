@@ -1,6 +1,7 @@
 package com.TyxApp.bangumi.main.search;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -65,7 +66,7 @@ public class SearchFragment extends BaseMvpFragment {
                 .commit();
     }
 
-    public void initView() {
+    public void initView(Bundle savedInstanceState) {
         mSearchInput = requireActivity().findViewById(R.id.search_input);
         mSearchInput.setVisibility(View.VISIBLE);
 

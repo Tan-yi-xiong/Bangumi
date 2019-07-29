@@ -1,6 +1,7 @@
 package com.TyxApp.bangumi.data.source.remote;
 
 import com.TyxApp.bangumi.data.bean.Bangumi;
+import com.TyxApp.bangumi.data.bean.CategorItem;
 import com.TyxApp.bangumi.data.bean.TextItemSelectBean;
 import com.TyxApp.bangumi.data.bean.VideoUrl;
 
@@ -71,6 +72,16 @@ public class Sakura implements BaseBangumiParser{
 
     @Override
     public Observable<List<Bangumi>> getNextCategoryBangumis() {
+        return null;
+    }
+
+    @Override
+    public Observable<List<CategorItem>> getCategorItems() {
+        return null;
+    }
+
+    @Override
+    public Observable<List<List<Bangumi>>> getBangumiTimeTable() {
         return null;
     }
 

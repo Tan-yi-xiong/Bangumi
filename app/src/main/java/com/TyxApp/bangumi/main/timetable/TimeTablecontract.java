@@ -1,4 +1,4 @@
-package com.TyxApp.bangumi.main.myfavorite;
+package com.TyxApp.bangumi.main.timetable;
 
 import com.TyxApp.bangumi.base.BasePresenter;
 import com.TyxApp.bangumi.base.BaseView;
@@ -6,14 +6,12 @@ import com.TyxApp.bangumi.data.bean.Bangumi;
 
 import java.util.List;
 
-public interface MyFavoriteContract {
+public interface TimeTablecontract {
     interface Presenter extends BasePresenter {
-        void getMyFavoriteBangumis();
-
-        void removeMyFavoriteBangumi(int id, String source);
+        void getBangumiTimtable();
     }
 
     interface View extends BaseView {
-        void showMyFavoriteBangumis(List<Bangumi> bangumis);
+        void showBangumiTimtable(List<List<Bangumi>> timeTableBangumis);
     }
 }

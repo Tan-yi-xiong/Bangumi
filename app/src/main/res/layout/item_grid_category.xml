@@ -12,7 +12,7 @@
         android:layout_height="wrap_content">
 
         <ImageView
-            android:id="@+id/bangumi_cover"
+            android:id="@+id/cover"
             android:layout_width="match_parent"
             android:layout_height="140.25dp"
             android:layout_marginTop="8dp"
@@ -25,7 +25,7 @@
         <TextView
             android:ellipsize="end"
             android:maxLines="1"
-            android:id="@+id/bangumi_name"
+            android:id="@+id/name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="3dp"
@@ -35,7 +35,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/bangumi_cover" />
+            app:layout_constraintTop_toBottomOf="@+id/cover" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </RelativeLayout>

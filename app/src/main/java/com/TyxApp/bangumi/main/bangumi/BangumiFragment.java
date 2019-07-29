@@ -1,5 +1,7 @@
 package com.TyxApp.bangumi.main.bangumi;
 
+import android.os.Bundle;
+
 import com.TyxApp.bangumi.R;
 import com.TyxApp.bangumi.base.BasePresenter;
 import com.TyxApp.bangumi.base.RecyclerViewFragment;
@@ -15,7 +17,6 @@ import com.kk.taurus.playerbase.utils.NetworkUtils;
 import java.util.List;
 
 import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.GridLayoutManager;
 
 public class BangumiFragment extends RecyclerViewFragment implements BangumiContract.View {
     private BangumiPresenter mPresenter;
@@ -25,13 +26,12 @@ public class BangumiFragment extends RecyclerViewFragment implements BangumiCont
     private BaseHomeBangumiAdapter mHomeBangumiAdapter;
 
     @Override
-    protected void initView() {
+    protected void initView(Bundle savedInstanceState) {
 
         getRefreshLayout().setRefreshing(true);
         getRefreshLayout().setColorSchemeColors(ContextCompat.getColor(getContext(), R.color.colorPrimary));
         getRefreshLayout().setOnRefreshListener(() -> mPresenter.refreshHomeData());
 
-        getRecyclerview().setLayoutManager(new GridLayoutManager(getActivity(), 2));
 
         String honeAdapterSourch = PreferenceUtil.getString(PreferenceUtil.HOME_SOURCE,
                 BangumiPresistenceContract.BangumiSource.ZZZFUN);
@@ -40,12 +40,11 @@ public class BangumiFragment extends RecyclerViewFragment implements BangumiCont
             case BangumiPresistenceContract.BangumiSource.ZZZFUN:
                 mHomeBangumiAdapter = new ZzzFunHomeBangumiAdapter(getContext());
                 ZzzFunHomeBangumiAdapter adapter = (ZzzFunHomeBangumiAdapter) mHomeBangumiAdapter;
+                getRecyclerview().addItemDecoration(adapter.getItemDecoration());
                 getLifecycle().addObserver(adapter);
                 break;
         }
         getRecyclerview().setAdapter(mHomeBangumiAdapter);
-        getRecyclerview().addItemDecoration(new ZzzFunHomeBangumiAdapter.ItemDecoration());
-
     }
 
     @Override

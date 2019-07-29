@@ -49,10 +49,10 @@ public class Bangumi implements Parcelable {
     @SerializedName(value = "total", alternate = {"vod_total"})
     private String total;//总集数
 
-    @SerializedName(value = "serial", alternate = {"vod_serial"})
+    @SerializedName(value = "serial", alternate = {"vod_serial", "ji"})
     private String serial;//更新至
 
-    private long time;//点击番剧观看的时间戳, 历史观看使用;
+    private long historyTime;//点击番剧观看的时间戳, 历史观看使用;
 
 
     protected Bangumi(Parcel in) {
@@ -84,12 +84,12 @@ public class Bangumi implements Parcelable {
         isDownLoad = downLoad;
     }
 
-    public long getTime() {
-        return time;
+    public long getHistoryTime() {
+        return historyTime;
     }
 
-    public void setTime(long time) {
-        this.time = time;
+    public void setHistoryTime(long historyTime) {
+        this.historyTime = historyTime;
     }
 
     public static final Creator<Bangumi> CREATOR = new Creator<Bangumi>() {

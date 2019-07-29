@@ -1,6 +1,7 @@
 package com.TyxApp.bangumi.data.source.remote;
 
 import com.TyxApp.bangumi.data.bean.Bangumi;
+import com.TyxApp.bangumi.data.bean.CategorItem;
 import com.TyxApp.bangumi.data.bean.TextItemSelectBean;
 import com.TyxApp.bangumi.data.bean.VideoUrl;
 
@@ -58,6 +59,10 @@ public interface BaseBangumiParser {
     Observable<List<Bangumi>> getCategoryBangumis(String category);
 
     Observable<List<Bangumi>> getNextCategoryBangumis();
+
+    Observable<List<CategorItem>> getCategorItems();
+
+    Observable<List<List<Bangumi>>> getBangumiTimeTable();
 
     void onDestroy();
 }

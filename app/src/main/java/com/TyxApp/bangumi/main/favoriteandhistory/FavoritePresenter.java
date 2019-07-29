@@ -1,30 +1,27 @@
-package com.TyxApp.bangumi.main.myfavorite;
+package com.TyxApp.bangumi.main.favoriteandhistory;
 
 import com.TyxApp.bangumi.data.source.local.AppDatabase;
 import com.TyxApp.bangumi.data.source.local.BangumiDao;
-import com.TyxApp.bangumi.util.LogUtil;
+import com.TyxApp.bangumi.util.ExceptionUtil;
 
-import java.util.function.BiConsumer;
-
-import io.reactivex.Flowable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class MyFavoritePresenter implements MyFavoriteContract.Presenter {
+public class FavoritePresenter implements FavoriteAndHistoryContract.Presenter {
     private BangumiDao mBangumiDao;
     private CompositeDisposable mDisposable;
-    private MyFavoriteContract.View mView;
+    private FavoriteAndHistoryContract.View mView;
 
-    public MyFavoritePresenter(MyFavoriteContract.View view) {
+    public FavoritePresenter(FavoriteAndHistoryContract.View view) {
+        ExceptionUtil.checkNull(view, "view不能为空, FavoritePresenter");
         mView = view;
         mBangumiDao = AppDatabase.getInstance().getBangumiDao();
         mDisposable = new CompositeDisposable();
     }
 
     @Override
-    public void getMyFavoriteBangumis() {
+    public void getBangumis() {
         mDisposable.add(mBangumiDao.getFavoriteBangumi()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -33,7 +30,7 @@ public class MyFavoritePresenter implements MyFavoriteContract.Presenter {
                             if (bangumis.isEmpty()) {
                                 mView.showResultEmpty();
                             } else {
-                                mView.showMyFavoriteBangumis(bangumis);
+                                mView.showBangumis(bangumis);
                             }
 
                         },
@@ -42,7 +39,7 @@ public class MyFavoritePresenter implements MyFavoriteContract.Presenter {
     }
 
     @Override
-    public void removeMyFavoriteBangumi(int id, String source) {
+    public void removeBangumi(int id, String source) {
        mDisposable.add(mBangumiDao.updateFavoriteState(id, source, false)
                .subscribeOn(Schedulers.io())
                .observeOn(AndroidSchedulers.mainThread())

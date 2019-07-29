@@ -1,6 +1,7 @@
 package com.TyxApp.bangumi.main.search.searchhistory;
 
 import android.graphics.Color;
+import android.os.Bundle;
 
 import com.TyxApp.bangumi.R;
 import com.TyxApp.bangumi.base.BasePresenter;
@@ -21,7 +22,7 @@ public class SearchHistoryFragment extends RecyclerViewFragment implements Searc
     private OnSearchWordItemClickListener mOnSearchWordItemClickListener;
 
     @Override
-    protected void initView() {
+    protected void initView(Bundle savedInstanceState) {
         getRefreshLayout().setEnabled(false);
         mSearchHistoryAdapter = new SearchHistoryAdapter(getActivity());
         getRecyclerview().setBackgroundColor(Color.WHITE);

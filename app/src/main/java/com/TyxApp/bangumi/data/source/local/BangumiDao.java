@@ -9,10 +9,8 @@ import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import io.reactivex.Flowable;
-import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.SingleOnSubscribe;
-import io.reactivex.schedulers.Schedulers;
 
 @Dao
 public interface BangumiDao {
@@ -20,7 +18,7 @@ public interface BangumiDao {
     Single<Long> insertBangumi(Bangumi bangumi);
 
 
-    @Query("UPDATE BANGUMI SET time = :time WHERE vod_id = :videoId AND vod_soure = :sourch")
+    @Query("UPDATE BANGUMI SET historyTime = :time WHERE vod_id = :videoId AND vod_soure = :sourch")
     int updatetime(int videoId, String sourch, long time);
 
 
@@ -35,7 +33,7 @@ public interface BangumiDao {
 
 
 
-    @Query("SELECT * FROM BANGUMI ORDER BY time DESC")
+    @Query("SELECT * FROM BANGUMI ORDER BY historyTime DESC")
     Single<List<Bangumi>> getHistoryBangumi();
 
     @Query("SELECT * FROM BANGUMI WHERE isFavorite = 1")
@@ -56,7 +54,7 @@ public interface BangumiDao {
                 return insertBangumi(bangumi);
             }
             bangumi.dbId = dbId;
-            return Single.just((long) updatetime(bangumi.getVodId(), bangumi.getVideoSoure(), bangumi.getTime()));
+            return Single.just((long) updatetime(bangumi.getVodId(), bangumi.getVideoSoure(), bangumi.getHistoryTime()));
         });
     }
 

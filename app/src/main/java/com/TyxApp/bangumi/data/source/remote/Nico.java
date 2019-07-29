@@ -4,6 +4,7 @@ import android.os.Build;
 import android.util.SparseArray;
 
 import com.TyxApp.bangumi.data.bean.Bangumi;
+import com.TyxApp.bangumi.data.bean.CategorItem;
 import com.TyxApp.bangumi.data.bean.TextItemSelectBean;
 import com.TyxApp.bangumi.data.bean.VideoUrl;
 import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
@@ -245,6 +246,16 @@ public class Nico implements BaseBangumiParser {
 
     @Override
     public Observable<List<Bangumi>> getNextCategoryBangumis() {
+        return null;
+    }
+
+    @Override
+    public Observable<List<CategorItem>> getCategorItems() {
+        return null;
+    }
+
+    @Override
+    public Observable<List<List<Bangumi>>> getBangumiTimeTable() {
         return null;
     }
 

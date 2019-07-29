@@ -69,17 +69,22 @@ public class ContentAdapter extends RecyclerView.Adapter<BaseViewHolder> {
         int angle = AnimationUtil.dp2px(mContext, 5);
         holder.setRoundedImage(R.id.recommend_cover, bangumi.getCover(), angle);
         holder.setText(R.id.name, bangumi.getName());
-        String ji = bangumi.getRemarks();
-        if (TextUtils.isEmpty(ji)) {
-            if (!TextUtils.isEmpty(bangumi.getTotal())) {
-                if (Integer.valueOf(bangumi.getTotal()) == 0) {
-                    ji = "更新至" + bangumi.getSerial() + "话";
-                } else {
-                    ji = "全" + bangumi.getTotal() + "话";
-                }
+        String jiTotal = bangumi.getRemarks();
+        if (TextUtils.isEmpty(jiTotal)) {
+            StringBuilder builder = new StringBuilder();
+            jiTotal = bangumi.getTotal();
+            if (!TextUtils.isEmpty(jiTotal) && !"0".equals(jiTotal)) {
+                builder.append("全");
+                builder.append(jiTotal);
+                builder.append("话");
+            } else if (!TextUtils.isEmpty(bangumi.getSerial())) {
+                builder.append("更新至");
+                builder.append(bangumi.getSerial());
+                builder.append("话");
             }
+            jiTotal = builder.toString();
         }
-        holder.setText(R.id.ji_total, ji);
+        holder.setText(R.id.ji_total, jiTotal);
 
         holder.itemView.setOnClickListener(v -> {
             if (mOnItemSelectListener != null) {
@@ -128,19 +133,25 @@ public class ContentAdapter extends RecyclerView.Adapter<BaseViewHolder> {
 
     private void bindIntro(BaseViewHolder holder) {
         int angle = AnimationUtil.dp2px(mContext, 3);
-        holder.setRoundedImage(R.id.bangumi_cover, mBangumi.getCover(), angle);
-        holder.setText(R.id.bangumi_name, mBangumi.getName());
-        String ji = mBangumi.getRemarks();
-        if (TextUtils.isEmpty(ji)) {
-            if (!TextUtils.isEmpty(mBangumi.getTotal())) {
-                if (Integer.valueOf(mBangumi.getTotal()) == 0) {
-                    ji = "更新至" + mBangumi.getSerial() + "话";
-                } else {
-                    ji = "全" + mBangumi.getTotal() + "话";
-                }
+        holder.setRoundedImage(R.id.cover, mBangumi.getCover(), angle);
+        holder.setText(R.id.name, mBangumi.getName());
+        String jiTotal = mBangumi.getRemarks();
+        if (TextUtils.isEmpty(jiTotal)) {
+            StringBuilder builder = new StringBuilder();
+            jiTotal = mBangumi.getTotal();
+            if (!TextUtils.isEmpty(jiTotal) && !"0".equals(jiTotal)) {
+                builder.append("全");
+                builder.append(jiTotal);
+                builder.append("话");
+            } else if (!TextUtils.isEmpty(mBangumi.getSerial())) {
+                builder.append("更新至");
+                builder.append(mBangumi.getSerial());
+                mBangumi.getSerial();
+                builder.append("话");
             }
+            jiTotal = builder.toString();
         }
-        holder.setText(R.id.ji_total, ji);
+        holder.setText(R.id.ji_total, jiTotal);
 
         holder.setText(R.id.intro, mBangumi.getIntro());
 
@@ -156,7 +167,7 @@ public class ContentAdapter extends RecyclerView.Adapter<BaseViewHolder> {
             if (mOnItemSelectListener != null) {
                 mOnItemSelectListener.onFavoriteButtonClick(v.isSelected());
             }
-                
+
         });
     }
 

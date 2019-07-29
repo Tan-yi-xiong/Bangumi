@@ -1,4 +1,4 @@
-package com.TyxApp.bangumi.category;
+package com.TyxApp.bangumi.categoryresult;
 
 import com.TyxApp.bangumi.data.source.remote.BaseBangumiParser;
 import com.TyxApp.bangumi.util.ExceptionUtil;
@@ -6,14 +6,14 @@ import com.TyxApp.bangumi.util.ExceptionUtil;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 
-public class CategoryPresenter implements CategoryContract.Presenter {
+public class CategoryResultPresenter implements CategoryResultContract.Presenter {
     private BaseBangumiParser mBangumiParser;
-    private CategoryContract.View mView;
+    private CategoryResultContract.View mView;
     private CompositeDisposable mDisposable;
 
-    public CategoryPresenter(BaseBangumiParser bangumiParser, CategoryContract.View view) {
-        ExceptionUtil.checkNull(bangumiParser, "Parser不能为空  CategoryPresenter");
-        ExceptionUtil.checkNull(view, "view不能为空  CategoryPresenter");
+    public CategoryResultPresenter(BaseBangumiParser bangumiParser, CategoryResultContract.View view) {
+        ExceptionUtil.checkNull(bangumiParser, "Parser不能为空  CategoryResultPresenter");
+        ExceptionUtil.checkNull(view, "view不能为空  CategoryResultPresenter");
         mBangumiParser = bangumiParser;
         mView = view;
         mDisposable = new CompositeDisposable();

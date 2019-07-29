@@ -5,11 +5,10 @@ import android.graphics.Rect;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import com.TyxApp.bangumi.R;
 import com.TyxApp.bangumi.base.BaseViewHolder;
-import com.TyxApp.bangumi.category.CategoryActivity;
+import com.TyxApp.bangumi.categoryresult.CategoryResultActivity;
 import com.TyxApp.bangumi.data.bean.Bangumi;
 import com.TyxApp.bangumi.main.bangumi.adapter.BaseHomeBangumiAdapter;
 import com.TyxApp.bangumi.player.PlayerActivity;
@@ -23,7 +22,7 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.OnLifecycleEvent;
-import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class ZzzFunHomeBangumiAdapter extends BaseHomeBangumiAdapter<List<Bangumi>, BaseViewHolder> implements LifecycleObserver {
@@ -32,10 +31,11 @@ public class ZzzFunHomeBangumiAdapter extends BaseHomeBangumiAdapter<List<Bangum
     private final static int TITLE = 2;
     private BannerView mBannerView;
     private String[] titles;
+    private ItemDecoration mItemDecoration;
 
     public ZzzFunHomeBangumiAdapter(Context context) {
         super(context);
-        titles = getContext().getResources().getStringArray(R.array.zzfun_title);
+        titles = context.getResources().getStringArray(R.array.zzfun_title);
     }
 
     @Override
@@ -55,7 +55,6 @@ public class ZzzFunHomeBangumiAdapter extends BaseHomeBangumiAdapter<List<Bangum
         notifyDataSetChanged();
     }
 
-
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     public void onResume() {
         if (mBannerView != null) {
@@ -73,7 +72,6 @@ public class ZzzFunHomeBangumiAdapter extends BaseHomeBangumiAdapter<List<Bangum
     @NonNull
     @Override
     public BaseViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-
         if (viewType == HEADE) {
             return BaseViewHolder.get(getContext(), parent, R.layout.layout_zzzfun_homeheader);
         } else if (viewType == TITLE) {
@@ -103,58 +101,65 @@ public class ZzzFunHomeBangumiAdapter extends BaseHomeBangumiAdapter<List<Bangum
     }
 
     private void bindBody(int position, BaseViewHolder holder) {
-        //计算真正的下标
-        final int group = getWichGroup(position);
-        final int gropChildCount = getDataList().get(group).size();
-        position = ((gropChildCount + 1) * (group + 1) - position) - 5;
-        position = Math.abs(position);
-        final int pos = position;
-        Bangumi bangumi = getDataList().get(group).get(position);
-        holder.setImageRes(R.id.iv_bangumi_cover, bangumi.getCover());
-        holder.setText(R.id.tv_bangumi_name, bangumi.getName());
-        holder.setText(R.id.tv_bangumi_hit, bangumi.getHits());
-        String ji = bangumi.getRemarks();
-        if (TextUtils.isEmpty(ji)) {
-            if (!TextUtils.isEmpty(bangumi.getTotal())){
-                if (Integer.valueOf(bangumi.getTotal()) == 0) {
-                    ji = "更新至" + bangumi.getSerial() + "话";
-                } else {
-                    ji = "全" + bangumi.getTotal() + "话";
-                }
-            }
+        int group = getBodyGroup(position);
+        int index = 0;
+        if (position % 2 == 1) {
+            index = 2;
+        } else if (2 * (group * 2 + 1) != position) {
+            index = 4;
         }
-        holder.getView(R.id.home_bangumi_item_parent).setOnClickListener(v -> {
-            PlayerActivity.startPlayerActivity(getContext(), bangumi);
-        });
-        holder.setText(R.id.tv_bangumi_ji, ji);
+        Bangumi leftBangumi = getData(group).get(index);
+        holder.setText(R.id.bangumi_name_left, leftBangumi.getName());
+        String jiTotal = getJiTotal(leftBangumi);
+        holder.setText(R.id.bangumi_ji_left, jiTotal);
+        holder.setImageRes(R.id.bangumi_cover_left, leftBangumi.getCover());
+        holder.setText(R.id.bangumi_hit_left, leftBangumi.getHits());
+        holder.getView(R.id.parent_left).setOnClickListener(v -> PlayerActivity.startPlayerActivity(getContext(), leftBangumi));
+
+        Bangumi rightBangumi = getData(group).get(index + 1);
+        holder.setText(R.id.bangumi_name_right, rightBangumi.getName());
+        jiTotal = getJiTotal(rightBangumi);
+        holder.setText(R.id.bangumi_ji_right, jiTotal);
+        holder.setImageRes(R.id.bangumi_cover_right, rightBangumi.getCover());
+        holder.setText(R.id.bangumi_hit_right, rightBangumi.getHits());
+        holder.getView(R.id.parent_right).setOnClickListener(v -> PlayerActivity.startPlayerActivity(getContext(), rightBangumi));
     }
 
-    /**
-     * 获取是哪组数据, zzzfun首页6个为1组, 也可以判断是否显示番剧条目
-     * 规律：2 - 7, 9 - 14 ....
-     * 最后一个都为7的倍数
-     */
-    private int getWichGroup(int pos) {
+    private String getJiTotal(Bangumi bangumi) {
+        String jiTotal = bangumi.getRemarks();
+        if (TextUtils.isEmpty(jiTotal)) {
+            StringBuilder builder = new StringBuilder();
+            jiTotal = bangumi.getTotal();
+            if (!TextUtils.isEmpty(jiTotal) && !"0".equals(jiTotal)) {
+                builder.append("全");
+                builder.append(jiTotal);
+                builder.append("话");
+            } else if (!TextUtils.isEmpty(bangumi.getSerial())){
+                builder.append("更新至");
+                builder.append(bangumi.getSerial());
+                builder.append("话");
+            }
+            jiTotal = builder.toString();
+        }
+        return jiTotal;
+    }
+
+    private void bindTitle(int position, BaseViewHolder holder) {
+        position = (position - 1) / 4;
+        String title = titles[position];
+        holder.setText(R.id.zzzfun_home_title, title);
+        holder.getView(R.id.home_bangumi_more).setOnClickListener(v -> CategoryResultActivity.startCategoryActivity(getContext(), title));
+    }
+
+    private int getBodyGroup(int position) {
         for (int i = 0; i < getDataList().size() - 1; i++) {
-            int end = (getDataList().get(i).size() + 1) * (i + 1);
-            int start = end - 5;
-            if (start <= pos && pos <= end) {
+            int start = 2 * (i * 2 + 1);
+            int end = start + 2;
+            if (start <= position && position <= end) {
                 return i;
             }
         }
         return -1;
-    }
-
-    private void bindTitle(int position, BaseViewHolder holder) {
-        //获取对应标题下标
-        position = position % 6 - 1;
-        holder.setText(R.id.zzzfun_home_title, titles[position]);
-        TextView moreTextView = holder.getView(R.id.home_bangumi_more);
-        int finalPosition = position;
-        moreTextView.setOnClickListener(v -> {
-            String categoryWord = titles[finalPosition];
-            CategoryActivity.startCategoryActivity(getContext(), categoryWord);
-        });
     }
 
     private void bindHeader(BaseViewHolder holder) {
@@ -178,57 +183,54 @@ public class ZzzFunHomeBangumiAdapter extends BaseHomeBangumiAdapter<List<Bangum
     }
 
     @Override
-    public int getItemCount() {
-        int bangumiSize = 0;
-        for (int i = 0; i < getDataList().size(); i++) {
-            //不记头部数量
-            if (i == 5) {
-                continue;
-            }
-            bangumiSize += getDataList().get(i).size();
-        }
-        return getDataList().size() + bangumiSize;
-    }
-
-    @Override
     public int getItemViewType(int position) {
         if (position == 0) {
             return HEADE;
-        } else if (position % 7 == 1) {
+        } else if (getBodyGroup(position) != -1) {
+            return BODY;
+        } else {
             return TITLE;
         }
-        return BODY;
+
+    }
+
+    @Override
+    public int getItemCount() {
+        int row = 0;
+        for (int i = 0; i < getDataList().size() - 1; i++) {
+            row += getData(i).size() / 2;
+        }
+        return getDataList().size() + row;
+    }
+
+    public ItemDecoration getItemDecoration() {
+        if (mItemDecoration == null) {
+            mItemDecoration = new ItemDecoration();
+        }
+        return mItemDecoration;
     }
 
     @Override
     public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false));
         super.onAttachedToRecyclerView(recyclerView);
-        GridLayoutManager layoutManager = recyclerView.getLayoutManager() instanceof GridLayoutManager ?
-                (GridLayoutManager) recyclerView.getLayoutManager() : null;
-
-        if (layoutManager != null) {
-            layoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
-                @Override
-                public int getSpanSize(int position) {
-                    int viewType = getItemViewType(position);
-                    //头部和标题部分宽度占满
-                    return viewType == HEADE || viewType == TITLE ? layoutManager.getSpanCount() : 1;
-                }
-            });
-        }
     }
 
-
-
-
-    public static class ItemDecoration extends RecyclerView.ItemDecoration {
+    private class ItemDecoration extends RecyclerView.ItemDecoration {
         @Override
         public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
             int viewType = parent.getChildViewHolder(view).getItemViewType();
             if (viewType == BODY) {
-                outRect.bottom = AnimationUtil.dp2px(view.getContext(), 10);
-                outRect.left = AnimationUtil.dp2px(view.getContext(), 8);
+                int position = parent.getChildAdapterPosition(view);
+                int group = getBodyGroup(position);
+                if (position % 2 == 1 || position == (group * 2 + 1) * 2) {
+                    outRect.bottom = AnimationUtil.dp2px(view.getContext(), 10);
+                }
+
             }
         }
     }
+
 }
+
+

@@ -1,4 +1,4 @@
-package com.TyxApp.bangumi.category.adapter;
+package com.TyxApp.bangumi.categoryresult.adapter;
 
 import android.content.Context;
 import android.view.ViewGroup;
@@ -12,24 +12,24 @@ import com.TyxApp.bangumi.util.AnimationUtil;
 
 import androidx.annotation.NonNull;
 
-public class CategoryAdapter extends BaseAdapter<Bangumi, BaseViewHolder> {
+public class CategoryResultAdapter extends BaseAdapter<Bangumi, BaseViewHolder> {
 
-    public CategoryAdapter(Context context) {
+    public CategoryResultAdapter(Context context) {
         super(context);
     }
 
     @NonNull
     @Override
     public BaseViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return BaseViewHolder.get(getContext(), parent, R.layout.item_category);
+        return BaseViewHolder.get(getContext(), parent, R.layout.item_grid_category);
     }
 
     @Override
     public void onBindViewHolder(@NonNull BaseViewHolder holder, int position) {
         int imageAngle = AnimationUtil.dp2px(getContext(), 3);
         Bangumi bangumi = getData(position);
-        holder.setRoundedImage(R.id.bangumi_cover, bangumi.getCover(), imageAngle);
-        holder.setText(R.id.bangumi_name, bangumi.getName());
+        holder.setRoundedImage(R.id.cover, bangumi.getCover(), imageAngle);
+        holder.setText(R.id.name, bangumi.getName());
         holder.itemView.setOnClickListener(v -> PlayerActivity.startPlayerActivity(getContext(), bangumi));
     }
 

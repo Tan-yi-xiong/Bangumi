@@ -1,4 +1,4 @@
-package com.TyxApp.bangumi.category;
+package com.TyxApp.bangumi.categoryresult;
 
 import com.TyxApp.bangumi.base.BasePresenter;
 import com.TyxApp.bangumi.base.BaseView;
@@ -7,7 +7,7 @@ import com.TyxApp.bangumi.data.bean.Bangumi;
 import java.util.List;
 
 
-public interface CategoryContract {
+public interface CategoryResultContract {
     interface Presenter extends BasePresenter {
        void getResult(String category);
 

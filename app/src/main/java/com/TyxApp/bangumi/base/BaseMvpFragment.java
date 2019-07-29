@@ -24,11 +24,13 @@ public abstract class BaseMvpFragment extends Fragment {
         getLifecycle().addObserver(presenter);
         View view = inflater.inflate(getLayoutId(), container, false);
         mUnbinder = ButterKnife.bind(this, view);
-        initView();
+        initView(savedInstanceState);
         return view;
     }
 
-    protected abstract void initView();
+
+
+    protected abstract void initView(Bundle savedInstanceState);
 
 
     public abstract BasePresenter getPresenter();

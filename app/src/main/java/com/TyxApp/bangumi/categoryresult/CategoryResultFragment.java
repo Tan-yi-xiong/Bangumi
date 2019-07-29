@@ -1,8 +1,10 @@
-package com.TyxApp.bangumi.category;
+package com.TyxApp.bangumi.categoryresult;
+
+import android.os.Bundle;
 
 import com.TyxApp.bangumi.base.BasePresenter;
 import com.TyxApp.bangumi.base.RecyclerViewFragment;
-import com.TyxApp.bangumi.category.adapter.CategoryAdapter;
+import com.TyxApp.bangumi.categoryresult.adapter.CategoryResultAdapter;
 import com.TyxApp.bangumi.data.bean.Bangumi;
 import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
 import com.TyxApp.bangumi.data.source.remote.BaseBangumiParser;
@@ -16,16 +18,16 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class CategoryFragment extends RecyclerViewFragment implements CategoryContract.View {
-    private CategoryContract.Presenter mPresenter;
-    private CategoryAdapter mAdapter;
+public class CategoryResultFragment extends RecyclerViewFragment implements CategoryResultContract.View {
+    private CategoryResultContract.Presenter mPresenter;
+    private CategoryResultAdapter mAdapter;
     private boolean isLoading;
 
     @Override
-    protected void initView() {
+    protected void initView(Bundle savedInstanceState) {
         getRefreshLayout().setEnabled(false);
 
-        mAdapter = new CategoryAdapter(requireContext());
+        mAdapter = new CategoryResultAdapter(requireContext());
         getRecyclerview().setLayoutManager(new GridLayoutManager(requireContext(), 3));
         getRecyclerview().setAdapter(mAdapter);
         getRecyclerview().addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -51,12 +53,12 @@ public class CategoryFragment extends RecyclerViewFragment implements CategoryCo
                 parser = ZzzFun.getInstance();
                 break;
         }
-        mPresenter = new CategoryPresenter(parser, this);
+        mPresenter = new CategoryResultPresenter(parser, this);
         return mPresenter;
     }
 
-    public static CategoryFragment newInstance() {
-        return new CategoryFragment();
+    public static CategoryResultFragment newInstance() {
+        return new CategoryResultFragment();
     }
 
     @Override
@@ -83,7 +85,7 @@ public class CategoryFragment extends RecyclerViewFragment implements CategoryCo
 
     @Override
     public void FristLoading() {
-        String categoryword = requireActivity().getIntent().getStringExtra(CategoryActivity.CATEGORYWORD_KEY);
+        String categoryword = requireActivity().getIntent().getStringExtra(CategoryResultActivity.CATEGORYWORD_KEY);
         mPresenter.getResult(categoryword);
     }
 }

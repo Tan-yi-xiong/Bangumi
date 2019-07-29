@@ -119,7 +119,7 @@ public class GestureCover extends ImpTouchListenerCover {
     public void onScroll(MotionEvent downPoint, MotionEvent endPoint) {
         float distanceX = endPoint.getX() - downPoint.getX();
         float distanceY = endPoint.getY() - downPoint.getY();
-        if (Math.abs(distanceX) < 10 && Math.abs(distanceY) < 10 || isDownOnStateBarRegion) {
+        if (Math.abs(distanceX) < 15 && Math.abs(distanceY) < 15 || isDownOnStateBarRegion) {
             return;
         }
         //X滑动距离大于Y表示调节进度

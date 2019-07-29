@@ -8,7 +8,7 @@
     android:layout_height="125dp">
 
     <ImageView
-        android:id="@+id/bangumi_cover"
+        android:id="@+id/cover"
         android:layout_width="77dp"
         android:layout_height="104dp"
         android:layout_marginStart="16dp"
@@ -19,7 +19,7 @@
         tools:srcCompat="@tools:sample/backgrounds/scenic[1]" />
 
     <TextView
-        android:id="@+id/bangumi_name"
+        android:id="@+id/name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -27,8 +27,8 @@
         android:textColor="@android:color/black"
         android:textSize="16sp"
         app:layout_constraintEnd_toStartOf="@+id/bangumi_source"
-        app:layout_constraintStart_toEndOf="@+id/bangumi_cover"
-        app:layout_constraintTop_toTopOf="@+id/bangumi_cover" />
+        app:layout_constraintStart_toEndOf="@+id/cover"
+        app:layout_constraintTop_toTopOf="@+id/cover" />
 
     <TextView
         android:id="@+id/bangumi_ji"
@@ -37,8 +37,8 @@
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/bangumi_cover"
-        app:layout_constraintTop_toBottomOf="@+id/bangumi_name" />
+        app:layout_constraintStart_toEndOf="@+id/cover"
+        app:layout_constraintTop_toBottomOf="@+id/name" />
 
     <TextView
         android:id="@+id/bangumi_source"
@@ -56,11 +56,12 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/bangumi_cover"
+        app:layout_constraintTop_toBottomOf="@+id/cover"
         app:layout_constraintVertical_bias="1.0" />
 
     <TextView
         android:id="@+id/history_time"
+        android:textSize="12sp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"

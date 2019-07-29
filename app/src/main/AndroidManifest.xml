@@ -17,10 +17,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".main.myfavorite.MyFavoriteActivity"
+        <activity android:name=".main.favoriteandhistory.MyFavoriteActivity"
             android:label="我的追番"
             android:screenOrientation="portrait"/>
-        <activity android:name=".category.CategoryActivity"
+        <activity android:name=".categoryresult.CategoryResultActivity"
             android:screenOrientation="portrait"/>
         <activity
             android:name=".player.PlayerActivity"

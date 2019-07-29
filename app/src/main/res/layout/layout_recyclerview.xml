@@ -32,7 +32,7 @@
         android:layout_centerInParent="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/img_error" />
+        android:src="@drawable/img_page_error" />
 
     <ImageView
         android:id="@+id/no_result_view"

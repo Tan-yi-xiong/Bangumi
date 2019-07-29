@@ -1,13 +1,36 @@
 package com.TyxApp.bangumi.data.bean;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.List;
 
-public class StackBangumi {
+public class StackBangumi implements Parcelable {
     private List<TextItemSelectBean> PlayedJi;
     private Bangumi mBangumi;
     private List<Bangumi> recommendBangumis;
     private int currentJi;
     private int jiTotal;
+
+    protected StackBangumi(Parcel in) {
+        mBangumi = in.readParcelable(Bangumi.class.getClassLoader());
+        recommendBangumis = in.createTypedArrayList(Bangumi.CREATOR);
+        currentJi = in.readInt();
+        jiTotal = in.readInt();
+        playingUrl = in.readString();
+    }
+
+    public static final Creator<StackBangumi> CREATOR = new Creator<StackBangumi>() {
+        @Override
+        public StackBangumi createFromParcel(Parcel in) {
+            return new StackBangumi(in);
+        }
+
+        @Override
+        public StackBangumi[] newArray(int size) {
+            return new StackBangumi[size];
+        }
+    };
 
     public int getJiTotal() {
         return jiTotal;
@@ -81,5 +104,19 @@ public class StackBangumi {
 
     public String getBanhumiSourch() {
         return mBangumi.getVideoSoure();
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeParcelable(mBangumi, flags);
+        dest.writeTypedList(recommendBangumis);
+        dest.writeInt(currentJi);
+        dest.writeInt(jiTotal);
+        dest.writeString(playingUrl);
     }
 }

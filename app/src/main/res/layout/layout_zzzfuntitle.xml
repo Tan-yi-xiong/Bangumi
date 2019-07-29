@@ -18,14 +18,12 @@
 
     <TextView
         android:id="@+id/zzzfun_home_title"
-        android:layout_centerVertical="true"
         android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
         android:textStyle="bold"
         android:textColor="#000000"
         android:layout_weight="1"
         android:layout_width="0sp"
-        android:layout_height="wrap_content"
-        android:text="最近更新"/>
+        android:layout_height="wrap_content"/>
 
     <TextView
         android:text="@string/more"
