@@ -1,36 +1,33 @@
 package com.TyxApp.bangumi.server;
 
 import android.app.Service;
-import android.content.ContentValues;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.IBinder;
+import android.widget.Toast;
 
 import com.TyxApp.bangumi.data.bean.Bangumi;
-import com.TyxApp.bangumi.data.bean.VideoDownloadInfo;
+import com.TyxApp.bangumi.data.bean.VideoDownloadTask;
 import com.TyxApp.bangumi.data.source.local.AppDatabase;
 import com.TyxApp.bangumi.data.source.local.BangumiDao;
-import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
+import com.TyxApp.bangumi.data.source.local.VideoDownloadTaskDao;
 import com.TyxApp.bangumi.util.HttpRequestUtil;
+import com.TyxApp.bangumi.util.LogUtil;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import androidx.annotation.Nullable;
-import io.reactivex.BackpressureStrategy;
-import io.reactivex.Flowable;
-import io.reactivex.FlowableEmitter;
-import io.reactivex.FlowableOnSubscribe;
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
@@ -39,27 +36,31 @@ import okhttp3.Response;
 
 public class DownloadServer extends Service {
     private DownloadBinder mBinder;
-    private List<VideoDownloadInfo> mDownloadInfos;
-    private Map<String, Call> mCallMap;
+
     private static final int STATE_ERROR = 3;
     private static final int STATE_FINISH = 2;
     private static final int STATE_AWAIT = 0;
+    private static final int STATE_PAUSE = 4;
     private static final int STATE_DOWNLOADING = 1;
+
     private OkHttpClient mClient;
     private BangumiDao mBangumiDao;
-    private CompositeDisposable mDisposable;
+    private Call mCall;
+    private VideoDownloadTaskDao mTaskDao;
+    private Disposable mDisposable;
+    private boolean hasTaskDownLoading;
+    private VideoDownloadTask mCurrentTask;
     private static final String BASE_DOWNLOAD_PATH_FORMAT =
-            Environment.getExternalStorageDirectory().getAbsolutePath() + "/Bangumi/%s/%s/%s.mp4";
+            Environment.getExternalStorageDirectory().getAbsolutePath() + "/Bangumi/%s/%s";
 
 
     @Override
     public void onCreate() {
         super.onCreate();
-        mDownloadInfos = new ArrayList<>();
         mClient = HttpRequestUtil.getClient();
         mDisposable = new CompositeDisposable();
         mBangumiDao = AppDatabase.getInstance().getBangumiDao();
-        mCallMap = new HashMap<>();
+        mTaskDao = AppDatabase.getInstance().getVideoDownloadStackDao();
     }
 
     @Nullable
@@ -76,58 +77,78 @@ public class DownloadServer extends Service {
 
         @Override
         public void addStack(Bangumi bangumi, String videoUrl, String fileName) {
-            String filePath = String.format(BASE_DOWNLOAD_PATH_FORMAT, bangumi.getVideoSoure(), bangumi.getVodId(), fileName);
-            for (VideoDownloadInfo downloadInfo : mDownloadInfos) {
-                if (downloadInfo.getUrl().equals(videoUrl)) {
-                    return;
-                }
-            }
-            VideoDownloadInfo downloadInfo = new VideoDownloadInfo(filePath, fileName, bangumi.getVodId(), bangumi.getVideoSoure());
-            downloadInfo.setState(STATE_AWAIT);
-            downloadInfo.setUrl(videoUrl);
-            mDownloadInfos.add(downloadInfo);
-            start();
+            Single.just(videoUrl)
+                    .map(url -> mTaskDao.hasSaveInQueue(url))
+                    .map(id -> {
+                        VideoDownloadTask task = null;
+                        if (id != 0) {
+                            task = mTaskDao.getTaskState(id);
+                            if (new File(task.getPath()).exists()) {
+                                if (task.getState() != STATE_FINISH) {
+                                    task.setState(STATE_AWAIT);
+                                    mTaskDao.update(task);
+                                }
+                            } else {
+                                mTaskDao.delete(task);
+                                task = null;//文件被手动删除要重新创建加入任务队列
+                            }
+                        }
+                        if (task == null) {
+                            String dirPath = String.format(BASE_DOWNLOAD_PATH_FORMAT, bangumi.getVideoSoure(), bangumi.getVodId());
+                            task = new VideoDownloadTask(dirPath, fileName + ".mp4", bangumi.getVodId(), bangumi.getVideoSoure(), videoUrl);
+                            task.id = (int) mTaskDao.insert(task);
+                        }
+                        return task;
+                    })
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(task -> {
+                        if (mCurrentTask == null) {
+                            mCurrentTask = task;
+                            start();
+                        }
+                    });
         }
 
         @Override
         public void start() {
-            int takeCount = 3 - mCallMap.size();
-            if (takeCount <= 0) {
+            if (hasTaskDownLoading) {
                 return;
             }
-            mDisposable.add(Flowable.fromIterable(mDownloadInfos)
-                    .map(this::getFileLengthAndState)
-                    .filter(downloadInfo -> {
-                        int state = downloadInfo.getState();
-                        return state != STATE_FINISH && state != STATE_DOWNLOADING;
-                    })
-                    .take(takeCount)
-                    .flatMap(downloadInfo -> Flowable.create(new DownloadSubscribe(downloadInfo), BackpressureStrategy.BUFFER))
+            Observable.just(mCurrentTask)
+                    .map(task -> setFileLength())
+                    .flatMap(task -> Observable.create(new DownloadSubscribe()))
                     .subscribeOn(Schedulers.io())
+                    .doOnComplete(() -> updateTaskState(STATE_FINISH))
+                    .doOnError(throwable -> updateTaskState(STATE_ERROR))
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(
-                            downloadInfo -> {
+                            videoDownloadTask -> {},
+                            throwable -> {
+                                Toast.makeText(DownloadServer.this, mCurrentTask.getFileName() + "下载出错", Toast.LENGTH_SHORT).show();
+                                nextTask();
                             },
-                            throwable -> start(),
-                            this::start));
+                            () -> nextTask());
 
         }
 
-        private VideoDownloadInfo getFileLengthAndState(VideoDownloadInfo downloadInfo) throws IOException {
-            File videoFile = new File(downloadInfo.getPath());
-            long total = getFileTotal(downloadInfo.getUrl());
+        private VideoDownloadTask setFileLength() throws IOException {
+            File dirFile = new File(mCurrentTask.getDirPath());
+            long total = getFileTotal(mCurrentTask.getUrl());
             long downloadLength = 0;
-
-            if (videoFile.exists()) {
-                downloadLength = videoFile.length();
-                if (total == downloadLength) {
-                    downloadInfo.setState(STATE_FINISH);
+            if (!dirFile.exists()) {
+                dirFile.mkdirs();
+            } else {
+                File videoFile = new File(mCurrentTask.getPath());
+                if (videoFile.exists()) {
+                    downloadLength = videoFile.length();
+                } else {
+                    videoFile.createNewFile();
                 }
             }
-
-            downloadInfo.setTotal(total);
-            downloadInfo.setDownloadLength(downloadLength);
-            return downloadInfo;
+            mCurrentTask.setDownloadLength(downloadLength);
+            mCurrentTask.setTotal(total);
+            return mCurrentTask;
         }
 
         private long getFileTotal(String videoUrl) throws IOException {
@@ -144,75 +165,81 @@ public class DownloadServer extends Service {
 
         @Override
         public void pause(String url) {
-            mCallMap.remove(url);
-            start();
+            if (hasTaskDownLoading && mCall != null) {
+                mCall.cancel();
+                if (mDisposable != null) {
+                    mDisposable.dispose();
+                }
+                nextTask();
+            }
+        }
+
+        private void nextTask() {
+            hasTaskDownLoading = false;
+            Observable.create(new ObservableOnSubscribe<VideoDownloadTask>() {
+                @Override
+                public void subscribe(ObservableEmitter<VideoDownloadTask> emitter) throws Exception {
+                    VideoDownloadTask task = mTaskDao.getAwaitDownloadTasks();
+                    if (task == null) {//null为数据库中没有等待的任务
+                        emitter.onComplete();
+                    } else {
+                        emitter.onNext(task);
+                    }
+                }
+            })
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(
+                            task -> {
+                                mCurrentTask = task;
+                                start();
+                            },
+                            throwable -> LogUtil.i(throwable.toString()),
+                            () -> stopSelf());
         }
     }
 
-    private class DownloadSubscribe implements FlowableOnSubscribe<VideoDownloadInfo> {
-        private VideoDownloadInfo mVideoDownloadInfo;
-
-        public DownloadSubscribe(VideoDownloadInfo videoDownloadInfo) {
-            mVideoDownloadInfo = videoDownloadInfo;
-        }
+    private class DownloadSubscribe implements ObservableOnSubscribe<VideoDownloadTask> {
 
         @Override
-        public void subscribe(FlowableEmitter<VideoDownloadInfo> emitter) throws Exception {
-            mVideoDownloadInfo.setState(STATE_DOWNLOADING);
-            long downloadLength = mVideoDownloadInfo.getDownloadLength();
-            long contentLength = mVideoDownloadInfo.getTotal();
+        public void subscribe(ObservableEmitter<VideoDownloadTask> emitter) throws Exception {
+            updateTaskState(STATE_DOWNLOADING);
+            long downloadLength = mCurrentTask.getDownloadLength();
+            long contentLength = mCurrentTask.getTotal();
 
-            emitter.onNext(mVideoDownloadInfo);
+            emitter.onNext(mCurrentTask);
 
             Request request = new Request.Builder()
-                    .url(mVideoDownloadInfo.getUrl())
+                    .url(mCurrentTask.getUrl())
                     .addHeader("RANGE", "bytes=" + downloadLength + "-" + contentLength)
                     .build();
 
-            //创建文件夹
-            String absolutePath = mVideoDownloadInfo.getPath();
-            String dirPath = absolutePath.substring(0, absolutePath.lastIndexOf("/"));
-            File dir = new File(dirPath);
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
-
-            File file = new File(mVideoDownloadInfo.getPath());
-            if (!file.exists()) {
-                file.createNewFile();
-            }
-
-            Call call = mClient.newCall(request);
-            mCallMap.put(mVideoDownloadInfo.getUrl(), call);
-            Response response = call.execute();
+            mCall = mClient.newCall(request);
+            Response response = mCall.execute();
             byte[] buffer = new byte[2048];
             int length;
+            File videoFile = new File(mCurrentTask.getPath());
+            hasTaskDownLoading = true;
             try (InputStream inputStream = response.body().byteStream();
-                 FileOutputStream outputStream = new FileOutputStream(file, true)) {
+                 FileOutputStream outputStream = new FileOutputStream(videoFile, true)) {
 
                 while ((length = inputStream.read(buffer)) != -1) {
                     outputStream.write(buffer, 0, length);
                     downloadLength += length;
-                    mVideoDownloadInfo.setDownloadLength(downloadLength);
-                    emitter.onNext(mVideoDownloadInfo);
+                    mCurrentTask.setDownloadLength(downloadLength);
+                    emitter.onNext(mCurrentTask);
                 }
-                mCallMap.remove(mVideoDownloadInfo.getUrl());
-                mDownloadInfos.remove(mVideoDownloadInfo);
-                mVideoDownloadInfo.setState(STATE_FINISH);
                 emitter.onComplete();
-                //下载完将信息存进数据库
-                saveToDB(mVideoDownloadInfo);
+                hasTaskDownLoading = false;
             } catch (Exception e) {
-                mCallMap.remove(mVideoDownloadInfo.getUrl());
-                mVideoDownloadInfo.setState(STATE_ERROR);
-                saveToDB(mVideoDownloadInfo);
                 emitter.onError(e);
             }
         }
     }
 
-    private void saveToDB(VideoDownloadInfo videoDownloadInfo) {
-
+    private int updateTaskState(int state) {
+        mCurrentTask.setState(state);
+        return mTaskDao.update(mCurrentTask);
     }
 
 }

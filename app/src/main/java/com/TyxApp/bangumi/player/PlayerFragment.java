@@ -34,6 +34,7 @@ import com.TyxApp.bangumi.player.cover.PlayerControlCover;
 import com.TyxApp.bangumi.player.cover.VideoPlayerEvent;
 import com.TyxApp.bangumi.server.Download;
 import com.TyxApp.bangumi.server.DownloadServer;
+import com.TyxApp.bangumi.util.LogUtil;
 import com.google.android.material.snackbar.Snackbar;
 import com.kk.taurus.playerbase.assist.OnVideoViewEventHandler;
 import com.kk.taurus.playerbase.config.PConst;
@@ -54,6 +55,9 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 public class PlayerFragment extends BaseMvpFragment implements PlayContract.View {
 
@@ -73,7 +77,7 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
     private static final String SCREEN_STATE_KEY = "S_S_K";
     private static final String STACK_BANGUM_KEY = "S_B_K";
 
-    private Download mDownload;
+    private Download mDownloadBinder;
 
 
     @Override
@@ -305,18 +309,18 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
 
 
     private void downLoadVideo() {
-        if (mDownload != null) {
+        if (mDownloadBinder != null) {
             String fileName = mContentAdapter.getJiList().get(mStackBangumi.getCurrentJi()).getText();
-            mDownload.addStack(mStackBangumi.getBangumi(), mStackBangumi.getPlayingUrl(), fileName);
+            mDownloadBinder.addStack(mStackBangumi.getBangumi(), mStackBangumi.getPlayingUrl(), fileName);
         } else {
             Intent intent = new Intent(requireActivity(), DownloadServer.class);
             requireActivity().startService(intent);
             requireActivity().bindService(intent, new ServiceConnection() {
                 @Override
                 public void onServiceConnected(ComponentName name, IBinder service) {
-                    mDownload = (Download) service;
+                    mDownloadBinder = (Download) service;
                     String fileName = mContentAdapter.getJiList().get(mStackBangumi.getCurrentJi()).getText();
-                    mDownload.addStack(mStackBangumi.getBangumi(), mStackBangumi.getPlayingUrl(), fileName);
+                    mDownloadBinder.addStack(mStackBangumi.getBangumi(), mStackBangumi.getPlayingUrl(), fileName);
                 }
 
                 @Override
