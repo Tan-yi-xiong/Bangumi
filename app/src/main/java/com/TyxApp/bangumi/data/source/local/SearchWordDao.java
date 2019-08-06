@@ -23,8 +23,8 @@ public interface SearchWordDao {
 
 
     @Query("SELECT * FROM SEARCH_WORD ORDER BY time DESC")
-    Flowable<List<SearchWord>> getSearchWords();
+    Single<List<SearchWord>> getSearchWords();
 
     @Query("SELECT * FROM SEARCH_WORD WHERE word LIKE :word")
-    Flowable<List<SearchWord>> getSimilarityWords(String word);
+    Single<List<SearchWord>> getSimilarityWords(String word);
 }

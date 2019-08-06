@@ -1,14 +1,18 @@
 package com.TyxApp.bangumi.player;
 
+import android.Manifest;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,7 +28,9 @@ import com.TyxApp.bangumi.data.bean.StackBangumi;
 import com.TyxApp.bangumi.data.bean.TextItemSelectBean;
 import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
 import com.TyxApp.bangumi.data.source.remote.BaseBangumiParser;
+import com.TyxApp.bangumi.data.source.remote.Dilidili;
 import com.TyxApp.bangumi.data.source.remote.Nico;
+import com.TyxApp.bangumi.data.source.remote.Sakura;
 import com.TyxApp.bangumi.data.source.remote.ZzzFun;
 import com.TyxApp.bangumi.player.adapter.ContentAdapter;
 import com.TyxApp.bangumi.player.cover.ErrorCover;
@@ -32,9 +38,10 @@ import com.TyxApp.bangumi.player.cover.GestureCover;
 import com.TyxApp.bangumi.player.cover.LoadingCover;
 import com.TyxApp.bangumi.player.cover.PlayerControlCover;
 import com.TyxApp.bangumi.player.cover.VideoPlayerEvent;
-import com.TyxApp.bangumi.server.Download;
+import com.TyxApp.bangumi.server.DownloadBinder;
 import com.TyxApp.bangumi.server.DownloadServer;
 import com.TyxApp.bangumi.util.LogUtil;
+import com.TyxApp.bangumi.util.PreferenceUtil;
 import com.google.android.material.snackbar.Snackbar;
 import com.kk.taurus.playerbase.assist.OnVideoViewEventHandler;
 import com.kk.taurus.playerbase.config.PConst;
@@ -51,15 +58,14 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import butterknife.BindView;
-import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
 
-public class PlayerFragment extends BaseMvpFragment implements PlayContract.View {
+import butterknife.BindView;
+
+public class RemotePlayerFragment extends BaseMvpFragment implements PlayContract.View {
 
     @BindView(R.id.player_videoview)
     BaseVideoView mPlayerVideoview;
@@ -74,10 +80,12 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
     private int videoViewPortraitHeighe;
     private ReceiverGroup mReceiverGroup;
     private boolean isuserPuase;
+    private boolean isFristLoading = true;
     private static final String SCREEN_STATE_KEY = "S_S_K";
     private static final String STACK_BANGUM_KEY = "S_B_K";
 
-    private Download mDownloadBinder;
+    private DownloadBinder mDownloadBinder;
+    private ServiceConnection mServiceConnection;
 
 
     @Override
@@ -129,6 +137,14 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
 
             case BangumiPresistenceContract.BangumiSource.ZZZFUN:
                 parser = ZzzFun.getInstance();
+                break;
+
+            case BangumiPresistenceContract.BangumiSource.SAKURA:
+                parser = Sakura.getInstance();
+                break;
+
+            case BangumiPresistenceContract.BangumiSource.DILIDLI:
+                parser = Dilidili.getInstance();
                 break;
         }
         mPlayerPresenter = new PlayerPresenter(this, parser);
@@ -193,7 +209,7 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
                 PlayerControlCover.class.getName(),
                 new PlayerControlCover(requireContext(), getChildFragmentManager()));
         mReceiverGroup.addReceiver(LoadingCover.class.getName(), new LoadingCover(requireContext()));
-        mReceiverGroup.addReceiver(GestureCover.class.getName(), new GestureCover(requireContext()));
+        mReceiverGroup.addReceiver(GestureCover.class.getName(), new GestureCover(requireActivity()));
         mReceiverGroup.addReceiver(ErrorCover.class.getName(), new ErrorCover(requireContext()));
         mPlayerVideoview.setReceiverGroup(mReceiverGroup);
         mPlayerVideoview.setEventHandler(mViewEventHandler);
@@ -204,7 +220,6 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
 
         hindStateBar();
 
-        LoadingPageData();
 
     }
 
@@ -222,7 +237,7 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
 
                 @Override
                 public void requestResume(BaseVideoView videoView, Bundle bundle) {
-                    super.requestResume(videoView, bundle);
+                    videoView.resume();
                     isuserPuase = false;
                     if (!isFullScreen()) {
                         hindStateBar();
@@ -268,23 +283,14 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
                 break;
 
             case VideoPlayerEvent.Code.CODE_DOWNLOAD://下载
-                mStackBangumi.getBangumi().setDownLoad(true);
-                mPlayerPresenter.setDownload(mStackBangumi.getBangumi());
-                if (TextUtils.isEmpty(mStackBangumi.getPlayingUrl()) && NetworkUtils.getNetworkState(requireContext()) < 0) {
-                    mPlayerVideoview.getState();
-                    Snackbar.make(mPlayerVideoview, "请等下重试", Snackbar.LENGTH_LONG);
-                    break;
+                if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
+                } else {
+                    downLoadVideo();
                 }
-                downLoadVideo();
+
                 break;
 
-            case VideoPlayerEvent.Code.CODE_BRIGHTNESS_ADJUST://亮度调节
-                int brightness = bundle.getInt(EventKey.INT_DATA);
-                Window window = requireActivity().getWindow();
-                WindowManager.LayoutParams params = window.getAttributes();
-                params.screenBrightness = brightness / 255.0f;
-                window.setAttributes(params);
-                break;
 
             case VideoPlayerEvent.Code.CODE_NEXT://下一集
                 if (mStackBangumi.isLastJi()) {
@@ -309,25 +315,30 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
 
 
     private void downLoadVideo() {
+        mStackBangumi.getBangumi().setDownLoad(true);
+        mPlayerPresenter.setDownload(mStackBangumi.getBangumi());
         if (mDownloadBinder != null) {
             String fileName = mContentAdapter.getJiList().get(mStackBangumi.getCurrentJi()).getText();
-            mDownloadBinder.addStack(mStackBangumi.getBangumi(), mStackBangumi.getPlayingUrl(), fileName);
+            mDownloadBinder.addTask(mStackBangumi.getBangumiId(), mStackBangumi.getBanhumiSourch(), mStackBangumi.getPlayingUrl(), fileName);
         } else {
             Intent intent = new Intent(requireActivity(), DownloadServer.class);
             requireActivity().startService(intent);
-            requireActivity().bindService(intent, new ServiceConnection() {
-                @Override
-                public void onServiceConnected(ComponentName name, IBinder service) {
-                    mDownloadBinder = (Download) service;
-                    String fileName = mContentAdapter.getJiList().get(mStackBangumi.getCurrentJi()).getText();
-                    mDownloadBinder.addStack(mStackBangumi.getBangumi(), mStackBangumi.getPlayingUrl(), fileName);
-                }
+            if (mServiceConnection == null) {
+                mServiceConnection = new ServiceConnection() {
+                    @Override
+                    public void onServiceConnected(ComponentName name, IBinder service) {
+                        mDownloadBinder = (DownloadBinder) service;
+                        String fileName = mContentAdapter.getJiList().get(mStackBangumi.getCurrentJi()).getText();
+                        mDownloadBinder.addTask(mStackBangumi.getBangumiId(), mStackBangumi.getBanhumiSourch(), mStackBangumi.getPlayingUrl(), fileName);
+                    }
 
-                @Override
-                public void onServiceDisconnected(ComponentName name) {
+                    @Override
+                    public void onServiceDisconnected(ComponentName name) {
 
-                }
-            }, Context.BIND_AUTO_CREATE);
+                    }
+                };
+            }
+            requireActivity().bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
         }
     }
 
@@ -405,11 +416,11 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
 
     @Override
     public int getLayoutId() {
-        return R.layout.fragment_player;
+        return R.layout.fragment_player_remote;
     }
 
-    public static PlayerFragment newInstance() {
-        return new PlayerFragment();
+    public static RemotePlayerFragment newInstance() {
+        return new RemotePlayerFragment();
     }
 
     @Override
@@ -422,8 +433,14 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
     public void onResume() {
         super.onResume();
         requireActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        if (!isuserPuase) {
-            mPlayerVideoview.resume();
+        if (isFristLoading) {
+            LoadingPageData();
+            isFristLoading = false;
+        }
+        if (mPlayerVideoview.isInPlaybackState()) {
+            if (!isuserPuase) {
+                mPlayerVideoview.resume();
+            }
         }
     }
 
@@ -431,7 +448,10 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
     public void onPause() {
         super.onPause();
         requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        mPlayerVideoview.pause();
+        if (mPlayerVideoview.isPlaying()) {
+            mPlayerVideoview.pause();
+        }
+
     }
 
     @Override
@@ -443,10 +463,8 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
             }
             jiList.get(mStackBangumi.getCurrentJi()).setSelect(true);
             mContentAdapter.notifijiListChange(jiList);
-            mPlayerPresenter.getPlayerUrl(mStackBangumi.getBangumiId(), mStackBangumi.getCurrentJi());
-        } else {
-            Snackbar.make(contentRecyclerView, "解析失败", Snackbar.LENGTH_LONG).show();
         }
+        mPlayerPresenter.getPlayerUrl(mStackBangumi.getBangumiId(), mStackBangumi.getCurrentJi());
     }
 
     @Override
@@ -457,10 +475,10 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
 
         dataSource.setTitle(title);
         mPlayerVideoview.setDataSource(dataSource);
-        int newState = NetworkUtils.getNetworkState(requireContext());
         mStackBangumi.setPlayingUrl(url);
         //WiFi情况下才开始播放, 不是Wifi情况下通知相应Cover显示
-        if (newState == PConst.NETWORK_STATE_WIFI) {
+        boolean playInMobileNet = PreferenceUtil.getBollean(getString(R.string.key_play_no_wifi), false);
+        if (NetworkUtils.isWifiConnected(requireContext()) || playInMobileNet) {
             mPlayerVideoview.start();
         } else {
             mReceiverGroup.getGroupValue().putBoolean(VideoPlayerEvent.Key.NOTIFI_ERROR_COVER_SHOW, true, true);
@@ -500,6 +518,30 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            downLoadVideo();
+        } else {
+            if (!shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity())
+                        .setTitle("提示")
+                        .setMessage("如果不授权储存权限, 将无法下载视频喔")
+                        .setNegativeButton("取消", (dialog, which) -> dialog.dismiss())
+                        .setNeutralButton("去授权", (dialog, which) -> {
+                            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                            intent.setData(Uri.fromParts("package", requireContext().getPackageName(), null));
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            requireActivity().startActivity(intent);
+                        });
+                builder.show();
+            } else {
+
+            }
+        }
+    }
+
+    @Override
     public void onDestroyView() {
         mPlayerVideoview.stopPlayback();
         super.onDestroyView();
@@ -526,6 +568,14 @@ public class PlayerFragment extends BaseMvpFragment implements PlayContract.View
     @Override
     public void showResultEmpty() {
 
+    }
+
+    @Override
+    public void onDestroy() {
+        if (mServiceConnection != null) {
+            requireActivity().unbindService(mServiceConnection);
+        }
+        super.onDestroy();
     }
 
     @Override

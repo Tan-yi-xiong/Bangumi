@@ -1,9 +1,6 @@
 package com.TyxApp.bangumi.main.favoriteandhistory;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 
 import com.TyxApp.bangumi.R;
 import com.TyxApp.bangumi.base.BasePresenter;
@@ -18,38 +15,28 @@ import java.util.List;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import io.reactivex.disposables.Disposable;
+
 public class FavoriteAndHistoryFragment extends RecyclerViewFragment implements FavoriteAndHistoryContract.View {
     private FavoriteAndHistoryContract.Presenter mPresenter;
     private static final String MEUN_TAG = "M_T";
     private FavoriteAndHistoryAdpater mAdpater;
-    private static final int WHAT = 5;
-    private static final int DURATION = 3000;
-    @SuppressLint("HandlerLeak")
-    private Handler removeBangumiHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            if (msg.what == WHAT) {
-                Bangumi bangumi = (Bangumi) msg.obj;
-                mPresenter.removeBangumi(bangumi.getVodId(), bangumi.getVideoSoure());
-            }
-        }
-    };
+    private Snackbar mSnackbar;
+
 
     @Override
     protected void initView(Bundle savedInstanceState) {
         getRefreshLayout().setEnabled(false);
 
-        mAdpater.setOnItemLongClickLisener(bangumi -> {
-            int index = mAdpater.getDataList().indexOf(bangumi);
-            mAdpater.remove(index);
-            Message message = removeBangumiHandler.obtainMessage();
-            message.obj = bangumi;
-            message.what = WHAT;
-            removeBangumiHandler.sendMessageDelayed(message, DURATION);
-            Snackbar.make(getRecyclerview(), bangumi.getName() + "已移除", Snackbar.LENGTH_LONG)
-                    .setAction("撤销", v -> {
-                        removeBangumiHandler.removeMessages(WHAT);
-                        mAdpater.addInserted(bangumi, index);
+        mAdpater.setOnItemLongClickLisener(pos -> {
+            Bangumi bangumi = mAdpater.getData(pos);
+            mAdpater.remove(pos);
+            mPresenter.removeBangumi(bangumi.getVodId(), bangumi.getVideoSoure());
+
+            mSnackbar = Snackbar.make(getRecyclerview(), bangumi.getName() + "已移除", Snackbar.LENGTH_SHORT);
+                    mSnackbar.setAction("撤销", v -> {
+                        mPresenter.revocationRemoveBangumi(bangumi);
+                        mAdpater.addInserted(bangumi, pos);
                     })
                     .show();
             return true;
@@ -102,7 +89,11 @@ public class FavoriteAndHistoryFragment extends RecyclerViewFragment implements 
 
     @Override
     public void onDestroyView() {
-        removeBangumiHandler.removeCallbacksAndMessages(null);
+        if (mSnackbar != null) {
+            if (mSnackbar.isShown()) {
+                mSnackbar.dismiss();
+            }
+        }
         super.onDestroyView();
     }
 }

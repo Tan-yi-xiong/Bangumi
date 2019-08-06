@@ -11,6 +11,8 @@ public interface SearchHistoryContract {
         void getWords();
 
         void getSimilarityWords(String word);
+
+        void removeWord(SearchWord searchWord);
     }
 
     interface View extends BaseView {

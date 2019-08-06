@@ -70,7 +70,7 @@ public class BannerView extends ViewPager {
         bannerSwitch = true;
         bannerTime = time;
         if (bannerHandler == null) {
-            addOnPageChangeListener(new MOnPageChangeListener() {
+            addOnPageChangeListener(new extendsOnPageChangeListener() {
                 @Override
                 public void onPageScrollStateChanged(int state) {
                     if (SCROLL_STATE_IDLE == state) {
@@ -115,7 +115,7 @@ public class BannerView extends ViewPager {
         this.mDuration = mDuration;
     }
 
-    public static class MOnPageChangeListener implements OnPageChangeListener {
+    public static class extendsOnPageChangeListener implements OnPageChangeListener {
 
         @Override
         public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {

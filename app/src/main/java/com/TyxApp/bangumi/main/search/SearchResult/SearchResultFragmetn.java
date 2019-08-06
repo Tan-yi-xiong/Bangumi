@@ -51,7 +51,10 @@ public class SearchResultFragmetn extends RecyclerViewFragment implements Search
         getRecyclerview().setLayoutManager(new LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false));
         getRecyclerview().setAdapter(mAdapter);
 
-        getErrorPageView().setOnClickListener(v -> mPresenter.getSearchResult(lastSearchWord));
+        getErrorPageView().setOnClickListener(v -> {
+            showDataLodaing();
+            mPresenter.getSearchResult(lastSearchWord);
+        });
     }
 
     @Override
@@ -115,7 +118,6 @@ public class SearchResultFragmetn extends RecyclerViewFragment implements Search
 
     @Override
     public void noNextSearchResult() {
-        Toast.makeText(getContext(), "没有更多了", Toast.LENGTH_SHORT).show();
         getRecyclerview().removeOnScrollListener(mScrollListener);
     }
 

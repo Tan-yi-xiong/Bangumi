@@ -39,7 +39,7 @@ public class CategoryResultActivity extends BaseMvpActivity {
         return R.layout.layout_base;
     }
 
-    public static void startCategoryActivity(Context context, String categoryWord) {
+    public static void startCategoryResultActivity(Context context, String categoryWord) {
         Intent intent = new Intent(context, CategoryResultActivity.class);
         intent.putExtra(CATEGORYWORD_KEY, categoryWord);
         context.startActivity(intent);

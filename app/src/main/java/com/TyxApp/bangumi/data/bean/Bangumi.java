@@ -2,6 +2,7 @@ package com.TyxApp.bangumi.data.bean;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -17,24 +18,25 @@ public class Bangumi implements Parcelable {
     @PrimaryKey(autoGenerate = true)
     public int dbId;
 
-    @SerializedName(value = "id", alternate = {"vod_id"})
+    @SerializedName(value = "id", alternate = {"vod_id", "typeid"})
     @ColumnInfo(name = "vod_id")
     private int vodId;
 
     @ColumnInfo(name = "vod_soure")
     private String videoSoure;//来源
 
-    @SerializedName(value = "name", alternate = {"vod_name"})
+    @SerializedName(value = "name", alternate = {"vod_name", "typename", "source"})
     private String name;
 
-    @SerializedName(value = "pic", alternate = {"vod_pic"})
+    @SerializedName(value = "pic", alternate = {"vod_pic", "litpic", "suoluetudizhi"})
     private String cover;
 
     private String img;
 
+    @SerializedName(value = "description")
     private String intro;//简介
 
-    @SerializedName(value = "hits", alternate = {"vod_hits"})
+    @SerializedName(value = "hits", alternate = {"vod_hits", "click"})
     @Ignore
     private String hits;//热度
 
@@ -46,10 +48,10 @@ public class Bangumi implements Parcelable {
     private boolean isDownLoad;//是否有下载
 
 
-    @SerializedName(value = "total", alternate = {"vod_total"})
+    @SerializedName(value = "total", alternate = {"vod_total", "latest"})
     private String total;//总集数
 
-    @SerializedName(value = "serial", alternate = {"vod_serial", "ji"})
+    @SerializedName(value = "serial", alternate = {"vod_serial", "ji", "writer"})
     private String serial;//更新至
 
     private long historyTime;//点击番剧观看的时间戳, 历史观看使用;
@@ -194,10 +196,30 @@ public class Bangumi implements Parcelable {
         this.intro = intro;
     }
 
+    public String getLatestJi () {
+        String jiTotal = remarks;
+        if (TextUtils.isEmpty(jiTotal)) {
+            StringBuilder builder = new StringBuilder();
+            jiTotal = total;
+            if (!TextUtils.isEmpty(jiTotal) && !"0".equals(jiTotal)) {
+                builder.append("全");
+                builder.append(jiTotal);
+                builder.append("话");
+            } else if (!TextUtils.isEmpty(serial)){
+                builder.append("更新至");
+                builder.append(serial);
+                builder.append("话");
+            }
+            jiTotal = builder.toString();
+        }
+        return jiTotal;
+    }
+
     @Override
     public int describeContents() {
         return 0;
     }
+
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {

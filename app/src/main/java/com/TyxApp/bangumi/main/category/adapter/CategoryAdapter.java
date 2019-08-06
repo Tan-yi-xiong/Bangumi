@@ -3,6 +3,7 @@ package com.TyxApp.bangumi.main.category.adapter;
 import android.content.Context;
 import android.view.Gravity;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.TyxApp.bangumi.R;
@@ -13,6 +14,7 @@ import com.TyxApp.bangumi.data.bean.CategorItem;
 import com.TyxApp.bangumi.util.AnimationUtil;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -34,7 +36,7 @@ public class CategoryAdapter extends BaseAdapter<CategorItem, BaseViewHolder> {
         TextView textView = holder.getView(R.id.name);
         textView.setGravity(Gravity.CENTER);
         textView.setText(item.getName());
-        holder.itemView.setOnClickListener(v -> CategoryResultActivity.startCategoryActivity(getContext(), item.getName()));
+        holder.itemView.setOnClickListener(v -> CategoryResultActivity.startCategoryResultActivity(getContext(), item.getName()));
     }
 
     @Override
@@ -47,4 +49,5 @@ public class CategoryAdapter extends BaseAdapter<CategorItem, BaseViewHolder> {
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 3));
         super.onAttachedToRecyclerView(recyclerView);
     }
+
 }

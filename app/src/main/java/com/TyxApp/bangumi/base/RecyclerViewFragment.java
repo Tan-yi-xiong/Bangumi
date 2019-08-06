@@ -25,7 +25,7 @@ public abstract class RecyclerViewFragment extends BaseMvpFragment {
 
     @Override
     public int getLayoutId() {
-        return R.layout.layout_recyclerview;
+        return R.layout.fragment_recyclerview;
     }
 
     public RecyclerView getRecyclerview() {

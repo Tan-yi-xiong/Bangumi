@@ -8,6 +8,8 @@ import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
+import androidx.room.Update;
+
 import io.reactivex.Flowable;
 import io.reactivex.Single;
 import io.reactivex.SingleOnSubscribe;
@@ -44,6 +46,9 @@ public interface BangumiDao {
 
     @Query("SELECT isFavorite FROM BANGUMI WHERE vod_id = :videoId AND vod_soure = :sourch")
     Flowable<Boolean> hasAddToFavorite(int videoId, String sourch);
+
+    @Update
+    int update(Bangumi bangumi);
 
     default Single insertOrUpdateTime(Bangumi bangumi) {
         return Single.create((SingleOnSubscribe<Integer>) emitter -> {

@@ -12,4 +12,27 @@
     <string name="cache">下载缓存</string>
     <string name="setting">设置</string>
     <string name="timetable">时间表</string>
+
+    //Preference
+    <string name="title_play_settings">播放</string>
+    <string name="summary_auto_play_next">视频结束后自动播放下一集</string>
+    <string name="title_auto_play_next">自动播放下一集</string>
+    <string name="summary_play_no_wifi">非wifi环境下不再提醒直接播放视频</string>
+    <string name="title_play_no_wifi">非wifi下自动播放</string>
+    <string name="title_download_settings">下载</string>
+    <string name="titel_auto_recover_download">自动恢复下载</string>
+    <string name="summary_auto_recover_download">软件开启后自动恢复未完成下载</string>
+    <string name="ui_settings">外观</string>
+    <string name="title_about">关于</string>
+    <string name="title_project_url">源码地址</string>
+    <string name="title_home_sourch">主页</string>
+    <string name="key_auto_play_next">auto_play_next</string>
+    <string name="key_play_no_wifi">play_no_wifi</string>
+    <string name="key_auto_recover_download">auto_recover_download</string>
+    <string name="key_home_sourch">home_sourch</string>
+    <string name="title_versions">版本</string>
+    <string name="toast_file_already_delete">文件已被删除</string>
+    <string name="snackbar_click_again_finish">再按一次退出</string>
+    <string name="text_error_click_retry">发生了未知错误, 点击图片重试</string>
+
 </resources>

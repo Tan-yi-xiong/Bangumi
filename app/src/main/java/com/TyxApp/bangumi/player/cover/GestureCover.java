@@ -1,5 +1,6 @@
 package com.TyxApp.bangumi.player.cover;
 
+import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.media.AudioManager;
@@ -9,6 +10,7 @@ import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -61,25 +63,25 @@ public class GestureCover extends ImpTouchListenerCover {
     private Unbinder mUnbinder;
 
 
-    public GestureCover(Context context) {
-        super(context);
-        WindowManager manager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+    public GestureCover(Activity activity) {
+        super(activity);
+        WindowManager manager = (WindowManager) activity.getSystemService(Context.WINDOW_SERVICE);
         DisplayMetrics displayMetrics = new DisplayMetrics();
         manager.getDefaultDisplay().getMetrics(displayMetrics);
         screenWidth = displayMetrics.widthPixels;
         float screenHeight = displayMetrics.heightPixels;
 
-        mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        mAudioManager = (AudioManager) activity.getSystemService(Context.AUDIO_SERVICE);
         mSystemMaxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
         mStep = ((screenHeight / 3) / mSystemMaxVolume);
         brightnessStepValue = 255 / mSystemMaxVolume;
 
-        ContentResolver resolver = context.getContentResolver();
+        ContentResolver resolver = activity.getContentResolver();
         mBrightness = Settings.System.getInt(resolver,
                 Settings.System.SCREEN_BRIGHTNESS, 125);
 
-        int resId = context.getResources().getIdentifier("status_bar_height", "dimen", "android");
-        stateBarHeight = context.getResources().getDimensionPixelSize(resId);
+        int resId = activity.getResources().getIdentifier("status_bar_height", "dimen", "android");
+        stateBarHeight = activity.getResources().getDimensionPixelSize(resId);
 
         mBundle = new Bundle();
     }
@@ -207,8 +209,10 @@ public class GestureCover extends ImpTouchListenerCover {
                     mBrightness = 0;
                 }
             }
-            mBundle.putInt(EventKey.INT_DATA, mBrightness);
-            notifyReceiverEvent(VideoPlayerEvent.Code.CODE_BRIGHTNESS_ADJUST, mBundle);
+            Window window = ((Activity) getContext()).getWindow();
+            WindowManager.LayoutParams params = window.getAttributes();
+            params.screenBrightness = mBrightness / 255.0f;
+            window.setAttributes(params);
         }
         videoBrightnessProgressBar.setProgress(mBrightness);
         videoBrightnessProgressBar.setMax(MAX_BRIGHTNESS);

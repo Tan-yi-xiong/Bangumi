@@ -8,11 +8,17 @@
         <item>影视剧</item>
     </array>
 
+    <array name="dilidili_title">
+        <item>最新更新</item>
+        <item>番剧排行</item>
+        <item>番剧推荐</item>
+    </array>
+
     <array name="search_result_tab_text">
         <item>Zzzfun</item>
         <item>nico</item>
         <item>樱花动漫</item>
-        <item>dilidili</item>
+        <!--<item>dilidili</item>-->
     </array>
 
     <array name="main_bottomsheet_item">
@@ -41,7 +47,7 @@
         <item>剧场版</item>
         <item>日本动漫</item>
     </array>
-    
+
     <array name="week">
         <item>周一</item>
         <item>周二</item>
@@ -50,5 +56,10 @@
         <item>周五</item>
         <item>周六</item>
         <item>周日</item>
+    </array>
+
+    <array name="home_sourch">
+        <item>Zzzfun</item>
+        <item>dilidili</item>
     </array>
 </resources>

@@ -4,6 +4,9 @@ public class VideoUrl {
     boolean isHtml;
     String url;
 
+    public VideoUrl() {
+    }
+
     public VideoUrl(String url) {
         this.url = url;
     }

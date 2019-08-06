@@ -8,6 +8,7 @@ import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
+import okhttp3.Response;
 import okhttp3.ResponseBody;
 
 public class HttpRequestUtil {
@@ -30,14 +31,18 @@ public class HttpRequestUtil {
     }
 
     public static String getGetRequestResponseBodyString(String url) throws IOException {
+        return getGetRequestResponseBodyString(url, "UTF-8");
+    }
+
+    public static String getGetRequestResponseBodyString(String url, String charsetName) throws IOException {
         checkNull(client);
         Request request = new Request.Builder()
                 .url(url)
                 .build();
-        return client.newCall(request)
+        ResponseBody responseBody = client.newCall(request)
                 .execute()
-                .body()
-                .string();
+                .body();
+        return new String(responseBody.bytes(), charsetName);
     }
 
     public static String postJosonResult(String url, ContentValues values) throws IOException {

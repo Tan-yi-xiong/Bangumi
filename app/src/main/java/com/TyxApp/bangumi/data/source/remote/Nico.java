@@ -5,6 +5,7 @@ import android.util.SparseArray;
 
 import com.TyxApp.bangumi.data.bean.Bangumi;
 import com.TyxApp.bangumi.data.bean.CategorItem;
+import com.TyxApp.bangumi.data.bean.Results;
 import com.TyxApp.bangumi.data.bean.TextItemSelectBean;
 import com.TyxApp.bangumi.data.bean.VideoUrl;
 import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
@@ -115,14 +116,14 @@ public class Nico implements BaseBangumiParser {
     }
 
     @Override
-    public Observable<List<Bangumi>> nextSearchResult() {
+    public Observable<Results> nextSearchResult() {
         if (searchMoreHtml.isEmpty()) {
-            return Observable.empty();
+            return Observable.just(new Results(true, null));
         }
         String nextUrl = searchMoreHtml.remove(0);
         return Observable.just(nextUrl)
                 .compose(ParseUtil.html2Transformer())
-                .flatMap(htmlData -> Observable.create((ObservableOnSubscribe<List<Bangumi>>) emitter -> emitter.onNext(parseSearchPageBangumis(htmlData))))
+                .map(document -> new Results(false, parseSearchPageBangumis(document)))
                 .subscribeOn(Schedulers.io());
     }
 
@@ -245,7 +246,7 @@ public class Nico implements BaseBangumiParser {
     }
 
     @Override
-    public Observable<List<Bangumi>> getNextCategoryBangumis() {
+    public Observable<Results> getNextCategoryBangumis() {
         return null;
     }
 

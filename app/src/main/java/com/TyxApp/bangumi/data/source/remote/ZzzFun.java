@@ -3,14 +3,18 @@ package com.TyxApp.bangumi.data.source.remote;
 import android.content.ContentValues;
 import android.util.SparseArray;
 
+import androidx.annotation.Nullable;
+
 import com.TyxApp.bangumi.BanghumiApp;
 import com.TyxApp.bangumi.R;
 import com.TyxApp.bangumi.data.bean.Bangumi;
 import com.TyxApp.bangumi.data.bean.CategorItem;
+import com.TyxApp.bangumi.data.bean.Results;
 import com.TyxApp.bangumi.data.bean.TextItemSelectBean;
 import com.TyxApp.bangumi.data.bean.VideoUrl;
 import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
 import com.TyxApp.bangumi.util.HttpRequestUtil;
+import com.TyxApp.bangumi.util.LogUtil;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -28,6 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.Observer;
 import io.reactivex.schedulers.Schedulers;
 
 public class ZzzFun implements BaseBangumiParser {
@@ -97,6 +102,7 @@ public class ZzzFun implements BaseBangumiParser {
                 .subscribeOn(Schedulers.io());
     }
 
+    @Nullable
     private List<Bangumi> getBangumis(String jsonData) {
         Gson gson = new Gson();
         //只要result字段的数据
@@ -115,27 +121,30 @@ public class ZzzFun implements BaseBangumiParser {
 
     @Override
     public Observable<List<Bangumi>> getSearchResult(final String word) {
-        return Observable.create((ObservableOnSubscribe<List<Bangumi>>) emitter -> {
-            String w = URLEncoder.encode(word, "UTF-8");
-            String searchUrl =
-                    "http://111.230.89.165:8099/api.php/provvde/vod/?ac=list&wd=" + w;
-
-            String jsonResultData = HttpRequestUtil.getGetRequestResponseBodyString(searchUrl);
-            Gson gson = new Gson();
-            JsonObject jsonObject = gson.fromJson(jsonResultData, JsonObject.class);
-            Type type = new TypeToken<List<Bangumi>>() {
-            }.getType();
-            List<Bangumi> bangumis = gson.fromJson(jsonObject.get("list").toString(), type);
-            for (Bangumi bangumi : bangumis) {
-                bangumi.setVideoSoure(BangumiPresistenceContract.BangumiSource.ZZZFUN);
-            }
-            emitter.onNext(bangumis);
-        }).subscribeOn(Schedulers.io());
+         return Observable.just(word)
+                 .map(URLEncoder::encode)
+                 .map(encodeWord -> "http://111.230.89.165:8099/api.php/provvde/vod/?ac=list&wd=" + encodeWord)
+                 .map(HttpRequestUtil::getGetRequestResponseBodyString)
+                 .flatMap(jsonData -> {
+                     Gson gson = new Gson();
+                     JsonObject jsonObject = gson.fromJson(jsonData, JsonObject.class);
+                     Type type = new TypeToken<List<Bangumi>>() {
+                     }.getType();
+                     List<Bangumi> bangumis = gson.fromJson(jsonObject.get("list").toString(), type);
+                     return Observable.fromIterable(bangumis);
+                 })
+                 .map(bangumi -> {
+                     bangumi.setVideoSoure(BangumiPresistenceContract.BangumiSource.ZZZFUN);
+                     return bangumi;
+                 })
+                 .toList()
+                 .toObservable()
+                 .subscribeOn(Schedulers.io());
     }
 
     @Override
-    public Observable<List<Bangumi>> nextSearchResult() {
-        return Observable.empty();
+    public Observable<Results> nextSearchResult() {
+        return Observable.just(new Results(true, null));
     }
 
     @Override
@@ -229,17 +238,18 @@ public class ZzzFun implements BaseBangumiParser {
     }
 
     @Override
-    public Observable<List<Bangumi>> getNextCategoryBangumis() {
+    public Observable<Results> getNextCategoryBangumis() {
         categoryPage++;
         String url = baseUrl + "/type/list.php";
         return Observable.just(url)
                 .map(this::parseCategoryBangumi)
-                .flatMap(jsonData -> {
+                .map(jsonData -> {
                     List<Bangumi> bangumis = getBangumis(jsonData);
+                    Results results = new Results(false, bangumis);
                     if (bangumis == null) {
-                        return Observable.empty();
+                        results.setFinalTag(true);
                     }
-                    return Observable.create((ObservableOnSubscribe<List<Bangumi>>) emitter -> emitter.onNext(bangumis));
+                    return results;
                 })
                 .subscribeOn(Schedulers.io());
     }

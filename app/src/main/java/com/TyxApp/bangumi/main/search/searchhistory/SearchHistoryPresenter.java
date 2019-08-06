@@ -1,5 +1,6 @@
 package com.TyxApp.bangumi.main.search.searchhistory;
 
+import com.TyxApp.bangumi.data.bean.SearchWord;
 import com.TyxApp.bangumi.data.source.local.AppDatabase;
 import com.TyxApp.bangumi.data.source.local.SearchWordDao;
 import com.TyxApp.bangumi.util.LogUtil;
@@ -44,6 +45,11 @@ public class SearchHistoryPresenter implements SearchHistoryContract.Presenter {
                 .subscribe(
                         searchWords -> mView.showSimilarityWords(searchWords),
                         throwable -> mView.showResultError(throwable)));
+    }
+
+    @Override
+    public void removeWord(SearchWord word) {
+        mCompositeDisposable.add(mSearchWordDao.delete(word).subscribeOn(Schedulers.io()).subscribe());
     }
 
     @Override

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:layout="@layout/coustom_preference_category"
+        android:title="@string/title_play_settings">
+        <SwitchPreference
+            android:key="@string/key_auto_play_next"
+            android:defaultValue="true"
+            android:layout="@layout/coustom_preference_widget_checkbox"
+            android:summary="@string/summary_auto_play_next"
+            android:title="@string/title_auto_play_next" />
+        <SwitchPreference
+            android:key="@string/key_play_no_wifi"
+            android:defaultValue="false"
+            android:layout="@layout/coustom_preference_widget_checkbox"
+            android:summary="@string/summary_play_no_wifi"
+            android:title="@string/title_play_no_wifi" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:layout="@layout/coustom_preference_category"
+        android:title="@string/title_download_settings">
+
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="@string/key_auto_recover_download"
+            android:layout="@layout/coustom_preference_widget_checkbox"
+            android:summary="@string/summary_auto_recover_download"
+            android:title="@string/titel_auto_recover_download" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:layout="@layout/coustom_preference_category"
+        android:title="@string/ui_settings">
+
+        <ListPreference
+            android:entries="@array/home_sourch"
+            android:entryValues="@array/home_sourch"
+            android:key="@string/key_home_sourch"
+            android:defaultValue="Zzzfun"
+            android:layout="@layout/coustom_preference_widget_checkbox"
+            android:title="@string/title_home_sourch" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:layout="@layout/coustom_preference_category"
+        android:title="@string/title_about">
+        <Preference
+            android:key="versions"
+            android:layout="@layout/coustom_preference_widget_checkbox"
+            android:summary="1.0.0"
+            android:title="@string/title_versions" />
+
+        <Preference
+            android:layout="@layout/coustom_preference_widget_checkbox"
+            android:summary="https://github.com/Tan-yi-xiong/Bangumi"
+            android:title="@string/title_project_url">
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:data="https://github.com/Tan-yi-xiong/Bangumi" />
+        </Preference>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

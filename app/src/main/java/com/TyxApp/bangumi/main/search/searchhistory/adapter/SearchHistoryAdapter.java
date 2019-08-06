@@ -1,6 +1,7 @@
 package com.TyxApp.bangumi.main.search.searchhistory.adapter;
 
 import android.content.Context;
+import android.view.View;
 import android.view.ViewGroup;
 
 import com.TyxApp.bangumi.R;
@@ -29,6 +30,13 @@ public class SearchHistoryAdapter extends BaseAdapter<SearchWord, BaseViewHolder
             if (mOnItemClickListener != null) {
                 mOnItemClickListener.onItemClick(position);
             }
+        });
+
+        holder.itemView.setOnLongClickListener(v -> {
+            if (mOnItemLongClickLisener != null) {
+                return mOnItemLongClickLisener.onItemLongClick(position);
+            }
+            return false;
         });
     }
 

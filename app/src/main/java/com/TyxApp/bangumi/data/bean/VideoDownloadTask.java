@@ -28,13 +28,6 @@ public class VideoDownloadTask {
     private long downloadLength;
     private String url;//视频地址
 
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
 
     public VideoDownloadTask(String path, String fileName, int bangumiId, String bangumiSourch, String url) {
         this.dirPath = path;
@@ -45,6 +38,14 @@ public class VideoDownloadTask {
     }
 
     public VideoDownloadTask() {
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 
     public String getDirPath() {

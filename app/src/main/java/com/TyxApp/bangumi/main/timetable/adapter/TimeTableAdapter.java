@@ -35,7 +35,7 @@ public class TimeTableAdapter extends BaseAdapter<List<Bangumi>, BaseViewHolder>
         int imageAngle = AnimationUtil.dp2px(getContext(), 3);
         holder.setRoundedImage(R.id.cover, bangumi.getCover(), imageAngle);
         holder.setText(R.id.name, bangumi.getName());
-        holder.setText(R.id.bangumi_ji, bangumi.getSerial());
+        holder.setText(R.id.bangumi_ji, bangumi.getLatestJi());
         holder.itemView.setOnClickListener(v -> PlayerActivity.startPlayerActivity(getContext(), bangumi));
     }
 

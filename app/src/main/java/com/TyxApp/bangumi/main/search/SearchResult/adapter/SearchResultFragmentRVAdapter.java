@@ -29,22 +29,7 @@ public class SearchResultFragmentRVAdapter extends BaseAdapter<Bangumi, BaseView
         Bangumi bangumi = getData(position);
         holder.setImageRes(R.id.cover, bangumi.getCover());
         holder.setText(R.id.name, bangumi.getName());
-        String jiTotal = bangumi.getRemarks();
-        if (TextUtils.isEmpty(jiTotal)) {
-            StringBuilder builder = new StringBuilder();
-            jiTotal = bangumi.getTotal();
-            if (!TextUtils.isEmpty(jiTotal) && !"0".equals(jiTotal)) {
-                builder.append("全");
-                builder.append(jiTotal);
-                builder.append("话");
-            } else if (!TextUtils.isEmpty(bangumi.getSerial())) {
-                builder.append("更新至");
-                builder.append(bangumi.getSerial());
-                builder.append("话");
-            }
-            jiTotal = builder.toString();
-        }
-        holder.setText(R.id.bangumi_ji_total, jiTotal);
+        holder.setText(R.id.bangumi_ji_total, bangumi.getLatestJi());
         holder.itemView.setOnClickListener(v -> PlayerActivity.startPlayerActivity(getContext(), bangumi));
     }
 

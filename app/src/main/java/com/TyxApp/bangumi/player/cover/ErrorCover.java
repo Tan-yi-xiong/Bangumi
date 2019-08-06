@@ -2,12 +2,15 @@ package com.TyxApp.bangumi.player.cover;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
 import com.TyxApp.bangumi.R;
+import com.TyxApp.bangumi.util.LogUtil;
+import com.TyxApp.bangumi.util.PreferenceUtil;
 import com.kk.taurus.playerbase.config.PConst;
 import com.kk.taurus.playerbase.event.EventKey;
 import com.kk.taurus.playerbase.event.OnPlayerEventListener;
@@ -75,14 +78,16 @@ public class ErrorCover extends BaseCover {
             if (getView().getVisibility() == View.VISIBLE) {
                 hideUI();
             }
-            return;
-        }
-        if (networkState < 0) {
+        } else if (networkState < 0) {
             mState = STATE_ERROR;
+            showUI();
         } else {
+            boolean playInMobile = PreferenceUtil.getBollean(getContext().getString(R.string.key_play_no_wifi), false);
             mState = STATE_MOBILE;
+            if (!playInMobile) {
+               showUI();
+            }
         }
-        showUI();
     }
 
     private void showUI() {

@@ -1,9 +1,11 @@
 package com.TyxApp.bangumi.main.favoriteandhistory;
 
+import com.TyxApp.bangumi.data.bean.Bangumi;
 import com.TyxApp.bangumi.data.source.local.AppDatabase;
 import com.TyxApp.bangumi.data.source.local.BangumiDao;
 import com.TyxApp.bangumi.util.ExceptionUtil;
 
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
@@ -41,9 +43,15 @@ public class FavoritePresenter implements FavoriteAndHistoryContract.Presenter {
     @Override
     public void removeBangumi(int id, String source) {
        mDisposable.add(mBangumiDao.updateFavoriteState(id, source, false)
-               .subscribeOn(Schedulers.io())
-               .observeOn(AndroidSchedulers.mainThread())
-               .subscribe());
+                .subscribeOn(Schedulers.io())
+                .subscribe());
+    }
+
+    @Override
+    public void revocationRemoveBangumi(Bangumi bangumi) {
+        mDisposable.add(Single.create(emitter -> emitter.onSuccess(mBangumiDao.update(bangumi)))
+                .subscribeOn(Schedulers.io())
+                .subscribe());
     }
 
     @Override

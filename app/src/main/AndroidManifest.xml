@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
         android:name=".BanghumiApp"
@@ -17,17 +18,22 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".main.favoriteandhistory.MyFavoriteActivity"
-            android:label="我的追番"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".categoryresult.CategoryResultActivity"
-            android:screenOrientation="portrait"/>
+        <activity
+            android:theme="@style/SettingStyle"
+            android:name=".setting.SettingsActivity" />
+        <activity android:name=".downloaddetails.DownloadDetailsActivity" />
+        <activity
+            android:name=".categoryresult.CategoryResultActivity"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".player.PlayerActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:screenOrientation="portrait" />
         <activity
+            android:theme="@style/MainactivityStyle"
+            android:configChanges="orientation|screenSize|keyboardHidden"
             android:name=".main.MainActivity"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -36,7 +42,9 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".server.DownloadServer" />
+        <service
+            android:name=".server.DownloadServer"
+            android:exported="false" />
     </application>
 
 </manifest>

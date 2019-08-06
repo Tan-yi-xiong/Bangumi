@@ -1,5 +1,6 @@
 package com.TyxApp.bangumi.main.favoriteandhistory;
 
+import com.TyxApp.bangumi.data.bean.Bangumi;
 import com.TyxApp.bangumi.data.source.local.AppDatabase;
 import com.TyxApp.bangumi.data.source.local.BangumiDao;
 import com.TyxApp.bangumi.util.ExceptionUtil;
@@ -55,6 +56,13 @@ public class HistoryPresenter implements FavoriteAndHistoryContract.Presenter {
     @Override
     public void removeBangumi(int id, String source) {
         mDisposable.add(Single.create(emitter -> mBangumiDao.updatetime(id, source, 0))
+                .subscribeOn(Schedulers.io())
+                .subscribe());
+    }
+
+    @Override
+    public void revocationRemoveBangumi(Bangumi bangumi) {
+        mDisposable.add(mBangumiDao.insertBangumi(bangumi)
                 .subscribeOn(Schedulers.io())
                 .subscribe());
     }

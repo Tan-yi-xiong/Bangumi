@@ -1,35 +1,45 @@
 package com.TyxApp.bangumi.player;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.transition.Explode;
+import android.transition.Slide;
+import android.view.Gravity;
+import android.view.Window;
+
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 
 import com.TyxApp.bangumi.R;
 import com.TyxApp.bangumi.base.BaseMvpActivity;
 import com.TyxApp.bangumi.data.bean.Bangumi;
 import com.TyxApp.bangumi.util.ActivityUtil;
 
-import androidx.core.app.ActivityOptionsCompat;
-
 public class PlayerActivity extends BaseMvpActivity {
 
-    public static final String INTENT_KEY = "bangumi_key";
-    private PlayerFragment mPlayerFragment;
+    public static final String INTENT_KEY = "intent_key";
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
 
     @Override
     protected void initView(Bundle savedInstanceState) {
-        mPlayerFragment = (PlayerFragment) ActivityUtil.findFragment(
-                getSupportFragmentManager(),
-                PlayerFragment.class.getName());
-        if (mPlayerFragment == null) {
-            mPlayerFragment = PlayerFragment.newInstance();
+        Fragment fragment;
+        fragment = ActivityUtil.findFragment(getSupportFragmentManager(), RemotePlayerFragment.class.getName());
+        if (fragment == null) {
+            fragment = ActivityUtil.findFragment(getSupportFragmentManager(), LocalPlayerFragment.class.getName());
+            if (fragment == null) {
+                if (getIntent().getParcelableExtra(INTENT_KEY) != null) {
+                    fragment = RemotePlayerFragment.newInstance();
+                } else {
+                    fragment = LocalPlayerFragment.newInstance();
+                }
+            }
         }
-
-        ActivityUtil.replaceFragment(
-                getSupportFragmentManager(),
-                mPlayerFragment,
-                R.id.fl_playercontent);
+        ActivityUtil.replaceFragment(getSupportFragmentManager(), fragment, R.id.fl_playercontent);
     }
 
     @Override
@@ -43,9 +53,9 @@ public class PlayerActivity extends BaseMvpActivity {
         context.startActivity(intent);
     }
 
-    public static void startPlayerActivityWithTransition(Activity activity, Bangumi bangumi, ActivityOptionsCompat compat) {
-        Intent intent = new Intent(activity, PlayerActivity.class);
-        intent.putExtra(INTENT_KEY, bangumi);
-        activity.startActivity(intent, compat.toBundle());
+    public static void startPlayerActivity(Context context, String filePath) {
+        Intent intent = new Intent(context, PlayerActivity.class);
+        intent.putExtra(INTENT_KEY, filePath);
+        context.startActivity(intent);
     }
 }

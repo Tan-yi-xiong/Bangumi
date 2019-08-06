@@ -5,6 +5,8 @@
     android:id="@+id/main_drawerlayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    app:insetForeground="@android:color/transparent"
     tools:context=".main.MainActivity">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -19,6 +21,7 @@
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/tb_main_search"
                 app:contentInsetLeft="0dp"
+                app:layout_scrollFlags="scroll|enterAlways"
                 app:contentInsetStart="0dp"
                 app:contentInsetStartWithNavigation="0dp"
                 android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
@@ -45,6 +48,7 @@
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     <com.google.android.material.navigation.NavigationView
+        app:insetForeground="@android:color/transparent"
         app:menu="@menu/nav_menu"
         app:headerLayout="@layout/layout_nav_heade"
         android:id="@+id/main_navigationview"

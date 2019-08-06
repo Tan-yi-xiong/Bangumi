@@ -36,29 +36,14 @@ public class FavoriteAndHistoryAdpater extends BaseAdapter<Bangumi, BaseViewHold
         holder.setRoundedImage(R.id.cover, bangumi.getCover(), imageAngle);
         holder.setText(R.id.name, bangumi.getName());
         holder.setText(R.id.bangumi_source, bangumi.getVideoSoure());
-        String jiTotal = bangumi.getRemarks();
-        if (TextUtils.isEmpty(jiTotal)) {
-            StringBuilder builder = new StringBuilder();
-            jiTotal = bangumi.getTotal();
-            if (!TextUtils.isEmpty(jiTotal) && !"0".equals(jiTotal)) {
-                builder.append("全");
-                builder.append(jiTotal);
-                builder.append("话");
-            } else if (!TextUtils.isEmpty(bangumi.getSerial())) {
-                builder.append("更新至");
-                builder.append(bangumi.getSerial());
-                builder.append("话");
-            }
-            jiTotal = builder.toString();
-        }
-        holder.setText(R.id.bangumi_ji, jiTotal);
+        holder.setText(R.id.bangumi_ji, bangumi.getLatestJi());
         if (showTime) {
             holder.setText(R.id.history_time, mDateFormat.format(bangumi.getHistoryTime()));
         }
         holder.itemView.setOnClickListener(v -> PlayerActivity.startPlayerActivity(getContext(), bangumi));
         holder.itemView.setOnLongClickListener(v -> {
             if (mOnItemLongClickLisener != null) {
-                return mOnItemLongClickLisener.onItemLongClick(bangumi);
+                return mOnItemLongClickLisener.onItemLongClick(position);
             }
             return false;
         });

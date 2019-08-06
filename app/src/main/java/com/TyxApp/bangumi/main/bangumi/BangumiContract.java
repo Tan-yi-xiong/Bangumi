@@ -10,8 +10,6 @@ public interface BangumiContract {
     interface View extends BaseView {
         void showHomeBangumis(List<List<Bangumi>> homeBangumis);
 
-
-        void showNewHomeBangumis(List<List<Bangumi>> newHomeBangumis);
     }
 
     interface Presenter extends BasePresenter {

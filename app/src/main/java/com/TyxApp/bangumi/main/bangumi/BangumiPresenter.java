@@ -15,13 +15,11 @@ public class BangumiPresenter implements BangumiContract.Presenter {
     private BaseBangumiParser banghumiParser;
     private BangumiContract.View mView;
     private CompositeDisposable mCompositeDisposable;
-    private boolean isFristLoadingData;
 
     public BangumiPresenter(BaseBangumiParser banghumiParser, BangumiContract.View view) {
         ExceptionUtil.checkNull(banghumiParser, "BangumiPresenter modle解析不能为空");
         ExceptionUtil.checkNull(view, "BangumiPresenter view不能为空");
 
-        isFristLoadingData = true;
         this.banghumiParser = banghumiParser;
         mView = view;
         mCompositeDisposable = new CompositeDisposable();
@@ -29,10 +27,7 @@ public class BangumiPresenter implements BangumiContract.Presenter {
 
     @Override
     public void onResume() {
-        if (isFristLoadingData) {
-            populaterBangumi();
-            isFristLoadingData = false;
-        }
+
     }
 
     @Override
@@ -50,17 +45,8 @@ public class BangumiPresenter implements BangumiContract.Presenter {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         homeBangumis::add,
-
                         throwable -> mView.showResultError(throwable),
-
-                        () -> {
-                            //如果不是第一次加载就表明是刷新数据, 调用view层的刷新方法
-                            if (isFristLoadingData) {
-                                mView.showHomeBangumis(homeBangumis);
-                            } else {
-                                mView.showNewHomeBangumis(homeBangumis);
-                            }
-                        }));
+                        () -> mView.showHomeBangumis(homeBangumis)));
     }
 
     @Override

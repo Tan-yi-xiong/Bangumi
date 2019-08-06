@@ -1,4 +1,4 @@
-package com.TyxApp.bangumi.main.bangumi.adapter.zzzfun;
+package com.TyxApp.bangumi.main.bangumi.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.TyxApp.bangumi.BanghumiApp;
 import com.TyxApp.bangumi.R;
 import com.TyxApp.bangumi.data.bean.Bangumi;
 import com.TyxApp.bangumi.player.PlayerActivity;
@@ -48,7 +49,7 @@ public class BannerAdapter extends PagerAdapter {
     @Override
     public Object instantiateItem(@NonNull ViewGroup container, int position) {
         final int relposition = (position - 1 + mBangumiList.size()) % mBangumiList.size();
-        View view = LayoutInflater.from(mContext).inflate(R.layout.layout_zzzfun_banner, null);
+        View view = LayoutInflater.from(mContext).inflate(R.layout.layout_banner_view, null);
         ImageView imageView = view.findViewById(R.id.iv_zzzfun_banner);
         TextView textView = view.findViewById(R.id.tv_zzzfun_banner_name);
         Bangumi bangumi = mBangumiList.get(relposition);

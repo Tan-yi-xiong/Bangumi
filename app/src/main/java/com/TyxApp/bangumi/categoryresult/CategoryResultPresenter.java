@@ -34,9 +34,14 @@ public class CategoryResultPresenter implements CategoryResultContract.Presenter
         mDisposable.add(mBangumiParser.getNextCategoryBangumis()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
-                        bangumis -> mView.showNextResult(bangumis),
-                        throwable -> mView.showResultError(throwable),
-                        () -> mView.showResultEmpty()));
+                        results -> {
+                            if (results.isFinalTag()) {
+                                mView.showResultEmpty();
+                            } else {
+                                mView.showNextResult(results.getBangumis());
+                            }
+                        },
+                        throwable -> mView.showResultError(throwable)));
     }
 
     @Override

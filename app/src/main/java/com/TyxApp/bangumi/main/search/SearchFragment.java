@@ -13,6 +13,7 @@ import com.TyxApp.bangumi.data.bean.SearchWord;
 import com.TyxApp.bangumi.main.search.SearchResult.SearchResultFragmetnContainer;
 import com.TyxApp.bangumi.main.search.searchhistory.SearchHistoryFragment;
 import com.TyxApp.bangumi.util.ActivityUtil;
+import com.TyxApp.bangumi.util.LogUtil;
 import com.TyxApp.bangumi.view.SearchInput;
 
 import androidx.activity.OnBackPressedCallback;

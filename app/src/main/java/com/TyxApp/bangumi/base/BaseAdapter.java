@@ -83,7 +83,7 @@ public abstract class BaseAdapter<T, VH extends RecyclerView.ViewHolder> extends
     }
 
     public interface onItemLongClickLisener {
-        boolean onItemLongClick(Bangumi bangumi);
+        boolean onItemLongClick(int pos);
     }
 
     public void setOnItemLongClickLisener(onItemLongClickLisener onItemLongClickLisener) {

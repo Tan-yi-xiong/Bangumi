@@ -69,22 +69,7 @@ public class ContentAdapter extends RecyclerView.Adapter<BaseViewHolder> {
         int angle = AnimationUtil.dp2px(mContext, 5);
         holder.setRoundedImage(R.id.recommend_cover, bangumi.getCover(), angle);
         holder.setText(R.id.name, bangumi.getName());
-        String jiTotal = bangumi.getRemarks();
-        if (TextUtils.isEmpty(jiTotal)) {
-            StringBuilder builder = new StringBuilder();
-            jiTotal = bangumi.getTotal();
-            if (!TextUtils.isEmpty(jiTotal) && !"0".equals(jiTotal)) {
-                builder.append("全");
-                builder.append(jiTotal);
-                builder.append("话");
-            } else if (!TextUtils.isEmpty(bangumi.getSerial())) {
-                builder.append("更新至");
-                builder.append(bangumi.getSerial());
-                builder.append("话");
-            }
-            jiTotal = builder.toString();
-        }
-        holder.setText(R.id.ji_total, jiTotal);
+        holder.setText(R.id.ji_total, bangumi.getLatestJi());
 
         holder.itemView.setOnClickListener(v -> {
             if (mOnItemSelectListener != null) {
@@ -135,23 +120,7 @@ public class ContentAdapter extends RecyclerView.Adapter<BaseViewHolder> {
         int angle = AnimationUtil.dp2px(mContext, 3);
         holder.setRoundedImage(R.id.cover, mBangumi.getCover(), angle);
         holder.setText(R.id.name, mBangumi.getName());
-        String jiTotal = mBangumi.getRemarks();
-        if (TextUtils.isEmpty(jiTotal)) {
-            StringBuilder builder = new StringBuilder();
-            jiTotal = mBangumi.getTotal();
-            if (!TextUtils.isEmpty(jiTotal) && !"0".equals(jiTotal)) {
-                builder.append("全");
-                builder.append(jiTotal);
-                builder.append("话");
-            } else if (!TextUtils.isEmpty(mBangumi.getSerial())) {
-                builder.append("更新至");
-                builder.append(mBangumi.getSerial());
-                mBangumi.getSerial();
-                builder.append("话");
-            }
-            jiTotal = builder.toString();
-        }
-        holder.setText(R.id.ji_total, jiTotal);
+        holder.setText(R.id.ji_total, mBangumi.getLatestJi());
 
         holder.setText(R.id.intro, mBangumi.getIntro());
 

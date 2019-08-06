@@ -2,12 +2,14 @@ package com.TyxApp.bangumi.categoryresult;
 
 import android.os.Bundle;
 
+import com.TyxApp.bangumi.R;
 import com.TyxApp.bangumi.base.BasePresenter;
 import com.TyxApp.bangumi.base.RecyclerViewFragment;
 import com.TyxApp.bangumi.categoryresult.adapter.CategoryResultAdapter;
 import com.TyxApp.bangumi.data.bean.Bangumi;
 import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
 import com.TyxApp.bangumi.data.source.remote.BaseBangumiParser;
+import com.TyxApp.bangumi.data.source.remote.Dilidili;
 import com.TyxApp.bangumi.data.source.remote.ZzzFun;
 import com.TyxApp.bangumi.util.PreferenceUtil;
 import com.google.android.material.snackbar.Snackbar;
@@ -46,11 +48,15 @@ public class CategoryResultFragment extends RecyclerViewFragment implements Cate
 
     @Override
     public BasePresenter getPresenter() {
-        String currentHomeSoure = PreferenceUtil.getString(PreferenceUtil.HOME_SOURCE, BangumiPresistenceContract.BangumiSource.ZZZFUN);
+        String currentHomeSoure = PreferenceUtil.getString(getString(R.string.key_home_sourch), BangumiPresistenceContract.BangumiSource.ZZZFUN);
         BaseBangumiParser parser = null;
         switch (currentHomeSoure) {
             case BangumiPresistenceContract.BangumiSource.ZZZFUN:
                 parser = ZzzFun.getInstance();
+                break;
+
+            case BangumiPresistenceContract.BangumiSource.DILIDLI:
+                parser = Dilidili.getInstance();
                 break;
         }
         mPresenter = new CategoryResultPresenter(parser, this);
@@ -63,6 +69,7 @@ public class CategoryResultFragment extends RecyclerViewFragment implements Cate
 
     @Override
     public void showResult(List<Bangumi> results) {
+        showRecyclerView();
         mAdapter.addAllInserted(results);
     }
 
@@ -87,5 +94,6 @@ public class CategoryResultFragment extends RecyclerViewFragment implements Cate
     public void FristLoading() {
         String categoryword = requireActivity().getIntent().getStringExtra(CategoryResultActivity.CATEGORYWORD_KEY);
         mPresenter.getResult(categoryword);
+        showDataLodaing();
     }
 }

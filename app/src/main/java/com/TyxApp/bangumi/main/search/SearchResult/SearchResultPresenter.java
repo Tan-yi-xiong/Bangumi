@@ -40,9 +40,14 @@ public class SearchResultPresenter implements SearchResultContract.Presenter {
         mCompositeDisposable.add(bangumiParser.nextSearchResult()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
-                        bangumis -> mView.showMoreSearchResult(bangumis),
-                        throwable -> mView.showResultError(throwable),
-                        () -> mView.noNextSearchResult()));
+                        results -> {
+                            if (results.isFinalTag()) {
+                                mView.noNextSearchResult();
+                            } else {
+                                mView.showMoreSearchResult(results.getBangumis());
+                            }
+                        },
+                        throwable -> mView.showResultError(throwable)));
     }
 
     @Override

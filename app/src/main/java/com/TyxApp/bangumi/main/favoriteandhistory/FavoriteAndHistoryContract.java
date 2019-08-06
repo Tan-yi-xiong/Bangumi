@@ -11,6 +11,8 @@ public interface FavoriteAndHistoryContract {
         void getBangumis();
 
         void removeBangumi(int id, String source);
+
+        void revocationRemoveBangumi(Bangumi bangumi);
     }
 
     interface View extends BaseView {

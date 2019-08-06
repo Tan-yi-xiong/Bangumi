@@ -2,6 +2,7 @@ package com.TyxApp.bangumi.main.category;
 
 import android.os.Bundle;
 
+import com.TyxApp.bangumi.R;
 import com.TyxApp.bangumi.base.BasePresenter;
 import com.TyxApp.bangumi.base.RecyclerViewFragment;
 import com.TyxApp.bangumi.data.bean.CategorItem;
@@ -28,7 +29,7 @@ public class CategoryFragment extends RecyclerViewFragment implements CategoryCo
 
     @Override
     public BasePresenter getPresenter() {
-        currentHomeSource = PreferenceUtil.getString(PreferenceUtil.HOME_SOURCE, BangumiPresistenceContract.BangumiSource.ZZZFUN);
+        currentHomeSource = PreferenceUtil.getString(getString(R.string.key_home_sourch), BangumiPresistenceContract.BangumiSource.ZZZFUN);
         BaseBangumiParser parser = null;
         switch (currentHomeSource) {
             case BangumiPresistenceContract.BangumiSource.ZZZFUN:
