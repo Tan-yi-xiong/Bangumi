@@ -16,6 +16,8 @@ import com.TyxApp.bangumi.R;
 import com.TyxApp.bangumi.player.bottomsheet.MainBottomSheet;
 import com.TyxApp.bangumi.player.bottomsheet.VideoSpeedBottomSheet;
 import com.TyxApp.bangumi.util.AnimationUtil;
+import com.TyxApp.bangumi.util.LogUtil;
+import com.TyxApp.bangumi.util.PreferenceUtil;
 import com.kk.taurus.playerbase.entity.DataSource;
 import com.kk.taurus.playerbase.event.EventKey;
 import com.kk.taurus.playerbase.event.OnPlayerEventListener;
@@ -291,6 +293,13 @@ public class PlayerControlCover extends ImpTimeAndTouchListenerCover {
                     playerPuaseStartButton.setSelected(true);
                 } else if (state == IPlayer.STATE_STARTED) {
                     playerPuaseStartButton.setSelected(false);
+                }
+                break;
+
+            case OnPlayerEventListener.PLAYER_EVENT_ON_PLAY_COMPLETE:
+                boolean isNext = PreferenceUtil.getBollean(getContext().getString(R.string.key_auto_play_next), true);
+                if (isNext) {
+                    notifyReceiverEvent(VideoPlayerEvent.Code.CODE_NEXT, null);
                 }
                 break;
         }

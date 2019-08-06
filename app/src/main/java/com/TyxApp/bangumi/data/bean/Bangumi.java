@@ -208,7 +208,9 @@ public class Bangumi implements Parcelable {
             } else if (!TextUtils.isEmpty(serial)){
                 builder.append("更新至");
                 builder.append(serial);
-                builder.append("话");
+                if (!serial.contains("话")) {
+                    builder.append("话");
+                }
             }
             jiTotal = builder.toString();
         }

@@ -40,7 +40,7 @@ public class TimeTableAdapter extends BaseAdapter<List<Bangumi>, BaseViewHolder>
     }
 
     public void setWeek(int week) {
-        if (mWeek == week) {
+        if (mWeek == week || week >= getDataList().size()) {
             return;
         }
         notifyItemRangeRemoved(0, getData(mWeek).size());

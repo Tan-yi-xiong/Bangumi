@@ -294,10 +294,15 @@ public class Dilidili implements BaseBangumiParser {
         return Observable.just(timeTableUrl)
                 .map(url -> {
                     String jsonData = HttpRequestUtil.getGetRequestResponseBodyString(url);
-                    Type type = new TypeToken<JsonResult<List<List<Bangumi>>>>() {
+                    JsonArray jsonArray = new JsonParser().parse(jsonData)
+                            .getAsJsonObject()
+                            .get("data")
+                            .getAsJsonObject()
+                            .getAsJsonArray("weeks");
+                    Type type = new TypeToken<List<List<Bangumi>>>() {
                     }.getType();
-                    JsonResult<List<List<Bangumi>>> jsonResult = new Gson().fromJson(jsonData, type);
-                    return jsonResult.data;
+                    List<List<Bangumi>> timeTableBangumis = new Gson().fromJson(jsonArray.toString(), type);
+                    return timeTableBangumis;
                 })
                 .subscribeOn(Schedulers.io());
     }

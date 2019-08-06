@@ -1,6 +1,7 @@
 package com.TyxApp.bangumi.data.source.remote;
 
 import android.content.ContentValues;
+import android.text.TextUtils;
 import android.util.SparseArray;
 
 import androidx.annotation.Nullable;
@@ -180,13 +181,18 @@ public class ZzzFun implements BaseBangumiParser {
             List<TextItemSelectBean> jiList = new ArrayList<>();
             List<VideoUrl> playUrls = new ArrayList<>();
             for (ZzzFunJi zzzFunJi : jiDataList) {
+                if (TextUtils.isEmpty(zzzFunJi.ji)) {
+                    continue;
+                }
                 TextItemSelectBean itemSelectBean = new TextItemSelectBean(zzzFunJi.ji);
                 jiList.add(itemSelectBean);
                 VideoUrl videoUrl = new VideoUrl(baseUrl + "/play.php?url=" + zzzFunJi.id);
                 videoUrl.setHtml(false);
                 playUrls.add(videoUrl);
             }
-            mPlayerUrlsCollect.append(id, playUrls);
+            if (!playUrls.isEmpty()) {
+                mPlayerUrlsCollect.append(id, playUrls);
+            }
             emitter.onNext(jiList);
         }).subscribeOn(Schedulers.io());
     }
@@ -197,7 +203,7 @@ public class ZzzFun implements BaseBangumiParser {
         if (playUrls != null) {
             return Observable.just(playUrls.get(ji));
         }
-        return getJiList(id).map(textItemSelectBeans -> mPlayerUrlsCollect.get(id).get(ji));
+        return Observable.just(new VideoUrl(true, "http://www.zzzfun.com/index.php/vod-detail-id-" + id + ".html"));
     }
 
     @Override

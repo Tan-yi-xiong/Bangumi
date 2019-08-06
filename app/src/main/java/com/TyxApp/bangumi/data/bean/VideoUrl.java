@@ -7,6 +7,11 @@ public class VideoUrl {
     public VideoUrl() {
     }
 
+    public VideoUrl(boolean isHtml, String url) {
+        this.isHtml = isHtml;
+        this.url = url;
+    }
+
     public VideoUrl(String url) {
         this.url = url;
     }
