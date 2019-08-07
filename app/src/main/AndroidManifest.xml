@@ -19,6 +19,7 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
+            android:launchMode="singleTask"
             android:theme="@style/SettingStyle"
             android:name=".setting.SettingsActivity" />
         <activity android:name=".downloaddetails.DownloadDetailsActivity" />
@@ -27,8 +28,7 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".player.PlayerActivity"
-            android:configChanges="orientation|screenSize|keyboardHidden"
-            android:screenOrientation="portrait" />
+            android:configChanges="orientation|screenSize|keyboardHidden"/>
         <activity
             android:theme="@style/MainactivityStyle"
             android:configChanges="orientation|screenSize|keyboardHidden"

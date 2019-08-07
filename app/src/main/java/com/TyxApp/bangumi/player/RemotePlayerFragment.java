@@ -183,17 +183,6 @@ public class RemotePlayerFragment extends BaseMvpFragment implements PlayContrac
         mStackBangumiList = new ArrayList<>();
         if (savedInstanceState != null) {
             mStackBangumi = savedInstanceState.getParcelable(STACK_BANGUM_KEY);
-            mPlayerVideoview.post(() -> {
-                if (savedInstanceState != null) {
-                    boolean isFullScreen = savedInstanceState.getBoolean(SCREEN_STATE_KEY, false);
-                    mReceiverGroup.getGroupValue().putBoolean(VideoPlayerEvent.Key.IS_FULLSCREEN_KEY, isFullScreen, true);
-                    if (isFullScreen) {
-                        Configuration configuration = new Configuration();
-                        configuration.orientation = Configuration.ORIENTATION_LANDSCAPE;
-                        onConfigurationChanged(configuration);
-                    }
-                }
-            });
         }
 
         if (mStackBangumi == null) {
@@ -250,7 +239,15 @@ public class RemotePlayerFragment extends BaseMvpFragment implements PlayContrac
         mReceiverGroup.addReceiver(ErrorCover.class.getName(), new ErrorCover(requireContext()));
         mPlayerVideoview.setReceiverGroup(mReceiverGroup);
         mPlayerVideoview.setEventHandler(mViewEventHandler);
-        mPlayerVideoview.post(() -> videoViewPortraitHeighe = mPlayerVideoview.getHeight());
+        mPlayerVideoview.post(() -> {
+            videoViewPortraitHeighe = mPlayerVideoview.getHeight();
+            if (isFullScreen()) {
+                mReceiverGroup.getGroupValue().putBoolean(VideoPlayerEvent.Key.IS_FULLSCREEN_KEY, isFullScreen(), true);
+                Configuration configuration = new Configuration();
+                configuration.orientation = Configuration.ORIENTATION_LANDSCAPE;
+                onConfigurationChanged(configuration);
+            }
+        });
 
         requireActivity().getWindow()
                 .setStatusBarColor(ContextCompat.getColor(requireContext(), R.color.primary_text_disabled_material_light));
@@ -295,18 +292,12 @@ public class RemotePlayerFragment extends BaseMvpFragment implements PlayContrac
     private void coverEventHandle(BaseVideoView assist, int eventCode, Bundle bundle) {
         switch (eventCode) {
             case VideoPlayerEvent.Code.CODE_FULL_SCREEN://屏幕旋转
-                if (isFullScreen()) {
-                    requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-                } else {
-                    requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-                }
-                mReceiverGroup.getGroupValue().putBoolean(VideoPlayerEvent.Key.IS_FULLSCREEN_KEY, !isFullScreen(), true);
+                requireActivity().setRequestedOrientation(isFullScreen() ? ActivityInfo.SCREEN_ORIENTATION_PORTRAIT : ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
                 break;
 
             case VideoPlayerEvent.Code.CODE_BACK://返回图标按下
                 if (isFullScreen()) {
                     requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-                    mReceiverGroup.getGroupValue().putBoolean(VideoPlayerEvent.Key.IS_FULLSCREEN_KEY, !isFullScreen(), true);
                 } else {
                     requireActivity().finish();
                 }
@@ -421,8 +412,7 @@ public class RemotePlayerFragment extends BaseMvpFragment implements PlayContrac
     }
 
     private boolean isFullScreen() {
-        return mReceiverGroup.getGroupValue()
-                .getBoolean(VideoPlayerEvent.Key.IS_FULLSCREEN_KEY, false);
+        return getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
     }
 
     private void showStateBar() {
@@ -450,7 +440,7 @@ public class RemotePlayerFragment extends BaseMvpFragment implements PlayContrac
         ViewGroup.LayoutParams layoutParams = mPlayerVideoview.getLayoutParams();
         layoutParams.height = videoViewHeight;
         mPlayerVideoview.requestLayout();
-
+        mReceiverGroup.getGroupValue().putBoolean(VideoPlayerEvent.Key.IS_FULLSCREEN_KEY, isLandscape, true);
         hindStateBar();
     }
 
@@ -562,7 +552,7 @@ public class RemotePlayerFragment extends BaseMvpFragment implements PlayContrac
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity())
                 .setTitle("无法解析")
                 .setMessage("是否跳转到解析源")
-                .setOnCancelListener(dialog ->  {
+                .setOnCancelListener(dialog -> {
                     dialog.dismiss();
                     onBackPressed();
                 })
@@ -641,7 +631,6 @@ public class RemotePlayerFragment extends BaseMvpFragment implements PlayContrac
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
-        outState.putBoolean(SCREEN_STATE_KEY, isFullScreen());
         outState.putParcelable(STACK_BANGUM_KEY, mStackBangumi);
         super.onSaveInstanceState(outState);
     }
