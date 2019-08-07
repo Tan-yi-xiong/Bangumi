@@ -1,7 +1,6 @@
 package com.TyxApp.bangumi.player.adapter;
 
 import android.content.Context;
-import android.text.TextUtils;
 import android.view.ViewGroup;
 import android.widget.Button;
 
@@ -42,9 +41,9 @@ public class ContentAdapter extends RecyclerView.Adapter<BaseViewHolder> {
     @Override
     public BaseViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if (viewType == BANGUMI_INTRO) {
-            return BaseViewHolder.get(parent.getContext(), parent, R.layout.item_player_bangumi_intro);
+            return BaseViewHolder.get(parent.getContext(), parent, R.layout.item_player_bangumi_info);
         } else if (viewType == JI_SELECT) {
-            return BaseViewHolder.get(parent.getContext(), parent, R.layout.item_player_ji_selsct);
+            return BaseViewHolder.get(parent.getContext(), parent, R.layout.item_player_ji_choose);
         } else if (viewType == TITLE) {
             return BaseViewHolder.get(parent.getContext(), parent, R.layout.item_player_title);
         } else {
@@ -55,7 +54,7 @@ public class ContentAdapter extends RecyclerView.Adapter<BaseViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull BaseViewHolder holder, int position) {
         if (holder.getItemViewType() == BANGUMI_INTRO) {
-            bindIntro(holder);
+            bindBangumiInfo(holder);
         } else if (holder.getItemViewType() == JI_SELECT) {
             bindJiSelect(holder);
         } else if (holder.getItemViewType() == RECOMMENBANGUMI) {
@@ -95,6 +94,9 @@ public class ContentAdapter extends RecyclerView.Adapter<BaseViewHolder> {
     }
 
     public void setJiSelect(int pos) {
+        if (pos >= mJiAdapter.getDataList().size()) {
+            return;
+        }
         int lastSelectPosition = 0;
         for (int i = 0; i < mJiAdapter.getItemCount(); i++) {
             if (mJiAdapter.getData(i).isSelect()) {
@@ -116,13 +118,15 @@ public class ContentAdapter extends RecyclerView.Adapter<BaseViewHolder> {
         }
     }
 
-    private void bindIntro(BaseViewHolder holder) {
+    private void bindBangumiInfo(BaseViewHolder holder) {
         int angle = AnimationUtil.dp2px(mContext, 3);
         holder.setRoundedImage(R.id.cover, mBangumi.getCover(), angle);
         holder.setText(R.id.name, mBangumi.getName());
         holder.setText(R.id.ji_total, mBangumi.getLatestJi());
 
-        holder.setText(R.id.intro, mBangumi.getIntro());
+        if (mBangumi.getBangumiInfo() != null) {
+            holder.setText(R.id.intro, mBangumi.getBangumiInfo().getIntro());
+        }
 
         Button favoriteButton = holder.getView(R.id.collect_button);
         if (mBangumi.isFavorite()) {
@@ -137,6 +141,11 @@ public class ContentAdapter extends RecyclerView.Adapter<BaseViewHolder> {
                 mOnItemSelectListener.onFavoriteButtonClick(v.isSelected());
             }
 
+        });
+        holder.itemView.setOnClickListener(v -> {
+            if (mOnItemSelectListener != null) {
+                mOnItemSelectListener.onDetailClick();
+            }
         });
     }
 
@@ -175,7 +184,13 @@ public class ContentAdapter extends RecyclerView.Adapter<BaseViewHolder> {
     }
 
     public void notifijiListChange(List<TextItemSelectBean> jiList) {
-        mJiAdapter.clearAddAll(jiList);
+        if (jiList == null) {
+            int size = mJiAdapter.getDataList().size();
+            mJiAdapter.clear();
+            mJiAdapter.notifyItemRangeRemoved(0, size);
+        } else {
+            mJiAdapter.clearAddAll(jiList);
+        }
     }
 
     public void notifiRecommendBangumisChange(List<Bangumi> recommendBangumis) {
@@ -194,6 +209,8 @@ public class ContentAdapter extends RecyclerView.Adapter<BaseViewHolder> {
         void onBangumiSelect(Bangumi bangumi);
 
         void onFavoriteButtonClick(boolean isCollect);
+
+        void onDetailClick();
     }
 
     public void setOnItemSelectListener(OnItemSelectListener onItemSelectListener) {

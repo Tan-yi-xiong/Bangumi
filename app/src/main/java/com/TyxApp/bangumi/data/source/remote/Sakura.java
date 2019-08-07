@@ -3,12 +3,14 @@ package com.TyxApp.bangumi.data.source.remote;
 import android.util.SparseArray;
 
 import com.TyxApp.bangumi.data.bean.Bangumi;
+import com.TyxApp.bangumi.data.bean.BangumiInfo;
 import com.TyxApp.bangumi.data.bean.CategorItem;
 import com.TyxApp.bangumi.data.bean.Results;
 import com.TyxApp.bangumi.data.bean.TextItemSelectBean;
 import com.TyxApp.bangumi.data.bean.VideoUrl;
 import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
 import com.TyxApp.bangumi.util.HttpRequestUtil;
+import com.TyxApp.bangumi.util.LogUtil;
 import com.TyxApp.bangumi.util.ParseUtil;
 
 import org.jsoup.nodes.Element;
@@ -116,12 +118,28 @@ public class Sakura implements BaseBangumiParser {
     }
 
     @Override
-    public Observable<String> getIntor(int id) {
-        String intorUrl = baseUrl + "/view/" + id +".html";
-        return Observable.just(intorUrl)
+    public Observable<BangumiInfo> getInfo(int id) {
+        return Observable.just(baseUrl + "/view/" + id +".html")
                 .compose(ParseUtil.html2Transformer("GB2312"))
-                .map(document -> document.getElementsByClass("txtDesc autoHeight").text())
+                .map(document -> {
+                    Element element = document.getElementById("p-info");
+                    String type = parseChilds(element.child(1));
+                    String niandai = element.child(3).text();
+                    String jiTotal = element.child(5).text();
+                    String intro = document.getElementsByClass("txtDesc autoHeight").text();
+                    return new BangumiInfo(niandai, "暂无信息", "暂无信息", type, intro, jiTotal);
+                })
                 .subscribeOn(Schedulers.io());
+    }
+
+    private String parseChilds(Element element) {
+        StringBuilder builder = new StringBuilder();
+        for (Element child : element.getElementsByTag("a")) {
+            builder.append(child.text());
+            builder.append(" ");
+        }
+        builder.deleteCharAt(builder.length() - 1);
+        return builder.toString();
     }
 
     @Override

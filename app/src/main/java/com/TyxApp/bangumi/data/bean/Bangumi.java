@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
+import com.TyxApp.bangumi.util.LogUtil;
 import com.google.gson.annotations.SerializedName;
 
 import androidx.room.ColumnInfo;
@@ -33,9 +34,6 @@ public class Bangumi implements Parcelable {
 
     private String img;
 
-    @SerializedName(value = "description")
-    private String intro;//简介
-
     @SerializedName(value = "hits", alternate = {"vod_hits", "click"})
     @Ignore
     private String hits;//热度
@@ -56,6 +54,19 @@ public class Bangumi implements Parcelable {
 
     private long historyTime;//点击番剧观看的时间戳, 历史观看使用;
 
+    @Ignore
+    private BangumiInfo mBangumiInfo;
+
+    public BangumiInfo getBangumiInfo() {
+        return mBangumiInfo;
+    }
+
+    public void setBangumiInfo(BangumiInfo bangumiInfo) {
+        mBangumiInfo = bangumiInfo;
+        if (!TextUtils.isEmpty(bangumiInfo.getJiTotal())) {
+            remarks = bangumiInfo.getJiTotal();
+        }
+    }
 
     protected Bangumi(Parcel in) {
         vodId = in.readInt();
@@ -63,12 +74,36 @@ public class Bangumi implements Parcelable {
         name = in.readString();
         cover = in.readString();
         img = in.readString();
-        intro = in.readString();
         hits = in.readString();
         remarks = in.readString();
         total = in.readString();
         serial = in.readString();
     }
+
+    public String getIntro() {
+        return mBangumiInfo == null ? null : mBangumiInfo.getIntro();
+    }
+
+
+    public String getNiandai() {
+        return mBangumiInfo == null ? null : mBangumiInfo.getNiandai();
+    }
+
+
+    public String getCast() {
+        return mBangumiInfo == null ? null : mBangumiInfo.getCast();
+    }
+
+
+    public String getStaff() {
+        return mBangumiInfo == null ? null : mBangumiInfo.getStaff();
+    }
+
+
+    public String getType() {
+        return mBangumiInfo == null ? null : mBangumiInfo.getType();
+    }
+
 
     public boolean isFavorite() {
         return isFavorite;
@@ -188,13 +223,6 @@ public class Bangumi implements Parcelable {
         this.cover = cover;
     }
 
-    public String getIntro() {
-        return intro;
-    }
-
-    public void setIntro(String intro) {
-        this.intro = intro;
-    }
 
     public String getLatestJi () {
         String jiTotal = remarks;
@@ -214,6 +242,7 @@ public class Bangumi implements Parcelable {
             }
             jiTotal = builder.toString();
         }
+
         return jiTotal;
     }
 
@@ -230,7 +259,6 @@ public class Bangumi implements Parcelable {
         dest.writeString(name);
         dest.writeString(cover);
         dest.writeString(img);
-        dest.writeString(intro);
         dest.writeString(hits);
         dest.writeString(remarks);
         dest.writeString(total);

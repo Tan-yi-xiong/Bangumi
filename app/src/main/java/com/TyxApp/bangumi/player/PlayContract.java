@@ -3,13 +3,14 @@ package com.TyxApp.bangumi.player;
 import com.TyxApp.bangumi.base.BasePresenter;
 import com.TyxApp.bangumi.base.BaseView;
 import com.TyxApp.bangumi.data.bean.Bangumi;
+import com.TyxApp.bangumi.data.bean.BangumiInfo;
 import com.TyxApp.bangumi.data.bean.TextItemSelectBean;
 
 import java.util.List;
 
 public interface PlayContract {
     interface Presenter extends BasePresenter {
-        void getBangumiIntro(int bangumiId);
+        void getBangumiInfo(int bangumiId);
 
         void getBangumiJiList(int bangumiId);
 
@@ -27,7 +28,7 @@ public interface PlayContract {
     }
 
     interface View extends BaseView {
-        void showBangumiIntro(String intor);
+        void showBangumiInfo(BangumiInfo info);
 
         void showBangumiJiList(List<TextItemSelectBean> jiList);
 

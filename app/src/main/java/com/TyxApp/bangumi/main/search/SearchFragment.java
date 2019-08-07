@@ -67,11 +67,11 @@ public class SearchFragment extends BaseMvpFragment {
                 .commit();
     }
 
-    public void initView(Bundle savedInstanceState) {
+    public void initView(View view, Bundle savedInstanceState) {
         mSearchInput = requireActivity().findViewById(R.id.search_input);
         mSearchInput.setVisibility(View.VISIBLE);
 
-        mSearchInput.setOnFocusChangeListener((SearchInput.OnFocusChangeListener) (view, hasFocus) -> {
+        mSearchInput.setOnFocusChangeListener((SearchInput.OnFocusChangeListener) (v, hasFocus) -> {
             if (hasFocus) {
                 SearchResultFragmetnContainer resultFragmetnContainer = (SearchResultFragmetnContainer) ActivityUtil.findFragment(
                         getChildFragmentManager(), SearchResultFragmetnContainer.class.getName());

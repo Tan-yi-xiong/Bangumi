@@ -1,6 +1,7 @@
 package com.TyxApp.bangumi.data.source.remote;
 
 import com.TyxApp.bangumi.data.bean.Bangumi;
+import com.TyxApp.bangumi.data.bean.BangumiInfo;
 import com.TyxApp.bangumi.data.bean.CategorItem;
 import com.TyxApp.bangumi.data.bean.Results;
 import com.TyxApp.bangumi.data.bean.TextItemSelectBean;
@@ -36,7 +37,7 @@ public interface BaseBangumiParser {
      * 根据id获取番剧的简介, 播放页面使用。
      *
      */
-    Observable<String> getIntor(int id);
+    Observable<BangumiInfo> getInfo(int id);
 
     /**
      * 根据id获取该番剧所有集的标题名字, 一般网站为第一集, 第二集....。

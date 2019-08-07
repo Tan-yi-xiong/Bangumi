@@ -1,6 +1,7 @@
 package com.TyxApp.bangumi.main.bangumi;
 
 import android.os.Bundle;
+import android.view.View;
 
 import com.TyxApp.bangumi.R;
 import com.TyxApp.bangumi.base.BasePresenter;
@@ -31,7 +32,7 @@ public class BangumiFragment extends RecyclerViewFragment implements BangumiCont
     private BannerHomeAdapter mHomeAdapter;
 
     @Override
-    protected void initView(Bundle savedInstanceState) {
+    protected void initView(View view, Bundle savedInstanceState) {
         getLifecycle().addObserver(mHomeAdapter);
         getRecyclerview().setAdapter(mHomeAdapter);
         if (mHomeAdapter instanceof ZzzFunHomeAdapter) {

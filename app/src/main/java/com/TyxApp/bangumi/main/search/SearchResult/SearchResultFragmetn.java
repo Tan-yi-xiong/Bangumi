@@ -2,6 +2,7 @@ package com.TyxApp.bangumi.main.search.SearchResult;
 
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Toast;
 
 import com.TyxApp.bangumi.R;
@@ -44,7 +45,7 @@ public class SearchResultFragmetn extends RecyclerViewFragment implements Search
     };
 
     @Override
-    protected void initView(Bundle savedInstanceState) {
+    protected void initView(View view, Bundle savedInstanceState) {
         getRefreshLayout().setEnabled(false);
         mSearchInput = requireActivity().findViewById(R.id.search_input);
         mAdapter = new SearchResultFragmentRVAdapter(requireActivity());

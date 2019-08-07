@@ -47,7 +47,7 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 
-public class MainActivity extends BaseMvpActivity implements NavigationView.OnNavigationItemSelectedListener, SharedPreferences.OnSharedPreferenceChangeListener{
+public class MainActivity extends BaseMvpActivity implements NavigationView.OnNavigationItemSelectedListener {
     @BindView(R.id.tb_main_search)
     Toolbar searchToolBar;
     @BindView(R.id.main_navigationview)
@@ -256,8 +256,4 @@ public class MainActivity extends BaseMvpActivity implements NavigationView.OnNa
         }
     }
 
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        LogUtil.i(key);
-    }
 }

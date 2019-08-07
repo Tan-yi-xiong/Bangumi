@@ -5,6 +5,7 @@ import android.util.SparseArray;
 import androidx.annotation.Nullable;
 
 import com.TyxApp.bangumi.data.bean.Bangumi;
+import com.TyxApp.bangumi.data.bean.BangumiInfo;
 import com.TyxApp.bangumi.data.bean.CategorItem;
 import com.TyxApp.bangumi.data.bean.Results;
 import com.TyxApp.bangumi.data.bean.TextItemSelectBean;
@@ -137,16 +138,16 @@ public class Dilidili implements BaseBangumiParser {
     }
 
     @Override
-    public Observable<String> getIntor(int id) {
-        return Observable.just(BASE_URL + "/bangumi/seasons?arctype_id=1333")
-                .map(HttpRequestUtil::getGetRequestResponseBodyString)
+    public Observable<BangumiInfo> getInfo(int id) {
+        return Observable.just(BASE_URL + "/bangumi/seasons?arctype_id=" + id)
+                .map(HttpRequestUtil::getGetRequestResponseBodyString)//获取json数据
                 .map(jsonData -> {
-                    JsonObject jsonObject = new JsonParser().parse(jsonData)
-                            .getAsJsonObject()
-                            .getAsJsonArray("data")
-                            .get(0)
-                            .getAsJsonObject();
-                    return jsonObject.get("description").getAsString();
+                    Type type = new TypeToken<JsonResult<List<BangumiInfo>>>(){}.getType();
+                    JsonResult<List<BangumiInfo>> jsonResult = new Gson().fromJson(jsonData, type);
+                    BangumiInfo info = jsonResult.data.get(0);
+                    info.setCast(info.getCast().replaceAll(" / ", "\n"));
+                    info.setStaff(info.getStaff().replaceAll(" / ", "\n"));
+                    return info;
                 })
                 .subscribeOn(Schedulers.io());
     }
@@ -159,7 +160,6 @@ public class Dilidili implements BaseBangumiParser {
                 .flatMap(jsonData -> {
                     Type type = new TypeToken<JsonResult<List<Ji>>>() {}.getType();
                     JsonResult<List<Ji>> jsonResult = new Gson().fromJson(jsonData, type);
-
                     return Observable.fromIterable(jsonResult.data);
                 })
                 .map(ji -> {
@@ -169,12 +169,20 @@ public class Dilidili implements BaseBangumiParser {
                 })
                 .toList()
                 .toObservable()
-                .doOnComplete(() -> videoUrlsCollect.append(id, videoUrls))
+                .doOnError(throwable -> LogUtil.i(throwable.toString()))
+                .doOnComplete(() -> {
+                    if (!videoUrls.isEmpty()) {
+                        videoUrlsCollect.append(id, videoUrls);
+                    }
+                })
                 .subscribeOn(Schedulers.io());
     }
 
     @Override
     public Observable<VideoUrl> getplayerUrl(int id, int ji) {
+        if (videoUrlsCollect.get(id) == null) {
+            return Observable.error(new IllegalAccessError("没有解析集"));
+        }
         return Observable.just(videoUrlsCollect.get(id).get(ji))
                 .map(HttpRequestUtil::getGetRequestResponseBodyString)//获取json数据
                 .map(jsonData -> {
@@ -182,7 +190,7 @@ public class Dilidili implements BaseBangumiParser {
                     }.getType();
                     JsonResult<List<String>> videoUrls = new Gson().fromJson(jsonData, type);
                     VideoUrl videoUrl = new VideoUrl();
-                    if (videoUrls.data.isEmpty()) {
+                    if (videoUrl == null && videoUrls.data.isEmpty()) {
                         videoUrl.setUrl("http://www.dilidili.name/");
                         videoUrl.setHtml(true);
                     } else {
@@ -292,7 +300,7 @@ public class Dilidili implements BaseBangumiParser {
     public Observable<List<List<Bangumi>>> getBangumiTimeTable() {
         String timeTableUrl = BASE_URL + "/home";
         return Observable.just(timeTableUrl)
-                .map(url -> {
+                .flatMap(url -> {
                     String jsonData = HttpRequestUtil.getGetRequestResponseBodyString(url);
                     JsonArray jsonArray = new JsonParser().parse(jsonData)
                             .getAsJsonObject()
@@ -302,8 +310,14 @@ public class Dilidili implements BaseBangumiParser {
                     Type type = new TypeToken<List<List<Bangumi>>>() {
                     }.getType();
                     List<List<Bangumi>> timeTableBangumis = new Gson().fromJson(jsonArray.toString(), type);
-                    return timeTableBangumis;
+                    return Observable.fromIterable(timeTableBangumis)
+                            .flatMap(bangumis -> Observable.fromIterable(bangumis))
+                            .compose(addSourch())
+                            .toList()
+                            .toObservable();
                 })
+                .toList()
+                .toObservable()
                 .subscribeOn(Schedulers.io());
     }
 

@@ -3,7 +3,6 @@ package com.TyxApp.bangumi.player;
 import android.Manifest;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
@@ -18,12 +17,23 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.TyxApp.bangumi.R;
 import com.TyxApp.bangumi.base.BaseMvpFragment;
 import com.TyxApp.bangumi.base.BasePresenter;
 import com.TyxApp.bangumi.data.bean.Bangumi;
+import com.TyxApp.bangumi.data.bean.BangumiInfo;
 import com.TyxApp.bangumi.data.bean.StackBangumi;
 import com.TyxApp.bangumi.data.bean.TextItemSelectBean;
 import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
@@ -40,11 +50,15 @@ import com.TyxApp.bangumi.player.cover.PlayerControlCover;
 import com.TyxApp.bangumi.player.cover.VideoPlayerEvent;
 import com.TyxApp.bangumi.server.DownloadBinder;
 import com.TyxApp.bangumi.server.DownloadServer;
+import com.TyxApp.bangumi.util.AnimationUtil;
 import com.TyxApp.bangumi.util.LogUtil;
 import com.TyxApp.bangumi.util.PreferenceUtil;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.CenterCrop;
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.snackbar.Snackbar;
 import com.kk.taurus.playerbase.assist.OnVideoViewEventHandler;
-import com.kk.taurus.playerbase.config.PConst;
 import com.kk.taurus.playerbase.entity.DataSource;
 import com.kk.taurus.playerbase.event.EventKey;
 import com.kk.taurus.playerbase.receiver.ReceiverGroup;
@@ -54,15 +68,6 @@ import com.kk.taurus.playerbase.widget.BaseVideoView;
 import java.util.ArrayList;
 import java.util.List;
 
-import androidx.activity.OnBackPressedCallback;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import butterknife.BindView;
 
 public class RemotePlayerFragment extends BaseMvpFragment implements PlayContract.View {
@@ -71,6 +76,22 @@ public class RemotePlayerFragment extends BaseMvpFragment implements PlayContrac
     BaseVideoView mPlayerVideoview;
     @BindView(R.id.rv_bangumi_relevant_information)
     RecyclerView contentRecyclerView;
+    @BindView(R.id.cover)
+    ImageView cover;
+    @BindView(R.id.name)
+    TextView name;
+    @BindView(R.id.ji)
+    TextView ji;
+    @BindView(R.id.niandai)
+    TextView niandai;
+    @BindView(R.id.type)
+    TextView type;
+    @BindView(R.id.cast)
+    TextView cast;
+    @BindView(R.id.staff)
+    TextView staff;
+    @BindView(R.id.intro)
+    TextView intro;
 
     private ContentAdapter mContentAdapter;
     private Snackbar mSnackbar;
@@ -79,8 +100,11 @@ public class RemotePlayerFragment extends BaseMvpFragment implements PlayContrac
     private StackBangumi mStackBangumi;
     private int videoViewPortraitHeighe;
     private ReceiverGroup mReceiverGroup;
+    private BottomSheetBehavior detailBottomSheet;
+
     private boolean isuserPuase;
     private boolean isFristLoading = true;
+
     private static final String SCREEN_STATE_KEY = "S_S_K";
     private static final String STACK_BANGUM_KEY = "S_B_K";
 
@@ -104,7 +128,9 @@ public class RemotePlayerFragment extends BaseMvpFragment implements PlayContrac
         if (isFullScreen()) {
             requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         } else {
-            if (mStackBangumiList.size() == 1) {
+            if (detailBottomSheet.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+                detailBottomSheet.setState(BottomSheetBehavior.STATE_HIDDEN);
+            } else if (mStackBangumiList.size() == 1) {
                 requireActivity().finish();
             } else {
                 removeBangumiFromList();
@@ -152,7 +178,7 @@ public class RemotePlayerFragment extends BaseMvpFragment implements PlayContrac
     }
 
     @Override
-    protected void initView(Bundle savedInstanceState) {
+    protected void initView(View view, Bundle savedInstanceState) {
         mStackBangumiList = new ArrayList<>();
         if (savedInstanceState != null) {
             mStackBangumi = savedInstanceState.getParcelable(STACK_BANGUM_KEY);
@@ -190,6 +216,9 @@ public class RemotePlayerFragment extends BaseMvpFragment implements PlayContrac
             @Override
             public void onBangumiSelect(Bangumi bangumi) {
                 addBangumiToList(bangumi);
+                if (mPlayerVideoview.isInPlaybackState()) {
+                    mPlayerVideoview.stop();
+                }
                 LoadingPageData();
             }
 
@@ -198,7 +227,14 @@ public class RemotePlayerFragment extends BaseMvpFragment implements PlayContrac
                 mStackBangumi.getBangumi().setFavorite(!isSelect);
                 mPlayerPresenter.setFavorite(mStackBangumi.getBangumi());
             }
+
+            @Override
+            public void onDetailClick() {
+                detailBottomSheet.setState(BottomSheetBehavior.STATE_EXPANDED);
+            }
         });
+
+        detailBottomSheet = BottomSheetBehavior.from(view.findViewById(R.id.detail_bottom_sheeet));
 
         contentRecyclerView.setAdapter(mContentAdapter);
         contentRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false));
@@ -219,8 +255,6 @@ public class RemotePlayerFragment extends BaseMvpFragment implements PlayContrac
                 .setStatusBarColor(ContextCompat.getColor(requireContext(), R.color.primary_text_disabled_material_light));
 
         hindStateBar();
-
-
     }
 
 
@@ -315,6 +349,11 @@ public class RemotePlayerFragment extends BaseMvpFragment implements PlayContrac
 
 
     private void downLoadVideo() {
+        if (TextUtils.isEmpty(mStackBangumi.getPlayingUrl()) || mStackBangumi.getPlayingUrl().contains(".html")
+                || mStackBangumi.getBanhumiSourch().equals(BangumiPresistenceContract.BangumiSource.DILIDLI)) {
+            Toast.makeText(requireContext(), "无法下载", Toast.LENGTH_SHORT).show();
+            return;
+        }
         mStackBangumi.getBangumi().setDownLoad(true);
         mPlayerPresenter.setDownload(mStackBangumi.getBangumi());
         if (mDownloadBinder != null) {
@@ -355,10 +394,10 @@ public class RemotePlayerFragment extends BaseMvpFragment implements PlayContrac
         } else {
             showBangumiJiList(mStackBangumi.getPlayedJi());
         }
-        if (TextUtils.isEmpty(mStackBangumi.getBangumi().getIntro())) {
-            mPlayerPresenter.getBangumiIntro(mStackBangumi.getBangumiId());
+        if (mStackBangumi.getBangumi().getBangumiInfo() == null) {
+            mPlayerPresenter.getBangumiInfo(mStackBangumi.getBangumiId());
         } else {
-            mContentAdapter.notifiBangumiChange(mStackBangumi.getBangumi());
+            showBangumiInfo(mStackBangumi.getBangumi().getBangumiInfo());
         }
 
         mPlayerPresenter.isFavorite(mStackBangumi.getBangumiId(), mStackBangumi.getBanhumiSourch());
@@ -424,9 +463,25 @@ public class RemotePlayerFragment extends BaseMvpFragment implements PlayContrac
     }
 
     @Override
-    public void showBangumiIntro(String intor) {
-        mStackBangumi.getBangumi().setIntro(intor);
+    public void showBangumiInfo(BangumiInfo info) {
+        mStackBangumi.getBangumi().setBangumiInfo(info);
+        setBangumiInfo(info);
         mContentAdapter.notifiBangumiChange(mStackBangumi.getBangumi());
+    }
+
+    private void setBangumiInfo(BangumiInfo info) {
+        Glide.with(requireActivity()).load(mStackBangumi.getBangumi().getCover())
+                .transform(new CenterCrop(),
+                        new RoundedCorners(AnimationUtil.dp2px(requireActivity(), 3)))
+                .into(cover);
+
+        ji.setText(mStackBangumi.getBangumi().getLatestJi());
+        staff.setText(info.getStaff());
+        name.setText(mStackBangumi.getBangumiName());
+        niandai.setText(info.getNiandai());
+        intro.setText(info.getIntro());
+        type.setText(info.getType());
+        cast.setText(info.getCast());
     }
 
     @Override
@@ -462,9 +517,9 @@ public class RemotePlayerFragment extends BaseMvpFragment implements PlayContrac
                 mStackBangumi.setJiTotal(jiList.size());
             }
             jiList.get(mStackBangumi.getCurrentJi()).setSelect(true);
-            mContentAdapter.notifijiListChange(jiList);
+            mPlayerPresenter.getPlayerUrl(mStackBangumi.getBangumiId(), mStackBangumi.getCurrentJi());
         }
-        mPlayerPresenter.getPlayerUrl(mStackBangumi.getBangumiId(), mStackBangumi.getCurrentJi());
+        mContentAdapter.notifijiListChange(jiList);
     }
 
     @Override
@@ -502,6 +557,7 @@ public class RemotePlayerFragment extends BaseMvpFragment implements PlayContrac
 
     @Override
     public void showSkipDialog(String url) {
+        mStackBangumi.setPlayingUrl(url);
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity())
                 .setTitle("无法解析")
                 .setMessage("是否跳转到解析源")
@@ -536,7 +592,7 @@ public class RemotePlayerFragment extends BaseMvpFragment implements PlayContrac
                         });
                 builder.show();
             } else {
-
+                Toast.makeText(getContext(), "你取消了授权", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -550,7 +606,8 @@ public class RemotePlayerFragment extends BaseMvpFragment implements PlayContrac
     @Override
     public void showResultError(Throwable throwable) {
         int netState = NetworkUtils.getNetworkState(requireContext());
-        String text = throwable.toString();
+        String text = "解析出错";
+        LogUtil.i(throwable.toString());
         mReceiverGroup.getGroupValue().putBoolean(VideoPlayerEvent.Key.NOTIFI_ERROR_COVER_SHOW, true, true);
         if (netState == -1) {
             text = "请联网后重试";

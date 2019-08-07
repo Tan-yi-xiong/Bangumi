@@ -3,6 +3,7 @@ package com.TyxApp.bangumi.downloaddetails;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.view.View;
 
 import androidx.core.content.ContextCompat;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -28,7 +29,7 @@ public class DownloadDetailsFragment extends RecyclerViewFragment implements Dow
 
 
     @Override
-    protected void initView(Bundle savedInstanceState) {
+    protected void initView(View view, Bundle savedInstanceState) {
         getRefreshLayout().setColorSchemeColors(ContextCompat.getColor(requireContext(), R.color.colorPrimary));
         getRefreshLayout().setOnRefreshListener(() -> mPresenter.getTasks(bangumiId, bangumiSourch));
         mAdapter = new DownloadDetailsAdapter(requireActivity());

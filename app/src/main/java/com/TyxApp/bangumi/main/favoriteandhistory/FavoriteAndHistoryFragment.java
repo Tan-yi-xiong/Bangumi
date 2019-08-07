@@ -1,6 +1,7 @@
 package com.TyxApp.bangumi.main.favoriteandhistory;
 
 import android.os.Bundle;
+import android.view.View;
 
 import com.TyxApp.bangumi.R;
 import com.TyxApp.bangumi.base.BasePresenter;
@@ -25,7 +26,7 @@ public class FavoriteAndHistoryFragment extends RecyclerViewFragment implements 
 
 
     @Override
-    protected void initView(Bundle savedInstanceState) {
+    protected void initView(View view, Bundle savedInstanceState) {
         getRefreshLayout().setEnabled(false);
 
         mAdpater.setOnItemLongClickLisener(pos -> {

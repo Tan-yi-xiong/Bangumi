@@ -4,12 +4,14 @@ import android.os.Build;
 import android.util.SparseArray;
 
 import com.TyxApp.bangumi.data.bean.Bangumi;
+import com.TyxApp.bangumi.data.bean.BangumiInfo;
 import com.TyxApp.bangumi.data.bean.CategorItem;
 import com.TyxApp.bangumi.data.bean.Results;
 import com.TyxApp.bangumi.data.bean.TextItemSelectBean;
 import com.TyxApp.bangumi.data.bean.VideoUrl;
 import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
 import com.TyxApp.bangumi.util.HttpRequestUtil;
+import com.TyxApp.bangumi.util.LogUtil;
 import com.TyxApp.bangumi.util.ParseUtil;
 import com.google.gson.Gson;
 
@@ -70,9 +72,9 @@ public class Nico implements BaseBangumiParser {
         String url = baseUrl + "/video/search/" + word + ".html";
         return Observable.just(url)
                 .compose(ParseUtil.html2Transformer())
-                .flatMap(document -> {
+                .map(document -> {
                     saveSearchResultUrls(document);
-                    return Observable.create((ObservableOnSubscribe<List<Bangumi>>) emitter -> emitter.onNext(parseSearchPageBangumis(document)));
+                    return parseSearchPageBangumis(document);
                 })
                 .subscribeOn(Schedulers.io());
 
@@ -128,8 +130,31 @@ public class Nico implements BaseBangumiParser {
     }
 
     @Override
-    public Observable<String> getIntor(int id) {
-        return Observable.just("暂无简介");
+    public Observable<BangumiInfo> getInfo(int id) {
+        return Observable.just(baseUrl + "/video/detail/" + id +".html")
+                .compose(ParseUtil.html2Transformer())
+                .map(document -> {
+                    Elements elements = document.getElementsByClass("ff-text-right");
+                    String cast = parseChild(elements.get(0)).replaceAll(" ", "\n");
+                    String staff = elements.get(1).child(0).text();
+                    String type = parseChild(elements.get(2));
+                    String niandai = elements.get(4).child(0).text();
+                    String intro = document.getElementsByClass("vod-content ff-collapse text-justify").text();
+                    intro = intro.replaceAll("&.*?;", "");
+                    BangumiInfo bangumiInfo = new BangumiInfo(niandai, cast, staff, type, intro, "");
+                    return bangumiInfo;
+                })
+                .subscribeOn(Schedulers.io());
+    }
+
+    private String parseChild(Element element) {
+        StringBuilder builder = new StringBuilder();
+        for (Element child : element.children()) {
+            builder.append(child.text());
+            builder.append(" ");
+        }
+        builder.deleteCharAt(builder.length() - 1);
+        return builder.toString();
     }
 
     @Override

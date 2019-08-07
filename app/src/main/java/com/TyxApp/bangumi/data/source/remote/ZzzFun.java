@@ -9,6 +9,7 @@ import androidx.annotation.Nullable;
 import com.TyxApp.bangumi.BanghumiApp;
 import com.TyxApp.bangumi.R;
 import com.TyxApp.bangumi.data.bean.Bangumi;
+import com.TyxApp.bangumi.data.bean.BangumiInfo;
 import com.TyxApp.bangumi.data.bean.CategorItem;
 import com.TyxApp.bangumi.data.bean.Results;
 import com.TyxApp.bangumi.data.bean.TextItemSelectBean;
@@ -16,6 +17,7 @@ import com.TyxApp.bangumi.data.bean.VideoUrl;
 import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
 import com.TyxApp.bangumi.util.HttpRequestUtil;
 import com.TyxApp.bangumi.util.LogUtil;
+import com.TyxApp.bangumi.util.ParseUtil;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -149,23 +151,18 @@ public class ZzzFun implements BaseBangumiParser {
     }
 
     @Override
-    public Observable<String> getIntor(int id) {
-        return Observable.create((ObservableOnSubscribe<String>) emitter -> {
-            String intorUrl = baseUrl + "/video.php?pp=" + id;
-            String jsonData = HttpRequestUtil.getGetRequestResponseBodyString(intorUrl);
-            JsonReader reader = new JsonReader(new StringReader(jsonData));
-            reader.beginObject();
-            String intor = "暂无简介";
-            while (reader.hasNext()) {
-                if ("neirong".equals(reader.nextName())) {
-                    intor = reader.nextString();
-                    intor = intor.replaceAll("<.*?>", "");
-                } else {
-                    reader.skipValue();
-                }
-            }
-            emitter.onNext(intor);
-        }).subscribeOn(Schedulers.io());
+    public Observable<BangumiInfo> getInfo(int id) {
+        return Observable.just(baseUrl + "/video.php?pp=" + id)
+                .map(HttpRequestUtil::getGetRequestResponseBodyString)
+                .map(jsonData -> {
+                    String intro = new JsonParser().parse(jsonData)
+                            .getAsJsonObject()
+                            .get("neirong")
+                            .getAsString()
+                            .replaceAll("<.*?>", "");
+                    return new BangumiInfo("暂无信息", "暂无信息", "暂无信息", "暂无信息", intro, "");
+                })
+                .subscribeOn(Schedulers.io());
     }
 
     @Override

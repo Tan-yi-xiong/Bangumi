@@ -1,6 +1,7 @@
 package com.TyxApp.bangumi.main.category;
 
 import android.os.Bundle;
+import android.view.View;
 
 import com.TyxApp.bangumi.R;
 import com.TyxApp.bangumi.base.BasePresenter;
@@ -21,7 +22,7 @@ public class CategoryFragment extends RecyclerViewFragment implements CategoryCo
     private CategoryAdapter mCategoryAdapter;
 
     @Override
-    protected void initView(Bundle savedInstanceState) {
+    protected void initView(View view, Bundle savedInstanceState) {
         getRefreshLayout().setEnabled(false);
         mCategoryAdapter = new CategoryAdapter(requireActivity());
         getRecyclerview().setAdapter(mCategoryAdapter);

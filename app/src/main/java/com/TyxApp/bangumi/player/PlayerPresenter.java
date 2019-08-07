@@ -27,11 +27,11 @@ public class PlayerPresenter implements PlayContract.Presenter {
     }
 
     @Override
-    public void getBangumiIntro(int bangumiId) {
-        mDisposable.add(mBangumiParser.getIntor(bangumiId)
+    public void getBangumiInfo(int bangumiId) {
+        mDisposable.add(mBangumiParser.getInfo(bangumiId)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
-                        intro -> mView.showBangumiIntro(intro),
+                        info -> mView.showBangumiInfo(info),
                         throwable -> mView.showResultError(throwable)));
     }
 
