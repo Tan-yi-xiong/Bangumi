@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.format.Time;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -12,11 +13,12 @@ import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import androidx.fragment.app.FragmentManager;
+
 import com.TyxApp.bangumi.R;
 import com.TyxApp.bangumi.player.bottomsheet.MainBottomSheet;
 import com.TyxApp.bangumi.player.bottomsheet.VideoSpeedBottomSheet;
 import com.TyxApp.bangumi.util.AnimationUtil;
-import com.TyxApp.bangumi.util.LogUtil;
 import com.TyxApp.bangumi.util.PreferenceUtil;
 import com.kk.taurus.playerbase.entity.DataSource;
 import com.kk.taurus.playerbase.event.EventKey;
@@ -25,7 +27,6 @@ import com.kk.taurus.playerbase.player.IPlayer;
 import com.kk.taurus.playerbase.receiver.IReceiverGroup;
 import com.kk.taurus.playerbase.utils.TimeUtil;
 
-import androidx.fragment.app.FragmentManager;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -50,8 +51,11 @@ public class PlayerControlCover extends ImpTimeAndTouchListenerCover {
     TextView durationTime;
     @BindView(R.id.player_control_next)
     ImageButton nextButton;
+    @BindView(R.id.time)
+    TextView timeTextView;
 
     private Unbinder mUnbinder;
+    private Time mTime;
 
     private static final int SINGLE_TAP = 0;
     private static final int HIND_VIEW = 1;
@@ -69,6 +73,11 @@ public class PlayerControlCover extends ImpTimeAndTouchListenerCover {
                     if (isVisble) {
                         AnimationUtil.fadeOut(getView(), 250);
                     } else {
+                        if (mTime == null) {
+                            mTime = new Time();
+                        }
+                        mTime.setToNow();
+                        timeTextView.setText(mTime.hour + ":" + mTime.minute);
                         AnimationUtil.fadeIn(getView(), 250);
                     }
                     break;
