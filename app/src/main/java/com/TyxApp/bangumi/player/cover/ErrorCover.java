@@ -70,7 +70,7 @@ public class ErrorCover extends BaseCover {
     @Override
     protected void onCoverAttachedToWindow() {
         super.onCoverAttachedToWindow();
-        handleUI(NetworkUtils.getNetworkState(getContext()));
+//        handleUI(NetworkUtils.getNetworkState(getContext()));
     }
 
     private void handleUI(int networkState) {

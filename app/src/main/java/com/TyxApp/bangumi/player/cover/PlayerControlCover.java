@@ -27,6 +27,9 @@ import com.kk.taurus.playerbase.player.IPlayer;
 import com.kk.taurus.playerbase.receiver.IReceiverGroup;
 import com.kk.taurus.playerbase.utils.TimeUtil;
 
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -55,7 +58,7 @@ public class PlayerControlCover extends ImpTimeAndTouchListenerCover {
     TextView timeTextView;
 
     private Unbinder mUnbinder;
-    private Time mTime;
+    private SimpleDateFormat mDateFormat;
 
     private static final int SINGLE_TAP = 0;
     private static final int HIND_VIEW = 1;
@@ -73,11 +76,7 @@ public class PlayerControlCover extends ImpTimeAndTouchListenerCover {
                     if (isVisble) {
                         AnimationUtil.fadeOut(getView(), 250);
                     } else {
-                        if (mTime == null) {
-                            mTime = new Time();
-                        }
-                        mTime.setToNow();
-                        timeTextView.setText(mTime.hour + ":" + mTime.minute);
+                        timeTextView.setText(mDateFormat.format(System.currentTimeMillis()));
                         AnimationUtil.fadeIn(getView(), 250);
                     }
                     break;
@@ -114,6 +113,7 @@ public class PlayerControlCover extends ImpTimeAndTouchListenerCover {
 
     @Override
     public void onReceiverBind() {
+        mDateFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
         mUnbinder = ButterKnife.bind(this, getView());
         playerSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -133,8 +133,8 @@ public class PlayerControlCover extends ImpTimeAndTouchListenerCover {
             @Override
             public String[] filterKeys() {
                 return new String[] {
-
-                        VideoPlayerEvent.Key.IS_FULLSCREEN_KEY};
+                        VideoPlayerEvent.Key.IS_FULLSCREEN_KEY
+                };
             }
 
             @Override

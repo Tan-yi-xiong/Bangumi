@@ -3,6 +3,7 @@ package com.TyxApp.bangumi.player;
 import android.Manifest;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
@@ -561,9 +562,12 @@ public class RemotePlayerFragment extends BaseMvpFragment implements PlayContrac
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity())
                 .setTitle("无法解析")
                 .setMessage("是否跳转到解析源")
-                .setNegativeButton("取消", (dialog, which) -> {
+                .setOnCancelListener(dialog ->  {
                     dialog.dismiss();
                     onBackPressed();
+                })
+                .setNegativeButton("取消", (dialog, which) -> {
+
                 })
                 .setPositiveButton("确认", (dialog, which) -> {
                     Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
