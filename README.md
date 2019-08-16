@@ -38,19 +38,19 @@
 
 # 应用截图  
 
-<div align=center>![image center](https://github.com/Tan-yi-xiong/Bangumi/tree/master/readmeImage/demo1.gif)</div>
-  
-<div align=center>![image](https://github.com/Tan-yi-xiong/Bangumi/tree/master/readmeImage/demo2.gif)</div>
-  
-  
-<div align=center>![image](https://github.com/Tan-yi-xiong/Bangumi/tree/master/readmeImage/demo3.gif)</div>
-
-<div align="center">
-<img src="./readmeImage/demo4.jpg" width="350">
+<img src="readmeImage/demo1.gif" width="25" height="300"/>  
 <br/>
 <br/>
-<img src="./readmeImage/demo5.jpg" width="350">
-<br/> 
+<img src="readmeImage/demo2.gif" width="25%" height="300"/> 
 <br/>
-<img src="./readmeImage/demo6.jpg" width="350">
-</div>
+<br/>
+<img src="readmeImage/demo3.gif" width="25%" height="300"/>  
+<br/>
+<br/>
+<img src="readmeImage/demo4.jpg" width="30%" height="300"/>  
+<br/>
+<br/>
+<img src="readmeImage/demo5.jpg" width="25%" height="300"/>  
+<br/>
+<br/>
+<img src="readmeImage/demo6.jpg" width="25%" height="300"/>
