@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface DownloadDetailsContract {
     interface Presenter extends BasePresenter {
-        void getTasks(int bangumiId, String sourch);
+        void getTasks(String bangumiId, String sourch);
 
         void deleteTask(VideoDownloadTask task);
 

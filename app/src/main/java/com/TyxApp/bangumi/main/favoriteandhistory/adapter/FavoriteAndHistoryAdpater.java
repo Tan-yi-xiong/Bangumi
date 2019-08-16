@@ -1,7 +1,6 @@
 package com.TyxApp.bangumi.main.favoriteandhistory.adapter;
 
 import android.content.Context;
-import android.text.TextUtils;
 import android.view.ViewGroup;
 
 import com.TyxApp.bangumi.R;

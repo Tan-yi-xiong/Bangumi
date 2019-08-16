@@ -16,8 +16,6 @@ import java.util.List;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import io.reactivex.disposables.Disposable;
-
 public class FavoriteAndHistoryFragment extends RecyclerViewFragment implements FavoriteAndHistoryContract.View {
     private FavoriteAndHistoryContract.Presenter mPresenter;
     private static final String MEUN_TAG = "M_T";
@@ -32,7 +30,7 @@ public class FavoriteAndHistoryFragment extends RecyclerViewFragment implements 
         mAdpater.setOnItemLongClickLisener(pos -> {
             Bangumi bangumi = mAdpater.getData(pos);
             mAdpater.remove(pos);
-            mPresenter.removeBangumi(bangumi.getVodId(), bangumi.getVideoSoure());
+            mPresenter.removeBangumi(bangumi.getVideoId(), bangumi.getVideoSoure());
 
             mSnackbar = Snackbar.make(getRecyclerview(), bangumi.getName() + "已移除", Snackbar.LENGTH_SHORT);
                     mSnackbar.setAction("撤销", v -> {

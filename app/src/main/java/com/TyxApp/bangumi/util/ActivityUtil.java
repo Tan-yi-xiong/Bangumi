@@ -13,7 +13,7 @@ public class ActivityUtil {
 
     public static void replaceFragment(FragmentManager manager, Fragment fragment, int contentId) {
         manager.beginTransaction()
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                 .replace(contentId, fragment, fragment.getClass().getName())
                 .commit();
     }

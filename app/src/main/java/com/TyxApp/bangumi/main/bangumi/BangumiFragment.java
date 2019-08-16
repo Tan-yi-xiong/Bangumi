@@ -10,35 +10,31 @@ import com.TyxApp.bangumi.data.bean.Bangumi;
 import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
 import com.TyxApp.bangumi.data.source.remote.Dilidili;
 import com.TyxApp.bangumi.data.source.remote.ZzzFun;
-import com.TyxApp.bangumi.main.bangumi.adapter.BannerHomeAdapter;
-import com.TyxApp.bangumi.main.bangumi.adapter.dilidli.DilidiliHomeAdapter;
-import com.TyxApp.bangumi.main.bangumi.adapter.zzzfun.ZzzFunHomeAdapter;
+import com.TyxApp.bangumi.main.bangumi.adapter.DefaultHomeAdapter;
+import com.TyxApp.bangumi.main.bangumi.adapter.BaseHomeAdapter;
+import com.TyxApp.bangumi.main.bangumi.adapter.Dilidili.DilidiliHomeAdapter;
 import com.TyxApp.bangumi.util.LogUtil;
 import com.TyxApp.bangumi.util.PreferenceUtil;
 import com.google.android.material.snackbar.Snackbar;
 import com.kk.taurus.playerbase.utils.NetworkUtils;
 
 import java.util.List;
+import java.util.Map;
 
 import androidx.core.content.ContextCompat;
+import androidx.lifecycle.LifecycleObserver;
+import androidx.recyclerview.widget.LinearSnapHelper;
 
 public class BangumiFragment extends RecyclerViewFragment implements BangumiContract.View {
     private BangumiPresenter mPresenter;
-
     public static BangumiFragment newInstance() {
         return new BangumiFragment();
     }
-
-    private BannerHomeAdapter mHomeAdapter;
+    private BaseHomeAdapter mHomeAdapter;
 
     @Override
     protected void initView(View view, Bundle savedInstanceState) {
-        getLifecycle().addObserver(mHomeAdapter);
         getRecyclerview().setAdapter(mHomeAdapter);
-        if (mHomeAdapter instanceof ZzzFunHomeAdapter) {
-            getRecyclerview().addItemDecoration(((ZzzFunHomeAdapter)mHomeAdapter).getItemDecoration());
-        }
-
         getRefreshLayout().setRefreshing(true);
         getRefreshLayout().setColorSchemeColors(ContextCompat.getColor(getContext(), R.color.colorPrimary));
         getRefreshLayout().setOnRefreshListener(() -> mPresenter.refreshHomeData());
@@ -47,6 +43,8 @@ public class BangumiFragment extends RecyclerViewFragment implements BangumiCont
             getRefreshLayout().setRefreshing(true);
             mPresenter.populaterBangumi();
         });
+
+        mPresenter.populaterBangumi();
     }
 
     @Override
@@ -57,7 +55,7 @@ public class BangumiFragment extends RecyclerViewFragment implements BangumiCont
         switch (homeSourch) {
             case BangumiPresistenceContract.BangumiSource.ZZZFUN:
                 mPresenter = new BangumiPresenter(ZzzFun.getInstance(), this);
-                mHomeAdapter = new ZzzFunHomeAdapter(requireActivity());
+                mHomeAdapter = new DefaultHomeAdapter(requireActivity());
                 break;
 
             case BangumiPresistenceContract.BangumiSource.DILIDLI:
@@ -70,11 +68,11 @@ public class BangumiFragment extends RecyclerViewFragment implements BangumiCont
 
     @Override
     public void FristLoading() {
-        mPresenter.populaterBangumi();
+
     }
 
     @Override
-    public void showHomeBangumis(List<List<Bangumi>> homeBangumis) {
+    public void showHomeBangumis(Map<String, List<Bangumi>> homeBangumis) {
         getRefreshLayout().setRefreshing(false);
         showRecyclerView();
         mHomeAdapter.populaterBangumis(homeBangumis);

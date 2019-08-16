@@ -2,36 +2,38 @@ package com.TyxApp.bangumi.main.search.SearchResult;
 
 
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.SearchView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.TyxApp.bangumi.R;
 import com.TyxApp.bangumi.base.BasePresenter;
 import com.TyxApp.bangumi.base.RecyclerViewFragment;
 import com.TyxApp.bangumi.data.bean.Bangumi;
 import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
-import com.TyxApp.bangumi.data.source.remote.BaseBangumiParser;
 import com.TyxApp.bangumi.data.source.remote.Dilidili;
+import com.TyxApp.bangumi.data.source.remote.IBangumiParser;
 import com.TyxApp.bangumi.data.source.remote.Nico;
 import com.TyxApp.bangumi.data.source.remote.Sakura;
 import com.TyxApp.bangumi.data.source.remote.ZzzFun;
-import com.TyxApp.bangumi.main.search.SearchResult.adapter.SearchResultFragmentRVAdapter;
+import com.TyxApp.bangumi.main.search.SearchResult.adapter.SearchResultRVAdapter;
 import com.TyxApp.bangumi.util.ExceptionUtil;
-import com.TyxApp.bangumi.view.SearchInput;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.List;
 
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 public class SearchResultFragmetn extends RecyclerViewFragment implements SearchResultContract.View {
     public static final String ARG_KEY = "P_TYPE";
-    private SearchInput mSearchInput;
     private String lastSearchWord;
+    private EditText mEditText;
     private SearchResultPresenter mPresenter;
-    private SearchResultFragmentRVAdapter mAdapter;
+    private SearchResultRVAdapter mAdapter;
     private boolean isLoading;
     private RecyclerView.OnScrollListener mScrollListener = new RecyclerView.OnScrollListener() {
         @Override
@@ -47,14 +49,15 @@ public class SearchResultFragmetn extends RecyclerViewFragment implements Search
     @Override
     protected void initView(View view, Bundle savedInstanceState) {
         getRefreshLayout().setEnabled(false);
-        mSearchInput = requireActivity().findViewById(R.id.search_input);
-        mAdapter = new SearchResultFragmentRVAdapter(requireActivity());
-        getRecyclerview().setLayoutManager(new LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false));
+        SearchView searchView = requireActivity().findViewById(R.id.searchView);
+        int id = searchView.getResources().getIdentifier("android:id/search_src_text", null, null);
+        mEditText = searchView.findViewById(id);
+        mAdapter = new SearchResultRVAdapter(requireActivity());
         getRecyclerview().setAdapter(mAdapter);
 
         getErrorPageView().setOnClickListener(v -> {
             showDataLodaing();
-            mPresenter.getSearchResult(lastSearchWord);
+            mPresenter.getSearchResult(mEditText.getText().toString());
         });
     }
 
@@ -62,7 +65,7 @@ public class SearchResultFragmetn extends RecyclerViewFragment implements Search
     public BasePresenter getPresenter() {
         ExceptionUtil.checkNull(getArguments(), "必须通过newInstance方法创建实例");
         String type = getArguments().getString(ARG_KEY);
-        BaseBangumiParser parser = null;
+        IBangumiParser parser = null;
         switch (type) {
             case BangumiPresistenceContract
                     .BangumiSource.ZZZFUN:
@@ -91,12 +94,17 @@ public class SearchResultFragmetn extends RecyclerViewFragment implements Search
 
     @Override
     public void onResume() {
-        if (!mSearchInput.getText().equals(lastSearchWord)) {
-            lastSearchWord = mSearchInput.getText();
+        super.onResume();
+        String qureWord = mEditText.getText().toString();
+        if (TextUtils.isEmpty(qureWord)) {
+            Toast.makeText(requireContext(), "搜索内容不能为空", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (!qureWord.equals(lastSearchWord)) {
+            lastSearchWord = qureWord;
             showDataLodaing();
             mPresenter.getSearchResult(lastSearchWord);
         }
-        super.onResume();
     }
 
 

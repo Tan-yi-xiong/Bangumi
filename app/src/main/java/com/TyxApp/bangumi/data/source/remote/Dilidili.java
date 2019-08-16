@@ -1,7 +1,5 @@
 package com.TyxApp.bangumi.data.source.remote;
 
-import android.util.SparseArray;
-
 import androidx.annotation.Nullable;
 
 import com.TyxApp.bangumi.data.bean.Bangumi;
@@ -11,99 +9,177 @@ import com.TyxApp.bangumi.data.bean.Results;
 import com.TyxApp.bangumi.data.bean.TextItemSelectBean;
 import com.TyxApp.bangumi.data.bean.VideoUrl;
 import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
+import com.TyxApp.bangumi.main.bangumi.adapter.BannerHomeAdapter;
 import com.TyxApp.bangumi.util.HttpRequestUtil;
 import com.TyxApp.bangumi.util.LogUtil;
+import com.TyxApp.bangumi.util.ParseUtil;
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
 
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
 import java.lang.reflect.Type;
-import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import io.reactivex.Observable;
-import io.reactivex.ObservableTransformer;
-import io.reactivex.Observer;
 import io.reactivex.schedulers.Schedulers;
 
-public class Dilidili implements BaseBangumiParser {
-    private static Dilidili INSTANCE;
-    private static AtomicInteger INSTANCECOUNTER = new AtomicInteger();
-    private static String BASE_URL = "http://go.dilidili.club";
-    private int mCategoryPage;
-    private String mCategoryWord;
-    private SparseArray<List<String>> videoUrlsCollect;
+public class Dilidili implements IBangumiParser {
+    private static final String BASE_URL = "http://m.dilidili.name";
+    private static final String BASE_URL_PC = "http://www.dilidili.name";
+    private List<String> mPlayerUrls;
+    private boolean isAddcategoryUrl;
 
     private Dilidili() {
-        videoUrlsCollect = new SparseArray<>();
     }
 
     public static Dilidili getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new Dilidili();
-        }
-        INSTANCECOUNTER.getAndIncrement();
-        return INSTANCE;
+        return new Dilidili();
     }
 
     @Override
-    public void onDestroy() {
-        videoUrlsCollect.clear();
-        if (INSTANCECOUNTER.getAndDecrement() == 1) {
-            INSTANCE = null;
-        }
-    }
+    public Observable<Map<String, List<Bangumi>>> getHomePageBangumiData() {
+        return Observable.fromArray(BASE_URL)
+                .compose(ParseUtil.html2Transformer())
+                .flatMap(document -> {
+                    AtomicReference<Observable> returnObservable = new AtomicReference<>();
+                    Map<String, List<Bangumi>> homeGroups = new LinkedHashMap<>();
+                    //解析轮播图
+                    Elements bannerElements = document.getElementsByClass("swiper-slide");
+                    Observable.fromIterable(bannerElements)
+                            .filter(element -> !element.attr("href").contains(".html"))//过滤广告
+                            .map(element -> {
+                                String id = parseId(element.attr("href"));
+                                String cover = element.child(0).attr("src");
+                                String name = element.child(0).attr("alt");
+                                Bangumi bangumi = new Bangumi(id, BangumiPresistenceContract.BangumiSource.DILIDLI, name, cover);
+                                return bangumi;
+                            })
+                            .toList()
+                            .subscribe(
+                                    bangumis -> homeGroups.put(BannerHomeAdapter.BANNER_KEY, bangumis),
+                                    throwable -> returnObservable.set(Observable.error(throwable)));
 
-    @Override
-    public Observable<List<Bangumi>> getHomePageBangumiData() {
-        String[] homeUrls = {
-                BASE_URL + "/bangumi/newest?size=9",//最新番剧
-                BASE_URL + "/bangumi_by_rank?size=9",//番剧排行
-                BASE_URL + "/get_recommend_bangumi?size=9",//推荐番剧
-                BASE_URL + "/banners?seat=0"//轮播图
-        };
-        return Observable.fromArray(homeUrls)
-                .concatMap(url -> {
-                    String jsonData = HttpRequestUtil.getGetRequestResponseBodyString(url);
-                    if (url.equals(homeUrls[3])) {
-                        Gson gson = new Gson();
-                        return Observable.just(jsonData)
-                                .flatMap(json -> {
-                                    JsonArray bangumiArray = new JsonParser().parse(jsonData)
-                                            .getAsJsonObject()
-                                            .get("data")
-                                            .getAsJsonArray();
-                                    return Observable.fromIterable(bangumiArray);
-                                })
-                                .filter(jsonElement -> jsonElement.getAsJsonObject().get("id").getAsInt() != 8)//广告id为8
-                                .map(jsonElement -> {
-                                    JsonObject jsonObject = jsonElement.getAsJsonObject().get("bangumi").getAsJsonObject();
-                                    jsonObject.addProperty("img", jsonElement.getAsJsonObject().get("img").getAsString());//轮播图地址
-                                    Bangumi bangumi = gson.fromJson(jsonObject.toString(), Bangumi.class);
-                                    bangumi.setVideoSoure(BangumiPresistenceContract.BangumiSource.DILIDLI);
+                    //解析更新
+                    if (returnObservable.get() == null) {
+                        Observable.fromIterable(document.getElementById("newId").child(0).children())
+                                .take(6)
+                                .map(element -> {
+                                    String url = element.getElementsByTag("a").attr("href");
+                                    Document doc = Jsoup.parse(HttpRequestUtil.getResponseBodyString(url));
+                                    String id = parseId(doc.getElementsByTag("h4").get(0).child(0).attr("href"));
+                                    String cover = element.getElementsByClass("coverImg").attr("style");
+                                    cover = cover.substring(cover.indexOf("(") + 1, cover.lastIndexOf(")"));
+                                    String name = element.getElementsByTag("h3").text();
+                                    String jiTotal = element.getElementsByTag("h4").text();
+                                    Bangumi bangumi = new Bangumi(id, BangumiPresistenceContract.BangumiSource.DILIDLI, name, cover);
+                                    bangumi.setRemarks(jiTotal);
+
                                     return bangumi;
                                 })
                                 .toList()
-                                .toObservable();
+                                .doOnError(throwable -> LogUtil.i(throwable.toString()))
+                                .subscribe(
+                                        bangumis -> homeGroups.put("最近更新", bangumis),
+                                        throwable -> returnObservable.set(Observable.error(throwable)));
                     }
-                    return Observable.fromIterable(parshBangumis(jsonData))
-                            .map(bangumi -> {
-                                bangumi.setVideoSoure(BangumiPresistenceContract.BangumiSource.DILIDLI);
-                                return bangumi;
-                            })
-                            .take(6)
-                            .toList()
-                            .toObservable();
 
+                    //解析本季新番内容
+                    if (returnObservable.get() == null) {
+                        String newBgmUrl = BASE_URL_PC + document.getElementById("navbar").child(0).child(1).child(0).attr("href");
+                        Observable.just(newBgmUrl)
+                                .compose(ParseUtil.html2Transformer())
+                                .flatMap(newBgmDocument -> Observable.fromIterable(newBgmDocument.getElementsByClass("anime_list").get(0).children()))
+                                .take(10)
+                                .map(element -> {
+                                    String id = parseId(element.getElementsByTag("h3").get(0).child(0).attr("href"));
+                                    String cover = element.getElementsByTag("img").attr("src");
+                                    String name = element.getElementsByTag("h3").get(0).child(0).text();
+                                    Elements pElements = element.getElementsByTag("p");
+                                    String intro = pElements.get(pElements.size() - 2).text();
+                                    String type = parsetype(element.getElementsByClass("d_label").get(2));
+                                    Bangumi bangumi = new Bangumi(id, BangumiPresistenceContract.BangumiSource.DILIDLI, name, cover);
+                                    BangumiInfo info = new BangumiInfo(null, null, null, type, intro, null);
+                                    bangumi.setBangumiInfo(info);
+                                    return bangumi;
+                                })
+                                .toList()
+                                .subscribe(
+                                        bangumis -> homeGroups.put("本季新番", bangumis),
+                                        throwable -> returnObservable.set(Observable.error(throwable)));
+                    }
+
+                    //解析推荐
+                    if (returnObservable.get() == null) {
+                        final String[] key = new String[1];
+                        Observable.just(BASE_URL_PC + "/bufantuijian.html")
+                                .compose(ParseUtil.html2Transformer())
+                                .flatMap(tuijianDocument -> {
+                                    key[0] = tuijianDocument.getElementsByClass("web-font").text();
+                                    return Observable.fromIterable(tuijianDocument.getElementsByClass("media"));
+                                })
+                                .map(element -> {
+                                    Element leftElement = element.getElementsByClass("media-left").get(0);
+                                    String id = parseId(leftElement.child(0).attr("href"));
+                                    String cover = leftElement.getElementsByClass("media-object").attr("src");
+                                    Element bodyElement = element.getElementsByClass("media-body").get(0);
+                                    String name = bodyElement.getElementsByClass("media-heading").text();
+                                    Bangumi bangumi = new Bangumi(id, BangumiPresistenceContract.BangumiSource.DILIDLI, name, cover);
+                                    String intro = element.getElementsByTag("p").get(0).text();
+                                    String type = parsetype(element);
+                                    BangumiInfo bangumiInfo = new BangumiInfo("", "", "", type, intro, "");
+                                    bangumi.setBangumiInfo(bangumiInfo);
+                                    return bangumi;
+                                })
+                                .doOnError(throwable -> LogUtil.i(throwable.toString()))
+                                .toList()
+                                .subscribe(
+                                        bangumis -> homeGroups.put(key[0], bangumis),
+                                        throwable -> returnObservable.set(Observable.error(throwable)));
+                    }
+
+                    return returnObservable.get() == null ? Observable.just(homeGroups) : returnObservable.get();
                 })
                 .subscribeOn(Schedulers.io());
+    }
+
+    private Bangumi parshCategoryBangumi(Element element) {
+        String id = parseId(element.child(0).attr("href"));
+        Element contentElement = element.child(0);
+        String cover = contentElement.getElementsByClass("episodeImg").attr("style");
+        cover = cover.substring(cover.indexOf("(") + 1);
+        String name = contentElement.getElementsByClass("ac").text();
+        Bangumi bangumi = new Bangumi(id, BangumiPresistenceContract.BangumiSource.DILIDLI, name, cover);
+        return bangumi;
+    }
+
+    private String parsetype(Element bodyElement) {
+        Elements elements = bodyElement.getElementsByTag("a");
+        StringBuilder builder = new StringBuilder();
+        for (Element element : elements) {
+            if (element.hasAttr("target")) {
+                continue;
+            }
+            builder.append(element.text());
+            builder.append(" ");
+        }
+        return builder.toString();
+    }
+
+    private String parseId(String idUrl) {
+        String[] strings = idUrl.trim().split("/");
+        String id = strings[strings.length - 1];
+        return id;
     }
 
     @Nullable
@@ -124,77 +200,69 @@ public class Dilidili implements BaseBangumiParser {
         return null;
     }
 
-    private ObservableTransformer<JsonElement, Bangumi> parseSearchBangumi() {
-        return observable -> observable.map(jsonElement -> {
-            JsonObject jsonObject = jsonElement.getAsJsonObject();
-            Bangumi bangumi = new Bangumi(
-                    jsonObject.get("typeid").getAsInt(),
-                    BangumiPresistenceContract.BangumiSource.DILIDLI,
-                    jsonObject.get("description").getAsString(),
-                    jsonObject.get("litpic").getAsString());
-            bangumi.setRemarks(jsonObject.get("writer").getAsString());
-            return bangumi;
-        });
-    }
 
     @Override
-    public Observable<BangumiInfo> getInfo(int id) {
-        return Observable.just(BASE_URL + "/bangumi/seasons?arctype_id=" + id)
-                .map(HttpRequestUtil::getGetRequestResponseBodyString)//获取json数据
-                .map(jsonData -> {
-                    Type type = new TypeToken<JsonResult<List<BangumiInfo>>>(){}.getType();
-                    JsonResult<List<BangumiInfo>> jsonResult = new Gson().fromJson(jsonData, type);
-                    BangumiInfo info = jsonResult.data.get(0);
-                    info.setCast(info.getCast().replaceAll(" / ", "\n"));
-                    info.setStaff(info.getStaff().replaceAll(" / ", "\n"));
+    public Observable<BangumiInfo> getInfo(String id) {
+        return Observable.just(BASE_URL_PC + "/anime/" + id)
+                .compose(ParseUtil.html2Transformer())
+                .map(document -> {
+                    Element contentElement = document.getElementsByClass("detail con24 clear").get(0);
+                    Elements labels = contentElement.getElementsByClass("d_label");
+                    String niandia = labels.get(1).getElementsByTag("a").text();
+                    String type = parsetype(labels.get(2));
+                    String jiTotal = labels.get(3).text();
+                    String staff = null;
+                    if (labels.size() == 5) {
+                        staff = labels.get(4).text();
+                    }
+                    labels = contentElement.getElementsByClass("d_label2");
+                    String cast = parsetype(labels.get(1));
+                    cast = cast.replaceAll(" ", "\n");
+                    String intor = labels.get(2).text();
+                    BangumiInfo info = new BangumiInfo(niandia, cast, staff, type, intor, jiTotal);
                     return info;
                 })
+                .doOnError(throwable -> LogUtil.i(throwable.toString() + "    info"))
                 .subscribeOn(Schedulers.io());
     }
 
     @Override
-    public Observable<List<TextItemSelectBean>> getJiList(int id) {
-        List<String> videoUrls = new ArrayList<>();
-        return Observable.just(BASE_URL + "/bangumi/episodes?arctype_id=" + id + "&size=1000")
-                .map(HttpRequestUtil::getGetRequestResponseBodyString)
-                .flatMap(jsonData -> {
-                    Type type = new TypeToken<JsonResult<List<Ji>>>() {}.getType();
-                    JsonResult<List<Ji>> jsonResult = new Gson().fromJson(jsonData, type);
-                    return Observable.fromIterable(jsonResult.data);
-                })
-                .map(ji -> {
-                    TextItemSelectBean itemSelectBean = new TextItemSelectBean("第" + ji.name + "话");
-                    videoUrls.add(BASE_URL + "/playurls?archive_id=" + ji.playerId);
-                    return itemSelectBean;
-                })
-                .toList()
-                .toObservable()
-                .doOnError(throwable -> LogUtil.i(throwable.toString()))
-                .doOnComplete(() -> {
-                    if (!videoUrls.isEmpty()) {
-                        videoUrlsCollect.append(id, videoUrls);
-                    }
+    public Observable<List<TextItemSelectBean>> getJiList(String id) {
+        if (mPlayerUrls == null) {
+            mPlayerUrls = new ArrayList<>();
+        }
+        return Observable.just(BASE_URL + "/anime/" + id)
+                .compose(ParseUtil.html2Transformer())
+                .flatMap(document -> {
+                    Elements elements = document.getElementsByClass("episode");
+                    return Observable.fromIterable(elements.get(0).child(1).children())
+                            .map(element -> {
+                                String playUrl = element.child(0).attr("href");
+                                String jiName = "第" + element.child(0).text() + "集";
+                                mPlayerUrls.add(playUrl);
+                                TextItemSelectBean selectBean = new TextItemSelectBean(jiName);
+                                return selectBean;
+                            })
+                            .toList()
+                            .toObservable();
                 })
                 .subscribeOn(Schedulers.io());
     }
 
     @Override
-    public Observable<VideoUrl> getplayerUrl(int id, int ji) {
-        if (videoUrlsCollect.get(id) == null) {
+    public Observable<VideoUrl> getplayerUrl(String id, int ji) {
+        if (mPlayerUrls == null || mPlayerUrls.isEmpty()) {
             return Observable.error(new IllegalAccessError("没有解析集"));
         }
-        return Observable.just(videoUrlsCollect.get(id).get(ji))
-                .map(HttpRequestUtil::getGetRequestResponseBodyString)//获取json数据
-                .map(jsonData -> {
-                    Type type = new TypeToken<JsonResult<List<String>>>() {
-                    }.getType();
-                    JsonResult<List<String>> videoUrls = new Gson().fromJson(jsonData, type);
-                    VideoUrl videoUrl = new VideoUrl();
-                    if (videoUrl == null && videoUrls.data.isEmpty()) {
-                        videoUrl.setUrl("http://www.dilidili.name/");
+        return Observable.just(mPlayerUrls.get(ji))
+                .compose(ParseUtil.html2Transformer())
+                .map(document -> {
+                    String[] htmlUrl = document.getElementsByTag("iframe").attr("src").split("=");
+                    String url = htmlUrl[htmlUrl.length - 1];
+                    VideoUrl videoUrl = new VideoUrl(url);
+                    if (url.contains(".html")) {
+                        videoUrl.setUrl(BASE_URL + "/anime/" + id);
                         videoUrl.setHtml(true);
-                    } else {
-                        videoUrl.setUrl(videoUrls.data.get(0));
                     }
                     return videoUrl;
                 })
@@ -202,121 +270,113 @@ public class Dilidili implements BaseBangumiParser {
     }
 
     @Override
-    public Observable<List<Bangumi>> getRecommendBangumis(int id) {
-        return Observable.just(BASE_URL + "/bangumi/similar?arctype_id=" + id)
-                .map(url -> HttpRequestUtil.getGetRequestResponseBodyString(url))
-                .map(this::parshBangumis)
-                .flatMap(bangumis -> Observable.fromIterable(bangumis))
-                .compose(addSourch())
+    public Observable<List<Bangumi>> getRecommendBangumis(String id) {
+        return Observable.just(BASE_URL_PC + "/anime/" + id)
+                .compose(ParseUtil.html2Transformer())
+                .flatMap(document -> Observable.fromIterable(document.getElementsByClass("m_pic clear").get(0).children()))
+                .map(element -> {
+                    String recommendBangumiId = parseId(element.child(0).attr("href"));
+                    String cover = element.getElementsByTag("img").attr("src");
+                    String name = element.getElementsByTag("p").text();
+                    Bangumi bangumi = new Bangumi(recommendBangumiId, BangumiPresistenceContract.BangumiSource.DILIDLI, name, cover);
+                    return bangumi;
+                })
                 .toList()
                 .toObservable()
                 .subscribeOn(Schedulers.io());
+
     }
 
     @Override
     public Observable<List<Bangumi>> getCategoryBangumis(String category) {
-        mCategoryPage = 1;
-        mCategoryWord = category;
-        return Observable.just(category)
-                .map(categoryWord -> {
-                    String url = null;
-                    if (categoryWord.equals("最新更新")) {
-                        url = BASE_URL + "/bangumi/newest?size=15&page=" + mCategoryPage;
-                    } else if (categoryWord.equals("番剧排行")) {
-                        url = BASE_URL + "/bangumi_by_rank?size=15&page=" + mCategoryPage;
-                    } else if (categoryWord.equals("番剧推荐")) {
-                        url = BASE_URL + "/get_recommend_bangumi?size=15&page=" + mCategoryPage;
-                    } else {
-                        categoryWord = URLEncoder.encode(categoryWord, "UTF-8");
-                        url = BASE_URL + "/bangumi_by_category?category=" + categoryWord + "&size=15&page=" + mCategoryPage;
-                    }
-                    return url;
-                })
-                .flatMap(url -> {
-                    String jsonData = HttpRequestUtil.getGetRequestResponseBodyString(url);
-                    return Observable.fromIterable(parshBangumis(jsonData));
-                })
-                .compose(addSourch())
-                .toList()
-                .toObservable()
-                .subscribeOn(Schedulers.io());
+        if ("最近更新".equals(category)) {
+            return Observable.just(BASE_URL_PC + "/zxgx/")
+                    .compose(ParseUtil.html2Transformer())
+                    .flatMap(document -> Observable.fromIterable(document.getElementsByClass("book article").get(0).children()))
+                    .map(element -> {
+                        Document document = Jsoup.parse(HttpRequestUtil.getResponseBodyString(element.attr("href")));
+                        String id = parseId(document.getElementsByTag("h2").get(0).child(1).attr("href"));
+                        String name = element.getElementsByTag("p").get(0).text();
+                        String jiTotal = element.getElementsByTag("p").get(1).text();
+                        String cover = element.getElementsByTag("div").attr("style");
+                        cover = cover.substring(cover.indexOf("(") + 1, cover.lastIndexOf(")"));
+                        Bangumi bangumi = new Bangumi(id, BangumiPresistenceContract.BangumiSource.DILIDLI, name, cover);
+                        bangumi.setRemarks(jiTotal);
+                        return bangumi;
+                    })
+                    .toList()
+                    .toObservable()
+                    .subscribeOn(Schedulers.io());
+        } else if (category.contains("新番")) {
+            return Observable.just(BASE_URL)
+                    .compose(ParseUtil.html2Transformer())
+                    .map(document -> BASE_URL + document.getElementById("navbar").child(0).child(1).child(0).attr("href"))
+                    .compose(ParseUtil.html2Transformer())
+                    .flatMap(newBgmDocument -> Observable.fromIterable(newBgmDocument.getElementById("episode_list").children()))
+                    .map(this::parshCategoryBangumi)
+                    .toList()
+                    .toObservable()
+                    .subscribeOn(Schedulers.io());
+        } else {
+            return Observable.just(BASE_URL + "/fenlei.html")
+                    .compose(ParseUtil.html2Transformer())
+                    .flatMap(document -> Observable.fromIterable(document.getElementsByClass("w").get(1).child(0).children()))
+                    .filter(categorElement -> categorElement.getElementsByTag("p").text().contains(category))
+                    .map(categorElement -> categorElement.child(0).attr("href"))
+                    .compose(ParseUtil.html2Transformer())
+                    .flatMap(document -> Observable.fromIterable(document.getElementById("episode_list").children()))
+                    .map(this::parshCategoryBangumi)
+                    .toList()
+                    .toObservable()
+                    .subscribeOn(Schedulers.io());
+        }
     }
 
     @Override
     public Observable<Results> getNextCategoryBangumis() {
-        mCategoryPage++;
-        return Observable.just(mCategoryWord)
-                .map(categoryWord -> {
-                    String url = null;
-                    if (categoryWord.equals("最新更新")) {
-                        url = BASE_URL + "/bangumi/newest?size=15&page=" + mCategoryPage;
-                    } else if (categoryWord.equals("番剧排行")) {
-                        url = BASE_URL + "/bangumi_by_rank?size=15&page=" + mCategoryPage;
-                    } else if (categoryWord.equals("番剧推荐")) {
-                        url = BASE_URL + "/get_recommend_bangumi?size=15&page=" + mCategoryPage;
-                    } else {
-                        categoryWord = URLEncoder.encode(categoryWord, "UTF-8");
-                        url = BASE_URL + "/bangumi_by_category?category=" + categoryWord + "&size=15&page=" + mCategoryPage;
-                    }
-                    return url;
-                })
-                .flatMap(url -> {
-                    String jsonData = HttpRequestUtil.getGetRequestResponseBodyString(url);
-                    List<Bangumi> bangumis = parshBangumis(jsonData);
-                    if (bangumis == null || bangumis.isEmpty()) {
-                        return Observable.just(new Results(true, bangumis));
-                    } else {
-                        return Observable.fromIterable(bangumis)
-                                .compose(addSourch())
-                                .toList()
-                                .toObservable()
-                                .map(bangumiList -> new Results(false, bangumiList));
-                    }
-                })
-                .subscribeOn(Schedulers.io());
+        return Observable.just(new Results(true, null));
     }
 
-    private ObservableTransformer<Bangumi, Bangumi> addSourch() {
-        return observable -> observable.map(bangumi -> {
-            bangumi.setVideoSoure(BangumiPresistenceContract.BangumiSource.DILIDLI);
-            return bangumi;
-        });
-    }
 
     @Override
     public Observable<List<CategorItem>> getCategorItems() {
-        return Observable.just(BASE_URL + "/categories")
-                .map(url -> {
-                    String jsonData = HttpRequestUtil.getGetRequestResponseBodyString(url);
-                    Type type = new TypeToken<JsonResult<List<CategorItem>>>() {
-                    }.getType();
-                    JsonResult<List<CategorItem>> jsonResult = new Gson().fromJson(jsonData, type);
-                    return jsonResult.data;
+        return Observable.just(BASE_URL + "/fenlei.html")
+                .compose(ParseUtil.html2Transformer())
+                .flatMap(document -> Observable.fromIterable(document.getElementsByClass("w").get(1).child(0).children()))
+                .map(categorElement -> {
+                    String img = categorElement.getElementsByTag("img").attr("src");
+                    String categorName = categorElement.getElementsByTag("p").text();
+                    CategorItem categorItem = new CategorItem(img, categorName);
+                    return categorItem;
                 })
+                .toList()
+                .toObservable()
+                .doOnNext(categorItems -> isAddcategoryUrl = true)
                 .subscribeOn(Schedulers.io());
     }
 
     @Override
     public Observable<List<List<Bangumi>>> getBangumiTimeTable() {
-        String timeTableUrl = BASE_URL + "/home";
-        return Observable.just(timeTableUrl)
-                .flatMap(url -> {
-                    String jsonData = HttpRequestUtil.getGetRequestResponseBodyString(url);
-                    JsonArray jsonArray = new JsonParser().parse(jsonData)
-                            .getAsJsonObject()
-                            .get("data")
-                            .getAsJsonObject()
-                            .getAsJsonArray("weeks");
-                    Type type = new TypeToken<List<List<Bangumi>>>() {
-                    }.getType();
-                    List<List<Bangumi>> timeTableBangumis = new Gson().fromJson(jsonArray.toString(), type);
-                    return Observable.fromIterable(timeTableBangumis)
-                            .flatMap(bangumis -> Observable.fromIterable(bangumis))
-                            .compose(addSourch())
+        return Observable.just("http://www.dilidili.name")
+                .compose(ParseUtil.html2Transformer())
+                .flatMap(document -> Observable.fromIterable(document.getElementsByClass("wrp animate").get(1).children()))
+                .flatMap(dayElement -> {
+                    return Observable.fromIterable(dayElement.child(0).children())
+                            .map(contentElement -> {
+                                String id = parseId(contentElement.attr("href"));
+                                String cover = contentElement.getElementsByTag("img").attr("src");
+                                String name = contentElement.getElementsByTag("img").attr("alt");
+                                Bangumi bangumi = new Bangumi(id, BangumiPresistenceContract.BangumiSource.DILIDLI, name, cover);
+                                if (contentElement.getElementsByTag("p").size() == 2) {
+                                    bangumi.setRemarks(contentElement.getElementsByTag("p").get(1).text());
+                                }
+                                return bangumi;
+                            })
                             .toList()
                             .toObservable();
                 })
                 .toList()
+
                 .toObservable()
                 .subscribeOn(Schedulers.io());
     }

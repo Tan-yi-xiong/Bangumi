@@ -17,6 +17,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.TyxApp.bangumi.R;
+import com.TyxApp.bangumi.player.VideoPlayerEvent;
 import com.kk.taurus.playerbase.event.EventKey;
 import com.kk.taurus.playerbase.player.IPlayer;
 import com.kk.taurus.playerbase.receiver.PlayerStateGetter;
@@ -104,7 +105,7 @@ public class GestureCover extends ImpTouchListenerCover {
         if (stateGetter != null) {
             if (stateGetter.getState() == IPlayer.STATE_PAUSED) {
                 requestResume(null);
-            } else {
+            } else if (stateGetter.getState() == IPlayer.STATE_STARTED){
                 requestPause(null);
             }
         }

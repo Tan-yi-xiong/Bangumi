@@ -25,6 +25,6 @@ public interface SearchWordDao {
     @Query("SELECT * FROM SEARCH_WORD ORDER BY time DESC")
     Single<List<SearchWord>> getSearchWords();
 
-    @Query("SELECT * FROM SEARCH_WORD WHERE word LIKE :word")
+    @Query("SELECT * FROM SEARCH_WORD WHERE word LIKE :word ORDER BY time DESC")
     Single<List<SearchWord>> getSimilarityWords(String word);
 }

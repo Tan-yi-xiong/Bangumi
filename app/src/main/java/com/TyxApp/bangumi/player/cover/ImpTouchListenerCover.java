@@ -3,7 +3,6 @@ package com.TyxApp.bangumi.player.cover;
 import android.content.Context;
 import android.view.MotionEvent;
 
-import com.TyxApp.bangumi.util.LogUtil;
 import com.kk.taurus.playerbase.receiver.BaseCover;
 import com.kk.taurus.playerbase.touch.OnTouchGestureListener;
 

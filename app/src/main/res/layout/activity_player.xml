@@ -1,11 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/fl_playercontent"
+    android:id="@+id/playerViewGroup"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".player.PlayerActivity">
+    android:layout_height="match_parent">
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/infoRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/mdtp_white" />
 
+    <com.TyxApp.bangumi.view.ParallaxBaseVideoView
+        android:id="@+id/videoView"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:background="@android:color/black"
+        android:minHeight="?attr/actionBarSize" />
 
+    <LinearLayout
+        android:id="@+id/gradualToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#2979fe"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <View
+            android:id="@+id/stateBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent" />
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/transparentToolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@android:color/transparent"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+    </LinearLayout>
 </FrameLayout>

@@ -24,7 +24,12 @@ public class BannerIndicator extends LinearLayout{
     }
 
     public void setDotCount(int count) {
-        ivList = new ArrayList<>();
+        removeAllViews();
+        if (ivList == null) {
+            ivList = new ArrayList<>();
+        } else {
+            ivList.clear();
+        }
         for (int i = 0; i < count; i++) {
             ImageView iv = new ImageView(getContext());
             LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(15, 15);

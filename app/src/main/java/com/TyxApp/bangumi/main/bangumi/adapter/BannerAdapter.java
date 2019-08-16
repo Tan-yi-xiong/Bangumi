@@ -1,13 +1,13 @@
 package com.TyxApp.bangumi.main.bangumi.adapter;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.TyxApp.bangumi.BanghumiApp;
 import com.TyxApp.bangumi.R;
 import com.TyxApp.bangumi.data.bean.Bangumi;
 import com.TyxApp.bangumi.player.PlayerActivity;
@@ -53,7 +53,11 @@ public class BannerAdapter extends PagerAdapter {
         ImageView imageView = view.findViewById(R.id.iv_zzzfun_banner);
         TextView textView = view.findViewById(R.id.tv_zzzfun_banner_name);
         Bangumi bangumi = mBangumiList.get(relposition);
-        Glide.with(mContext).load(bangumi.getImg()).into(imageView);
+        if (TextUtils.isEmpty(bangumi.getImg())) {
+            Glide.with(mContext).load(bangumi.getCover()).into(imageView);
+        } else {
+            Glide.with(mContext).load(bangumi.getImg()).into(imageView);
+        }
         textView.setText(bangumi.getName());
         view.setOnClickListener(v -> PlayerActivity.startPlayerActivity(mContext, bangumi));
         container.addView(view);

@@ -36,7 +36,7 @@ public class CacheVideoAdapter extends BaseAdapter<Bangumi, BaseViewHolder> {
             }
             return false;
         });
-        holder.itemView.setOnClickListener(v -> DownloadDetailsActivity.startDownloadDetailsActivity(getContext(), bangumi.getVodId(), bangumi.getVideoSoure()));
+        holder.itemView.setOnClickListener(v -> DownloadDetailsActivity.startDownloadDetailsActivity(getContext(), bangumi.getVideoId(), bangumi.getVideoSoure()));
     }
 
     @Override

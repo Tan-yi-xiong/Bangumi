@@ -1,17 +1,17 @@
 package com.TyxApp.bangumi.categoryresult;
 
-import com.TyxApp.bangumi.data.source.remote.BaseBangumiParser;
+import com.TyxApp.bangumi.data.source.remote.IBangumiParser;
 import com.TyxApp.bangumi.util.ExceptionUtil;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 
 public class CategoryResultPresenter implements CategoryResultContract.Presenter {
-    private BaseBangumiParser mBangumiParser;
+    private IBangumiParser mBangumiParser;
     private CategoryResultContract.View mView;
     private CompositeDisposable mDisposable;
 
-    public CategoryResultPresenter(BaseBangumiParser bangumiParser, CategoryResultContract.View view) {
+    public CategoryResultPresenter(IBangumiParser bangumiParser, CategoryResultContract.View view) {
         ExceptionUtil.checkNull(bangumiParser, "Parser不能为空  CategoryResultPresenter");
         ExceptionUtil.checkNull(view, "view不能为空  CategoryResultPresenter");
         mBangumiParser = bangumiParser;
@@ -52,6 +52,5 @@ public class CategoryResultPresenter implements CategoryResultContract.Presenter
     @Override
     public void onDestory() {
         mDisposable.dispose();
-        mBangumiParser.onDestroy();
     }
 }

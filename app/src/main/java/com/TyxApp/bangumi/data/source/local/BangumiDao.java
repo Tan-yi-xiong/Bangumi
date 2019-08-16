@@ -21,17 +21,17 @@ public interface BangumiDao {
 
 
     @Query("UPDATE BANGUMI SET historyTime = :time WHERE vod_id = :videoId AND vod_soure = :sourch")
-    int updatetime(int videoId, String sourch, long time);
+    int updatetime(String videoId, String sourch, long time);
 
 
     @Query("UPDATE BANGUMI SET isFavorite = :isFavorite WHERE vod_id = :videoId AND vod_soure = :sourch")
-    Single<Integer> updateFavoriteState(int videoId, String sourch, boolean isFavorite);
+    Single<Integer> updateFavoriteState(String videoId, String sourch, boolean isFavorite);
 
     @Query("UPDATE BANGUMI SET isDownLoad = :isDownLoad WHERE vod_id = :videoId AND vod_soure = :sourch")
-    Single<Integer> updateDownLoad(int videoId, String sourch, boolean isDownLoad);
+    Single<Integer> updateDownLoad(String videoId, String sourch, boolean isDownLoad);
 
     @Query("SELECT dbId FROM BANGUMI WHERE vod_id = :videoId AND vod_soure = :sourch")
-    int getBangumiDbId(int videoId, String sourch);
+    int getBangumiDbId(String videoId, String sourch);
 
 
 
@@ -45,21 +45,21 @@ public interface BangumiDao {
     Single<List<Bangumi>> getDownLoadBangumi();
 
     @Query("SELECT isFavorite FROM BANGUMI WHERE vod_id = :videoId AND vod_soure = :sourch")
-    Flowable<Boolean> hasAddToFavorite(int videoId, String sourch);
+    Flowable<Boolean> hasAddToFavorite(String videoId, String sourch);
 
     @Update
     int update(Bangumi bangumi);
 
     default Single insertOrUpdateTime(Bangumi bangumi) {
         return Single.create((SingleOnSubscribe<Integer>) emitter -> {
-            int DdbId = getBangumiDbId(bangumi.getVodId(), bangumi.getVideoSoure());
+            int DdbId = getBangumiDbId(bangumi.getVideoId(), bangumi.getVideoSoure());
             emitter.onSuccess(DdbId);
         }).flatMap(dbId -> {
             if (dbId == 0) {
                 return insertBangumi(bangumi);
             }
             bangumi.dbId = dbId;
-            return Single.just((long) updatetime(bangumi.getVodId(), bangumi.getVideoSoure(), bangumi.getHistoryTime()));
+            return Single.just((long) updatetime(bangumi.getVideoId(), bangumi.getVideoSoure(), bangumi.getHistoryTime()));
         });
     }
 

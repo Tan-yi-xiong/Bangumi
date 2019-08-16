@@ -10,7 +10,6 @@ import android.widget.TextView;
 import com.TyxApp.bangumi.R;
 import com.TyxApp.bangumi.base.BaseAdapter;
 import com.TyxApp.bangumi.base.BaseViewHolder;
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import java.util.Arrays;
 import java.util.List;

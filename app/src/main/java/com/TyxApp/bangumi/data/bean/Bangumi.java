@@ -4,7 +4,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
-import com.TyxApp.bangumi.util.LogUtil;
 import com.google.gson.annotations.SerializedName;
 
 import androidx.room.ColumnInfo;
@@ -21,7 +20,7 @@ public class Bangumi implements Parcelable {
 
     @SerializedName(value = "id", alternate = {"vod_id", "typeid"})
     @ColumnInfo(name = "vod_id")
-    private int vodId;
+    private String videoId;
 
     @ColumnInfo(name = "vod_soure")
     private String videoSoure;//来源
@@ -69,7 +68,7 @@ public class Bangumi implements Parcelable {
     }
 
     protected Bangumi(Parcel in) {
-        vodId = in.readInt();
+        videoId = in.readString();
         videoSoure = in.readString();
         name = in.readString();
         cover = in.readString();
@@ -184,19 +183,19 @@ public class Bangumi implements Parcelable {
     public Bangumi() {
     }
 
-    public Bangumi(int vod_id, String soure, String name, String cover) {
-        this.vodId = vod_id;
+    public Bangumi(String vod_id, String soure, String name, String cover) {
+        this.videoId = vod_id;
         this.videoSoure = soure;
         this.name = name;
         this.cover = cover;
     }
 
-    public int getVodId() {
-        return vodId;
+    public String getVideoId() {
+        return videoId;
     }
 
-    public void setVodId(int vodId) {
-        this.vodId = vodId;
+    public void setVideoId(String videoId) {
+        this.videoId = videoId;
     }
 
     public String getVideoSoure() {
@@ -254,7 +253,7 @@ public class Bangumi implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(vodId);
+        dest.writeString(videoId);
         dest.writeString(videoSoure);
         dest.writeString(name);
         dest.writeString(cover);

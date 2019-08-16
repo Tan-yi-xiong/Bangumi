@@ -12,12 +12,14 @@ import com.TyxApp.bangumi.data.bean.TextItemSelectBean;
 import com.TyxApp.bangumi.util.AnimationUtil;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class JiAdapter extends BaseAdapter<TextItemSelectBean, BaseViewHolder> {
     public JiAdapter(Context context) {
         super(context);
     }
+    private RecyclerView mRecyclerView;
 
     @NonNull
     @Override
@@ -35,10 +37,43 @@ public class JiAdapter extends BaseAdapter<TextItemSelectBean, BaseViewHolder> {
             holder.itemView.setSelected(false);
         }
         holder.itemView.setOnClickListener(v -> {
+            jiItemSelect(position);
             if (mOnItemClickListener != null) {
                 mOnItemClickListener.onItemClick(position);
             }
         });
+    }
+
+    public void jiItemSelect(int position) {
+        int lastSelectPosition = -1;
+        for (int i = 0; i < getDataList().size(); i++) {
+            if (getData(i).isSelect()) {
+                lastSelectPosition = i;
+                break;
+            }
+        }
+        if (mRecyclerView != null && lastSelectPosition != -1 && lastSelectPosition != position) {
+            RecyclerView.ViewHolder selectHolder = mRecyclerView.findViewHolderForLayoutPosition(position);
+            RecyclerView.ViewHolder lastSelectHolder = mRecyclerView.findViewHolderForLayoutPosition(lastSelectPosition);
+            if (selectHolder != null) {
+                selectHolder.itemView.setSelected(true);
+            }
+            if (lastSelectHolder != null) {
+                lastSelectHolder.itemView.setSelected(false);
+            } else {
+                notifyItemChanged(lastSelectPosition);
+            }
+            getData(lastSelectPosition).setSelect(false);
+            getData(position).setSelect(true);
+        }
+    }
+
+    @Override
+    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), RecyclerView.HORIZONTAL, false));
+        recyclerView.addItemDecoration(new ItemDecoration());
+        mRecyclerView = recyclerView;
+        super.onAttachedToRecyclerView(recyclerView);
     }
 
     @Override

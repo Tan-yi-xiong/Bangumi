@@ -1,8 +1,7 @@
 package com.TyxApp.bangumi.main.timetable;
 
-import com.TyxApp.bangumi.data.source.remote.BaseBangumiParser;
+import com.TyxApp.bangumi.data.source.remote.IBangumiParser;
 import com.TyxApp.bangumi.util.ExceptionUtil;
-import com.TyxApp.bangumi.util.LogUtil;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -10,9 +9,9 @@ import io.reactivex.disposables.CompositeDisposable;
 public class TimeTablePresenter implements TimeTablecontract.Presenter {
     private TimeTablecontract.View mView;
     private CompositeDisposable mDisposable;
-    private BaseBangumiParser mParser;
+    private IBangumiParser mParser;
 
-    public TimeTablePresenter(TimeTablecontract.View view, BaseBangumiParser parser) {
+    public TimeTablePresenter(TimeTablecontract.View view, IBangumiParser parser) {
         ExceptionUtil.checkNull(view, "view不能为空 TimeTablePresenter");
         ExceptionUtil.checkNull(parser, "parser不能为空 TimeTablePresenter");
         mView = view;
@@ -37,7 +36,6 @@ public class TimeTablePresenter implements TimeTablecontract.Presenter {
     @Override
     public void onDestory() {
         mDisposable.dispose();
-        mParser.onDestroy();
         mView = null;
     }
 }

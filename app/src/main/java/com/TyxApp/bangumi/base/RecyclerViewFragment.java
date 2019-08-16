@@ -3,6 +3,7 @@ package com.TyxApp.bangumi.base;
 import android.view.View;
 
 import com.TyxApp.bangumi.R;
+import com.TyxApp.bangumi.util.LogUtil;
 
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -72,8 +73,8 @@ public abstract class RecyclerViewFragment extends BaseMvpFragment {
     public void onResume() {
         super.onResume();
         if (isFristLoading) {
-            FristLoading();
             isFristLoading = false;
+            FristLoading();
         }
     }
 

@@ -5,7 +5,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.text.format.Time;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -18,6 +17,7 @@ import androidx.fragment.app.FragmentManager;
 import com.TyxApp.bangumi.R;
 import com.TyxApp.bangumi.player.bottomsheet.MainBottomSheet;
 import com.TyxApp.bangumi.player.bottomsheet.VideoSpeedBottomSheet;
+import com.TyxApp.bangumi.player.VideoPlayerEvent;
 import com.TyxApp.bangumi.util.AnimationUtil;
 import com.TyxApp.bangumi.util.PreferenceUtil;
 import com.kk.taurus.playerbase.entity.DataSource;
@@ -56,6 +56,8 @@ public class PlayerControlCover extends ImpTimeAndTouchListenerCover {
     ImageButton nextButton;
     @BindView(R.id.time)
     TextView timeTextView;
+    @BindView(R.id.topLayout)
+    View topView;
 
     private Unbinder mUnbinder;
     private SimpleDateFormat mDateFormat;
@@ -63,7 +65,7 @@ public class PlayerControlCover extends ImpTimeAndTouchListenerCover {
     private static final int SINGLE_TAP = 0;
     private static final int HIND_VIEW = 1;
 
-    private FragmentManager mFragmentManager;
+    private Bundle mBundle = new Bundle();
 
     @SuppressLint("HandlerLeak")
     private Handler tapEventHandle = new Handler() {
@@ -75,24 +77,29 @@ public class PlayerControlCover extends ImpTimeAndTouchListenerCover {
                     boolean isVisble = getView().getVisibility() == View.VISIBLE;
                     if (isVisble) {
                         AnimationUtil.fadeOut(getView(), 250);
+                        mBundle.putBoolean(VideoPlayerEvent.Key.CONTROL_VIEW_SHOW, false);
+                        notifyReceiverEvent(VideoPlayerEvent.Code.CODE_CONTROL_VIEW_SHOW, mBundle);
                     } else {
                         timeTextView.setText(mDateFormat.format(System.currentTimeMillis()));
                         AnimationUtil.fadeIn(getView(), 250);
+                        mBundle.putBoolean(VideoPlayerEvent.Key.CONTROL_VIEW_SHOW, true);
+                        notifyReceiverEvent(VideoPlayerEvent.Code.CODE_CONTROL_VIEW_SHOW, mBundle);
                     }
                     break;
 
                 case HIND_VIEW:
                     if (getView().getVisibility() == View.VISIBLE) {
                         AnimationUtil.fadeOut(getView(), 250);
+                        mBundle.putBoolean(VideoPlayerEvent.Key.CONTROL_VIEW_SHOW, false);
+                        notifyReceiverEvent(VideoPlayerEvent.Code.CODE_CONTROL_VIEW_SHOW, mBundle);
                     }
                     break;
             }
         }
     };
 
-    public PlayerControlCover(Context context, FragmentManager fragmentManager) {
+    public PlayerControlCover(Context context) {
         super(context);
-        mFragmentManager = fragmentManager;
     }
 
     @Override
@@ -139,17 +146,16 @@ public class PlayerControlCover extends ImpTimeAndTouchListenerCover {
 
             @Override
             public void onValueUpdate(String key, Object value) {
-                switch (key) {
-
-                    case VideoPlayerEvent.Key.IS_FULLSCREEN_KEY:
-                        if ((boolean)value) {
-                            fullScrenButton.setVisibility(View.GONE);
-                            nextButton.setVisibility(View.VISIBLE);
-                        } else {
-                            fullScrenButton.setVisibility(View.VISIBLE);
-                            nextButton.setVisibility(View.GONE);
-                        }
-                        break;
+                if (VideoPlayerEvent.Key.IS_FULLSCREEN_KEY.equals(key)) {
+                    if ((boolean) value) {
+                        topView.setVisibility(View.VISIBLE);
+                        fullScrenButton.setVisibility(View.GONE);
+                        nextButton.setVisibility(View.VISIBLE);
+                    } else {
+                        topView.setVisibility(View.GONE);
+                        fullScrenButton.setVisibility(View.VISIBLE);
+                        nextButton.setVisibility(View.GONE);
+                    }
                 }
             }
         });
@@ -185,7 +191,7 @@ public class PlayerControlCover extends ImpTimeAndTouchListenerCover {
                 break;
 
             case R.id.video_player_more:
-                showMainBottomSheet();
+                notifyReceiverEvent(VideoPlayerEvent.Code.CODE_PLAYER_MORE_CLICK, null);
                 break;
 
             case R.id.player_control_next:
@@ -194,56 +200,6 @@ public class PlayerControlCover extends ImpTimeAndTouchListenerCover {
         }
     }
 
-    private void showMainBottomSheet() {
-        String[] itemTexts = getContext().getResources().getStringArray(R.array.main_bottomsheet_item);
-        MainBottomSheet mainBottomSheet = MainBottomSheet.newInstance(itemTexts);
-        mainBottomSheet.setOnItemClickListener(pos -> {
-            mainBottomSheet.dismiss();
-            switch (pos) {
-                case 0://重播
-                    Bundle bundle = null;
-                    if (getPlayerStateGetter() != null) {
-                        bundle = new Bundle();
-                        bundle.putInt(EventKey.INT_DATA, getPlayerStateGetter().getCurrentPosition());
-                    }
-                    requestReplay(bundle);
-                    break;
-                case 1://调速
-                    showVideoSpeedBottomSheet();
-                    break;
-                case 2://下载
-                    notifyReceiverEvent(VideoPlayerEvent.Code.CODE_DOWNLOAD, null);
-                    break;
-            }
-        });
-        mainBottomSheet.show(mFragmentManager, MainBottomSheet.class.getName());
-    }
-
-    private void showVideoSpeedBottomSheet() {
-        String[] speedTexts = getContext().getResources().getStringArray(R.array.video_speed_bottomsheet_item);
-        VideoSpeedBottomSheet speedBottomSheet = VideoSpeedBottomSheet.newInstance(speedTexts);
-        speedBottomSheet.setOnItemClickListener(pos -> {
-            float speed = 1.0f;
-            switch (pos) {
-                case 0:
-                    speed = 0.5f;
-                    break;
-                case 1:
-                    speed = 0.7f;
-                    break;
-                case 3:
-                    speed = 1.5f;
-                    break;
-                case 4:
-                    speed = 2.0f;
-                    break;
-            }
-            Bundle bundle = new Bundle();
-            bundle.putFloat(VideoPlayerEvent.Key.SPEED_DATA_KEY, speed);
-            notifyReceiverEvent(VideoPlayerEvent.Code.CODE_SPEED_CHANGE, bundle);
-        });
-        speedBottomSheet.show(mFragmentManager, VideoSpeedBottomSheet.class.getName());
-    }
 
     @Override
     protected View onCreateCoverView(Context context) {

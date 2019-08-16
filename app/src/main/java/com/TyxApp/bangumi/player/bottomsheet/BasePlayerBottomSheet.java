@@ -8,14 +8,10 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import com.TyxApp.bangumi.base.BaseAdapter;
-import com.TyxApp.bangumi.base.BaseViewHolder;
 import com.TyxApp.bangumi.util.ExceptionUtil;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
-
-import java.lang.reflect.Array;
-import java.util.Arrays;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;

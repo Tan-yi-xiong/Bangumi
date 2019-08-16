@@ -11,6 +11,8 @@ import com.TyxApp.bangumi.player.PlayerActivity;
 import com.TyxApp.bangumi.util.AnimationUtil;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 public class CategoryResultAdapter extends BaseAdapter<Bangumi, BaseViewHolder> {
 
@@ -31,6 +33,12 @@ public class CategoryResultAdapter extends BaseAdapter<Bangumi, BaseViewHolder> 
         holder.setRoundedImage(R.id.cover, bangumi.getCover(), imageAngle);
         holder.setText(R.id.name, bangumi.getName());
         holder.itemView.setOnClickListener(v -> PlayerActivity.startPlayerActivity(getContext(), bangumi));
+    }
+
+    @Override
+    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+        recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 3));
+        super.onAttachedToRecyclerView(recyclerView);
     }
 
     @Override

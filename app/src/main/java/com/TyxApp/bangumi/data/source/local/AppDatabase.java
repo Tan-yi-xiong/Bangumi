@@ -11,7 +11,7 @@ import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
-@Database(entities = {SearchWord.class, Bangumi.class, VideoDownloadTask.class}, version = 1, exportSchema = false)
+@Database(entities = {SearchWord.class, Bangumi.class, VideoDownloadTask.class}, version = 2, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
     private static AppDatabase INSTANCE;
     public static final String DATABASE_NAME = "BANGUMI_APP";
@@ -24,7 +24,7 @@ public abstract class AppDatabase extends RoomDatabase {
 
     public static synchronized void init(Context context) {
         if (INSTANCE == null) {
-            INSTANCE = Room.databaseBuilder(context, AppDatabase.class, DATABASE_NAME).build();
+            INSTANCE = Room.databaseBuilder(context, AppDatabase.class, DATABASE_NAME).fallbackToDestructiveMigration().build();
         }
     }
 

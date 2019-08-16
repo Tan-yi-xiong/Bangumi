@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
+import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
 
@@ -30,6 +31,11 @@ public class BaseViewHolder extends RecyclerView.ViewHolder {
 
     public static BaseViewHolder get(Context context, ViewGroup content, int layoutId) {
         View view = LayoutInflater.from(context).inflate(layoutId, content, false);
+        return new BaseViewHolder(context, view);
+    }
+
+    public static BaseViewHolder get(Context context, int layoutId) {
+        View view = LayoutInflater.from(context).inflate(layoutId, null);
         return new BaseViewHolder(context, view);
     }
 
@@ -55,6 +61,11 @@ public class BaseViewHolder extends RecyclerView.ViewHolder {
     public void setRoundedImage(int viewId, Object res, int angle) {
         ImageView imageView = getView(viewId);
         Glide.with(mContext).load(res).transform(new CenterCrop(), new RoundedCorners(angle)).into(imageView);
+    }
+
+    public void setCircleImage(int viewId, Object res) {
+        ImageView imageView = getView(viewId);
+        Glide.with(mContext).load(res).transform(new CircleCrop()).into(imageView);
     }
 
 }

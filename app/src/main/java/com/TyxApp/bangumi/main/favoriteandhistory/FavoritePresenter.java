@@ -41,7 +41,7 @@ public class FavoritePresenter implements FavoriteAndHistoryContract.Presenter {
     }
 
     @Override
-    public void removeBangumi(int id, String source) {
+    public void removeBangumi(String id, String source) {
        mDisposable.add(mBangumiDao.updateFavoriteState(id, source, false)
                 .subscribeOn(Schedulers.io())
                 .subscribe());

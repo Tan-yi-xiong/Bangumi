@@ -1,44 +1,42 @@
 package com.TyxApp.bangumi.player;
 
 import com.TyxApp.bangumi.base.BasePresenter;
-import com.TyxApp.bangumi.base.BaseView;
 import com.TyxApp.bangumi.data.bean.Bangumi;
 import com.TyxApp.bangumi.data.bean.BangumiInfo;
 import com.TyxApp.bangumi.data.bean.TextItemSelectBean;
+import com.TyxApp.bangumi.data.bean.VideoUrl;
 
 import java.util.List;
 
 public interface PlayContract {
     interface Presenter extends BasePresenter {
-        void getBangumiInfo(int bangumiId);
+        void getBangumiInfo(String bangumiId);
 
-        void getBangumiJiList(int bangumiId);
+        void getBangumiJiList(String bangumiId);
 
-        void getPlayerUrl(int id, int ji);
+        void getPlayerUrl(String id, int ji);
 
-        void getRecommendBangumis(int id);
+        void getRecommendBangumis(String id);
 
-        void isFavorite(int id, String sourch);
+        void checkFavorite(String id, String sourch);
 
-        void setFavorite (Bangumi bangumi);
+        void setFavorite(Bangumi bangumi);
 
         void setTime(Bangumi bangumi);
 
         void setDownload(Bangumi bangumi);
     }
 
-    interface View extends BaseView {
+    interface View {
         void showBangumiInfo(BangumiInfo info);
 
         void showBangumiJiList(List<TextItemSelectBean> jiList);
 
-        void setPlayerUrl(String url);
+        void setPlayerUrl(VideoUrl url);
 
         void showRecommendBangumis(List<Bangumi> recommendBangumis);
 
+        void showFavoriteButton(boolean isFavourite);
 
-        void changeFavoriteButtonState(boolean isFavourite);
-
-        void showSkipDialog(String url);
     }
 }

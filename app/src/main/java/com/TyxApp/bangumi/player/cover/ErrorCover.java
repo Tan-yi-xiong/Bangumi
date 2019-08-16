@@ -2,15 +2,16 @@ package com.TyxApp.bangumi.player.cover;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.TyxApp.bangumi.R;
-import com.TyxApp.bangumi.util.LogUtil;
+import com.TyxApp.bangumi.player.VideoPlayerEvent;
 import com.TyxApp.bangumi.util.PreferenceUtil;
+import com.kk.taurus.playerbase.assist.InterKey;
 import com.kk.taurus.playerbase.config.PConst;
 import com.kk.taurus.playerbase.event.EventKey;
 import com.kk.taurus.playerbase.event.OnPlayerEventListener;
@@ -71,6 +72,14 @@ public class ErrorCover extends BaseCover {
     protected void onCoverAttachedToWindow() {
         super.onCoverAttachedToWindow();
 //        handleUI(NetworkUtils.getNetworkState(getContext()));
+    }
+
+    @Override
+    public void onProducerData(String key, Object data) {
+        if (key.equals(InterKey.KEY_NETWORK_STATE)) {
+            Toast.makeText(getContext(), "您正在使用移动网络", Toast.LENGTH_SHORT).show();
+        }
+        super.onProducerData(key, data);
     }
 
     private void handleUI(int networkState) {

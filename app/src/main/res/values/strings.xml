@@ -22,7 +22,7 @@
     <string name="title_download_settings">下载</string>
     <string name="titel_auto_recover_download">自动恢复下载</string>
     <string name="summary_auto_recover_download">wifi环境下软件开启后自动恢复未完成下载</string>
-    <string name="ui_settings">外观</string>
+    <string name="title_other_settings">其他</string>
     <string name="title_about">关于</string>
     <string name="title_project_url">源码地址</string>
     <string name="title_home_sourch">主页</string>
@@ -34,5 +34,9 @@
     <string name="toast_file_already_delete">文件已被删除</string>
     <string name="snackbar_click_again_finish">再按一次退出</string>
     <string name="text_error_click_retry">发生了未知错误, 点击图片重试</string>
+    <string name="key_decoder_plan">decoder_plan</string>
+    <string name="title_decoder_plan">解码方式</string>
+
+    <string name="search_transition_name">search_transition_name</string>
 
 </resources>

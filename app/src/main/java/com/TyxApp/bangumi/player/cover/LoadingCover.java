@@ -4,11 +4,8 @@ import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 
 import com.TyxApp.bangumi.R;
-import com.TyxApp.bangumi.util.AnimationUtil;
-import com.TyxApp.bangumi.view.VideoLoadingView;
 import com.kk.taurus.playerbase.event.OnPlayerEventListener;
 import com.kk.taurus.playerbase.player.IPlayer;
 import com.kk.taurus.playerbase.receiver.BaseCover;
@@ -16,8 +13,8 @@ import com.kk.taurus.playerbase.receiver.PlayerStateGetter;
 
 public class LoadingCover extends BaseCover {
 
-    public LoadingCover(Context c) {
-        super(c);
+    public LoadingCover(Context context) {
+        super(context);
     }
 
     @Override

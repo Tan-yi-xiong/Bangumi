@@ -6,6 +6,7 @@
         <item>国产动漫</item>
         <item>剧场版</item>
         <item>影视剧</item>
+        <item>banner</item>
     </array>
 
     <array name="dilidili_title">
@@ -62,4 +63,15 @@
         <item>Zzzfun</item>
         <item>dilidili</item>
     </array>
+
+    <array name="decoder_plan_name">
+        <item>MediaPlayer</item>
+        <item>IjkPlayer(有可能出现卡屏)</item>
+    </array>
+
+    <array name="decoder_plan_value">
+        <item>MediaPlayer</item>
+        <item>IjkPlayer</item>
+    </array>
+
 </resources>

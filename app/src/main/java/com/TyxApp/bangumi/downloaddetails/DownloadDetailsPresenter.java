@@ -26,7 +26,7 @@ public class DownloadDetailsPresenter implements DownloadDetailsContract.Present
     }
 
     @Override
-    public void getTasks(int bangumiId, String sourch) {
+    public void getTasks(String bangumiId, String sourch) {
         mDisposable.add(mTaskDao.getRxDownloadTasks(bangumiId, sourch)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

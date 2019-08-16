@@ -18,7 +18,7 @@ public class VideoDownloadTask {
 
     //下面两项用于查找
     @ColumnInfo(name = "bangumi_id")
-    private int bangumiId;
+    private String bangumiId;
     @ColumnInfo(name = "bangumi_sourch")
     private String bangumiSourch;
 
@@ -29,7 +29,7 @@ public class VideoDownloadTask {
     private String url;//视频地址
 
 
-    public VideoDownloadTask(String path, String fileName, int bangumiId, String bangumiSourch, String url) {
+    public VideoDownloadTask(String path, String fileName, String bangumiId, String bangumiSourch, String url) {
         this.dirPath = path;
         this.fileName = fileName;
         this.bangumiId = bangumiId;
@@ -64,11 +64,11 @@ public class VideoDownloadTask {
         this.fileName = fileName;
     }
 
-    public int getBangumiId() {
+    public String getBangumiId() {
         return bangumiId;
     }
 
-    public void setBangumiId(int bangumiId) {
+    public void setBangumiId(String bangumiId) {
         this.bangumiId = bangumiId;
     }
 

@@ -8,7 +8,6 @@ import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
-import okhttp3.Response;
 import okhttp3.ResponseBody;
 
 public class HttpRequestUtil {
@@ -30,11 +29,11 @@ public class HttpRequestUtil {
         return client;
     }
 
-    public static String getGetRequestResponseBodyString(String url) throws IOException {
-        return getGetRequestResponseBodyString(url, "UTF-8");
+    public static String getResponseBodyString(String url) throws IOException {
+        return getResponseBodyString(url, "UTF-8");
     }
 
-    public static String getGetRequestResponseBodyString(String url, String charsetName) throws IOException {
+    public static String getResponseBodyString(String url, String charsetName) throws IOException {
         checkNull(client);
         Request request = new Request.Builder()
                 .url(url)

@@ -8,7 +8,7 @@ import com.TyxApp.bangumi.base.BasePresenter;
 import com.TyxApp.bangumi.base.RecyclerViewFragment;
 import com.TyxApp.bangumi.data.bean.CategorItem;
 import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
-import com.TyxApp.bangumi.data.source.remote.BaseBangumiParser;
+import com.TyxApp.bangumi.data.source.remote.IBangumiParser;
 import com.TyxApp.bangumi.data.source.remote.Dilidili;
 import com.TyxApp.bangumi.data.source.remote.ZzzFun;
 import com.TyxApp.bangumi.main.category.adapter.CategoryAdapter;
@@ -31,7 +31,7 @@ public class CategoryFragment extends RecyclerViewFragment implements CategoryCo
     @Override
     public BasePresenter getPresenter() {
         currentHomeSource = PreferenceUtil.getString(getString(R.string.key_home_sourch), BangumiPresistenceContract.BangumiSource.ZZZFUN);
-        BaseBangumiParser parser = null;
+        IBangumiParser parser = null;
         switch (currentHomeSource) {
             case BangumiPresistenceContract.BangumiSource.ZZZFUN:
                 parser = ZzzFun.getInstance();

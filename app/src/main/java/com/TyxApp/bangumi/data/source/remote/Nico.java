@@ -1,7 +1,6 @@
 package com.TyxApp.bangumi.data.source.remote;
 
 import android.os.Build;
-import android.util.SparseArray;
 
 import com.TyxApp.bangumi.data.bean.Bangumi;
 import com.TyxApp.bangumi.data.bean.BangumiInfo;
@@ -23,46 +22,27 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Map;
 
 import androidx.annotation.RequiresApi;
 import io.reactivex.Observable;
-import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.schedulers.Schedulers;
 
-public class Nico implements BaseBangumiParser {
+public class Nico implements IBangumiParser {
     private String baseUrl = "http://www.nicotv.me";
-    private SparseArray<List<String>> jiUrlsCollect;
-    private SparseArray<SparseArray<VideoUrl>> videoUrlsCollect;
+    private List<String> jiUrls;
     private List<String> searchMoreHtml;
-    private static Nico INSTANCE;
-    private static AtomicInteger INSTANCECOUNTER = new AtomicInteger();
 
     private Nico() {
-        videoUrlsCollect = new SparseArray<>();
-        jiUrlsCollect = new SparseArray<>();
         searchMoreHtml = new ArrayList<>();
     }
 
     public static Nico getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new Nico();
-        }
-        INSTANCECOUNTER.getAndIncrement();
-        return INSTANCE;
+       return new Nico();
     }
 
     @Override
-    public void onDestroy() {
-        jiUrlsCollect.clear();
-        videoUrlsCollect.clear();
-        if (INSTANCECOUNTER.getAndDecrement() == 1) {
-            INSTANCE = null;
-        }
-    }
-
-    @Override
-    public Observable<List<Bangumi>> getHomePageBangumiData() {
+    public Observable<Map<String, List<Bangumi>>> getHomePageBangumiData() {
         return null;
     }
 
@@ -113,7 +93,7 @@ public class Nico implements BaseBangumiParser {
         bangumi.setName(name);
         bangumi.setRemarks(remark);
         bangumi.setCover(cover);
-        bangumi.setVodId(Integer.valueOf(id));
+        bangumi.setVideoId(id);
         return bangumi;
     }
 
@@ -130,7 +110,7 @@ public class Nico implements BaseBangumiParser {
     }
 
     @Override
-    public Observable<BangumiInfo> getInfo(int id) {
+    public Observable<BangumiInfo> getInfo(String id) {
         return Observable.just(baseUrl + "/video/detail/" + id +".html")
                 .compose(ParseUtil.html2Transformer())
                 .map(document -> {
@@ -158,16 +138,16 @@ public class Nico implements BaseBangumiParser {
     }
 
     @Override
-    public Observable<List<TextItemSelectBean>> getJiList(int id) {
+    public Observable<List<TextItemSelectBean>> getJiList(String id) {
         String url = baseUrl + "/video/play/" + id + "-1-1.html";
         return Observable.just(url)
                 .compose(ParseUtil.html2Transformer())
-                .concatMapIterable(document -> document.getElementsByAttributeValue("data-more", "36"))
+                .concatMapIterable(document -> document.getElementsByClass("tab-content ff-playurl-dropdown").get(0).children())
                 .filter(element -> !element.toString().contains("提取码"))
                 .take(1)
                 .map(jiListElement -> {
                     List<TextItemSelectBean> selectBeans = new ArrayList<>();
-                    List<String> jiUrls = new ArrayList<>();
+                    jiUrls = new ArrayList<>();
                     for (Element child : jiListElement.children()) {
                         String text = child.getElementsByTag("a").text();
                         String jiUrl = baseUrl + child.getElementsByTag("a").attr("href");
@@ -175,7 +155,6 @@ public class Nico implements BaseBangumiParser {
                         selectBeans.add(bean);
                         jiUrls.add(jiUrl);
                     }
-                    jiUrlsCollect.append(id, jiUrls);
                     return selectBeans;
                 })
                 .subscribeOn(Schedulers.io());
@@ -184,20 +163,14 @@ public class Nico implements BaseBangumiParser {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
-    public Observable<VideoUrl> getplayerUrl(int id, int ji) {
-        SparseArray<VideoUrl> videoUrls = videoUrlsCollect.get(id);
-        if (videoUrls != null) {
-            if (videoUrls.get(ji) != null) {
-                return Observable.just(videoUrls.get(ji));
-            }
-        }
-        String url = jiUrlsCollect.get(id).get(ji);
+    public Observable<VideoUrl> getplayerUrl(String id, int ji) {
+        String url = jiUrls.get(ji);
         return Observable.just(url)
                 .compose(ParseUtil.html2Transformer())
                 .flatMap(document -> {
                     Element element = document.getElementById("cms_player").child(0);
                     String videoHtmlUrl = baseUrl + element.attr("src");
-                    String html = HttpRequestUtil.getGetRequestResponseBodyString(videoHtmlUrl);
+                    String html = HttpRequestUtil.getResponseBodyString(videoHtmlUrl);
                     return Observable.just(html);
                 })
                 .map(html -> {
@@ -209,7 +182,7 @@ public class Nico implements BaseBangumiParser {
 
     }
 
-    private VideoUrl parsePlayerUrl(int id, int ji, NicoPlayerUrlBean bean) throws IOException {
+    private VideoUrl parsePlayerUrl(String id, int ji, NicoPlayerUrlBean bean) throws IOException {
         String url;
         boolean isHtmlUrl = false;
         if ("360biaofan".equals(bean.name)) {
@@ -223,22 +196,16 @@ public class Nico implements BaseBangumiParser {
         } else if ("kkm3u8".equals(bean.name)) {
             url = bean.url;
         } else {
-            url = jiUrlsCollect.get(id).get(ji);
+            url = jiUrls.get(ji);
             isHtmlUrl = true;
         }
         VideoUrl videoUrl = new VideoUrl(url);
         videoUrl.setHtml(isHtmlUrl);
-        SparseArray<VideoUrl> videoUrls = videoUrlsCollect.get(id);
-        if (videoUrls == null) {
-            videoUrls = new SparseArray<>();
-            videoUrlsCollect.append(id, videoUrls);
-        }
-        videoUrls.append(ji, videoUrl);
         return videoUrl;
     }
 
     private String parseVideoUrlFormhtml(String url) throws IOException {
-        String data = HttpRequestUtil.getGetRequestResponseBodyString(url);
+        String data = HttpRequestUtil.getResponseBodyString(url);
         Document d = Jsoup.parse(data);
         Element e = d.getElementsByTag("script").get(1);
         data = e.toString();
@@ -248,7 +215,7 @@ public class Nico implements BaseBangumiParser {
     }
 
     @Override
-    public Observable<List<Bangumi>> getRecommendBangumis(int id) {
+    public Observable<List<Bangumi>> getRecommendBangumis(String id) {
         String url = baseUrl + "/video/detail/" + id + ".html";
         return Observable.just(url)
                 .compose(ParseUtil.html2Transformer())

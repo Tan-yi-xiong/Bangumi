@@ -3,6 +3,13 @@
     <PreferenceCategory
         android:layout="@layout/coustom_preference_category"
         android:title="@string/title_play_settings">
+        <ListPreference
+            android:layout="@layout/coustom_preference_widget_checkbox"
+            android:title="@string/title_decoder_plan"
+            android:key="@string/key_decoder_plan"
+            android:entries="@array/decoder_plan_name"
+            android:entryValues="@array/decoder_plan_value"
+            android:defaultValue="MediaPlayer"/>
         <SwitchPreference
             android:key="@string/key_auto_play_next"
             android:defaultValue="true"
@@ -33,7 +40,7 @@
 
     <PreferenceCategory
         android:layout="@layout/coustom_preference_category"
-        android:title="@string/ui_settings">
+        android:title="@string/title_other_settings">
 
         <ListPreference
             android:entries="@array/home_sourch"

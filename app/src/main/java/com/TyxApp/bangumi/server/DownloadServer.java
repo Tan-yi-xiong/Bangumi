@@ -110,7 +110,7 @@ public class DownloadServer extends Service {
         return mBinder;
     }
 
-    public void addTask(int bangumiId, String sourch, String videoUrl, String fileName) {
+    public void addTask(String bangumiId, String sourch, String videoUrl, String fileName) {
         Single.just(videoUrl)
                 .map(url -> mTaskDao.getId(url))
                 .map(id -> {
@@ -326,7 +326,7 @@ public class DownloadServer extends Service {
     class DownloadBinder extends Binder implements com.TyxApp.bangumi.server.DownloadBinder {
 
         @Override
-        public void addTask(int bangumiId, String sourch, String videoUrl, String fileName) {
+        public void addTask(String bangumiId, String sourch, String videoUrl, String fileName) {
             DownloadServer.this.addTask(bangumiId, sourch, videoUrl, fileName);
         }
 

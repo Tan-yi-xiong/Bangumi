@@ -44,7 +44,7 @@ public class DownloadDetailsActivity extends BaseMvpActivity {
         return R.layout.layout_base;
     }
 
-    public static void startDownloadDetailsActivity(Context context, int bangumiId, String bangumiSourch) {
+    public static void startDownloadDetailsActivity(Context context, String bangumiId, String bangumiSourch) {
         Intent intent = new Intent(context, DownloadDetailsActivity.class);
         intent.putExtra(ID_KEY, bangumiId);
         intent.putExtra(SOURCH_KEY, bangumiSourch);

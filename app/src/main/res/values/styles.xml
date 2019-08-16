@@ -5,7 +5,7 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-
+        <item name="android:windowActivityTransitions">true</item>
     </style>
 
     <style name="MainactivityStyle" parent="AppTheme">
@@ -16,6 +16,15 @@
         <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
     </style>
 
+    <style name="SearchActivity" parent="AppTheme">
+        <item name="android:windowEnterAnimation">@null</item>
+        <item name="android:windowExitAnimation">@null</item>
+        <item name="android:windowContentTransitions">true</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowEnterTransition">@transition/search_entre_transition</item>
+        <item name="android:windowSharedElementsUseOverlay">true</item>
+    </style>
 
 
 </resources>

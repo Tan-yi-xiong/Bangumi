@@ -2,7 +2,7 @@ package com.TyxApp.bangumi.main.cachevideo;
 
 import android.widget.Toast;
 
-import com.TyxApp.bangumi.BanghumiApp;
+import com.TyxApp.bangumi.BangumiApp;
 import com.TyxApp.bangumi.data.bean.Bangumi;
 import com.TyxApp.bangumi.data.bean.VideoDownloadTask;
 import com.TyxApp.bangumi.data.source.local.AppDatabase;
@@ -17,8 +17,6 @@ import java.util.List;
 
 import io.reactivex.Flowable;
 import io.reactivex.Observable;
-import io.reactivex.Observer;
-import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
@@ -43,7 +41,7 @@ public class CacheVideoPresenter implements CacheVideoContract.Presenter {
                 .toFlowable()
                 .flatMap(Flowable::fromIterable)
                 .map(bangumi -> {//检查该番下载认为是否为空
-                    List<VideoDownloadTask> tasks = mTaskDao.getDownloadTasks(bangumi.getVodId(), bangumi.getVideoSoure());
+                    List<VideoDownloadTask> tasks = mTaskDao.getDownloadTasks(bangumi.getVideoId(), bangumi.getVideoSoure());
                     if (tasks.isEmpty()) {
                         bangumi.setDownLoad(false);
                         mBangumiDao.update(bangumi);
@@ -72,25 +70,25 @@ public class CacheVideoPresenter implements CacheVideoContract.Presenter {
                 .observeOn(Schedulers.io())
                 .map(b -> {
                     VideoDownloadTask task = mTaskDao.getDownloadTask(DownloadServer.STATE_DOWNLOADING);
-                    LogUtil.i(Thread.currentThread().getName());
                     if (task != null) {
-                        if (task.getBangumiId() == b.getVodId() && task.getBangumiSourch().equals(b.getVideoSoure())) {
+                        if (task.getBangumiId().equals(bangumi.getVideoId()) && task.getBangumiSourch().equals(bangumi.getVideoSoure())) {
                             return false;
                         } else {
                             return true;
                         }
+                    } else {
+                        return true;
                     }
-                    return true;
                 })
                 .observeOn(AndroidSchedulers.mainThread())
                 .filter(canDelete -> {
                     if (!canDelete) {
-                        Toast.makeText(BanghumiApp.appContext, "该番有任务下载中, 请暂停后再操作", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(BangumiApp.appContext, "该番有任务下载中, 请暂停后再操作", Toast.LENGTH_SHORT).show();
                     }
                     return canDelete;
                 })
                 .observeOn(Schedulers.io())
-                .flatMap(canDelete -> Observable.fromIterable(mTaskDao.getDownloadTasks(bangumi.getVodId(), bangumi.getVideoSoure())))
+                .flatMap(canDelete -> Observable.fromIterable(mTaskDao.getDownloadTasks(bangumi.getVideoId(), bangumi.getVideoSoure())))
                 .map(task -> {
                     File file = new File(task.getPath());
                     if (file.exists()) {
@@ -104,7 +102,7 @@ public class CacheVideoPresenter implements CacheVideoContract.Presenter {
                 .subscribe(
                         tasks -> {
                             if (!tasks.isEmpty()) {
-                                Toast.makeText(BanghumiApp.appContext, "删除" + tasks.size() + "个任务", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(BangumiApp.appContext, "删除" + tasks.size() + "个任务", Toast.LENGTH_SHORT).show();
                                 getDownoadBangumis();
                             }
 

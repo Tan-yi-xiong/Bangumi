@@ -98,8 +98,8 @@ public class StackBangumi implements Parcelable {
         return mBangumi.getName();
     }
 
-    public int getBangumiId() {
-        return mBangumi.getVodId();
+    public String getBangumiId() {
+        return mBangumi.getVideoId();
     }
 
     public String getBanhumiSourch() {

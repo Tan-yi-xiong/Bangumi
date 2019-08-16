@@ -1,7 +1,5 @@
 package com.TyxApp.bangumi.data.source.remote;
 
-import android.util.SparseArray;
-
 import com.TyxApp.bangumi.data.bean.Bangumi;
 import com.TyxApp.bangumi.data.bean.BangumiInfo;
 import com.TyxApp.bangumi.data.bean.CategorItem;
@@ -10,7 +8,6 @@ import com.TyxApp.bangumi.data.bean.TextItemSelectBean;
 import com.TyxApp.bangumi.data.bean.VideoUrl;
 import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
 import com.TyxApp.bangumi.util.HttpRequestUtil;
-import com.TyxApp.bangumi.util.LogUtil;
 import com.TyxApp.bangumi.util.ParseUtil;
 
 import org.jsoup.nodes.Element;
@@ -19,43 +16,25 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableTransformer;
 import io.reactivex.schedulers.Schedulers;
 
-public class Sakura implements BaseBangumiParser {
-    private static Sakura INSTANCE;
-    private static AtomicInteger INSTANCECOUNTER = new AtomicInteger();
+public class Sakura implements IBangumiParser {
     private static String baseUrl = "http://m.imomoe.io";
     private String nextSearchPageUrl;
-    private SparseArray<List<String>> videoPlayerUrlCollect;
-
-
-    private Sakura() {
-        videoPlayerUrlCollect = new SparseArray<>();
-    }
+    private List<String> mVideoPlayerUrls;
 
     public static Sakura getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new Sakura();
-        }
-        INSTANCECOUNTER.getAndIncrement();
-        return INSTANCE;
+        return new Sakura();
     }
 
-    @Override
-    public void onDestroy() {
-        videoPlayerUrlCollect.clear();
-        if (INSTANCECOUNTER.getAndDecrement() == 1) {
-            INSTANCE = null;
-        }
-    }
 
     @Override
-    public Observable<List<Bangumi>> getHomePageBangumiData() {
+    public Observable<Map<String, List<Bangumi>>> getHomePageBangumiData() {
         return null;
     }
 
@@ -91,7 +70,7 @@ public class Sakura implements BaseBangumiParser {
     private Bangumi parshBangumi(Element element) {
         String url = element.getElementsByTag("a").attr("href");
         Pattern pattern = Pattern.compile("[^0-9]");
-        int id = Integer.valueOf(pattern.matcher(url).replaceAll("").trim());
+        String id = pattern.matcher(url).replaceAll("").trim();
 
         String cover = element.getElementsByTag("img").attr("data-original");
         String name = element.getElementsByTag("img").attr("alt");
@@ -118,7 +97,7 @@ public class Sakura implements BaseBangumiParser {
     }
 
     @Override
-    public Observable<BangumiInfo> getInfo(int id) {
+    public Observable<BangumiInfo> getInfo(String id) {
         return Observable.just(baseUrl + "/view/" + id +".html")
                 .compose(ParseUtil.html2Transformer("GB2312"))
                 .map(document -> {
@@ -143,19 +122,19 @@ public class Sakura implements BaseBangumiParser {
     }
 
     @Override
-    public Observable<List<TextItemSelectBean>> getJiList(int id) {
+    public Observable<List<TextItemSelectBean>> getJiList(String id) {
         String url = baseUrl + "/player/"+ id +"-0-0.html";
         return Observable.just(url)
                 .compose(ParseUtil.html2Transformer())
                 .map(document -> {
                     String dataUrl = document.getElementsByClass("player").get(0).child(0).attr("src");
                     dataUrl = baseUrl + dataUrl;
-                    return parseJi(id, HttpRequestUtil.getGetRequestResponseBodyString(dataUrl));
+                    return parseJi(id, HttpRequestUtil.getResponseBodyString(dataUrl));
                 })
                 .subscribeOn(Schedulers.io());
     }
 
-    private List<TextItemSelectBean> parseJi(int id, String str) throws Exception {
+    private List<TextItemSelectBean> parseJi(String id, String str) throws Exception {
         List<TextItemSelectBean> jiList = new ArrayList<>();
         List<String> videoUrls = new ArrayList<>();
         str = str.substring(str.indexOf('['), str.lastIndexOf(']') - 1);
@@ -179,25 +158,24 @@ public class Sakura implements BaseBangumiParser {
             }
         }
         if (!videoUrls.isEmpty()) {
-            videoPlayerUrlCollect.append(id, videoUrls);
+            mVideoPlayerUrls = videoUrls;
         }
         return jiList;
     }
 
     @Override
-    public Observable<VideoUrl> getplayerUrl(int id, int ji) {
-        List<String> videoUrls = videoPlayerUrlCollect.get(id);
-        if (videoUrls == null) {
+    public Observable<VideoUrl> getplayerUrl(String id, int ji) {
+        if (mVideoPlayerUrls == null || mVideoPlayerUrls.isEmpty()) {
             VideoUrl videoUrl = new VideoUrl(baseUrl + "/player/" + id + "-0-"+ ji +".html");
             videoUrl.setHtml(true);
             return Observable.just(videoUrl);
         } else {
-            return Observable.just(new VideoUrl(videoUrls.get(ji)));
+            return Observable.just(new VideoUrl(mVideoPlayerUrls.get(ji)));
         }
     }
 
     @Override
-    public Observable<List<Bangumi>> getRecommendBangumis(int id) {
+    public Observable<List<Bangumi>> getRecommendBangumis(String id) {
         String url = baseUrl + "/player/" + id + "-0-0.html";
         return Observable.just(url)
                 .compose(ParseUtil.html2Transformer("GB2312"))

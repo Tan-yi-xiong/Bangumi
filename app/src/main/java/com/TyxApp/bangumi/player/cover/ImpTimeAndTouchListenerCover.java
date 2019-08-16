@@ -1,9 +1,7 @@
 package com.TyxApp.bangumi.player.cover;
 
 import android.content.Context;
-import android.os.Bundle;
 import android.view.MotionEvent;
-import android.view.View;
 
 import com.kk.taurus.playerbase.player.OnTimerUpdateListener;
 import com.kk.taurus.playerbase.receiver.BaseCover;

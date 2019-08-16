@@ -4,9 +4,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import io.reactivex.ObservableTransformer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Function;
-import io.reactivex.schedulers.Schedulers;
 
 public class ParseUtil {
     public static ObservableTransformer<String, Document> html2Transformer() {
@@ -15,7 +13,7 @@ public class ParseUtil {
 
     public static ObservableTransformer<String, Document> html2Transformer(String charsetName) {
         return observable -> observable.map((Function<String, Document>) s -> {
-            String html = HttpRequestUtil.getGetRequestResponseBodyString(s, charsetName);
+            String html = HttpRequestUtil.getResponseBodyString(s, charsetName);
             return Jsoup.parse(html);
         });
     }

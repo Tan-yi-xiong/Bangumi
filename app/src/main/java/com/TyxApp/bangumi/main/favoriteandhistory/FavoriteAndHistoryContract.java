@@ -10,7 +10,7 @@ public interface FavoriteAndHistoryContract {
     interface Presenter extends BasePresenter {
         void getBangumis();
 
-        void removeBangumi(int id, String source);
+        void removeBangumi(String id, String source);
 
         void revocationRemoveBangumi(Bangumi bangumi);
     }

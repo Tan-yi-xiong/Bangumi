@@ -30,10 +30,10 @@ public interface VideoDownloadTaskDao {
     Single<List<VideoDownloadTask>> getRxDownloadTasks();
 
     @Query("SELECT * FROM VIDEODOWNLOADTASK WHERE bangumi_id = :bangumiId AND bangumi_sourch = :sourch")
-    Flowable<List<VideoDownloadTask>> getRxDownloadTasks(int bangumiId, String sourch) ;
+    Flowable<List<VideoDownloadTask>> getRxDownloadTasks(String bangumiId, String sourch) ;
 
     @Query("SELECT * FROM VIDEODOWNLOADTASK WHERE bangumi_id = :bangumiId AND bangumi_sourch = :sourch")
-    List<VideoDownloadTask> getDownloadTasks(int bangumiId, String sourch) ;
+    List<VideoDownloadTask> getDownloadTasks(String bangumiId, String sourch) ;
 
     @Query("SELECT * FROM VIDEODOWNLOADTASK WHERE state != 2")
     Single<List<VideoDownloadTask>> getUnfinishedTasks();

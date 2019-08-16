@@ -24,7 +24,7 @@ import java.util.List;
 public class DownloadDetailsFragment extends RecyclerViewFragment implements DownloadDetailsContract.View {
     private DownloadDetailsContract.Presenter mPresenter;
     private DownloadDetailsAdapter mAdapter;
-    private int bangumiId;
+    private String bangumiId;
     private String bangumiSourch;
 
 
@@ -52,9 +52,8 @@ public class DownloadDetailsFragment extends RecyclerViewFragment implements Dow
 
     @Override
     public BasePresenter getPresenter() {
-        bangumiId = requireActivity().getIntent().getIntExtra(DownloadDetailsActivity.ID_KEY, 0);
+        bangumiId = requireActivity().getIntent().getStringExtra(DownloadDetailsActivity.ID_KEY);
         bangumiSourch = requireActivity().getIntent().getStringExtra(DownloadDetailsActivity.SOURCH_KEY);
-        LogUtil.i(bangumiSourch + bangumiId);
         mPresenter = new DownloadDetailsPresenter(this);
         return mPresenter;
     }

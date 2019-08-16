@@ -22,6 +22,7 @@ public class CategoryAdapter extends BaseAdapter<CategorItem, BaseViewHolder> {
     public CategoryAdapter(Context context) {
         super(context);
     }
+    private int lastAnimaPoaition = -1;
 
     @NonNull
     @Override
@@ -31,8 +32,15 @@ public class CategoryAdapter extends BaseAdapter<CategorItem, BaseViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull BaseViewHolder holder, int position) {
+        ImageView imageView = holder.getView(R.id.cover);
+        imageView.getLayoutParams().height = AnimationUtil.dp2px(getContext(), 80);
+        imageView.getLayoutParams().width = AnimationUtil.dp2px(getContext(), 80);;
+        if (lastAnimaPoaition < position) {
+            AnimationUtil.popAnima(imageView);
+            lastAnimaPoaition = holder.getAdapterPosition();
+        }
         CategorItem item = getData(position);
-        holder.setRoundedImage(R.id.cover, item.getImageRes(), AnimationUtil.dp2px(getContext(), 3));
+        holder.setCircleImage(R.id.cover, item.getImageRes());
         TextView textView = holder.getView(R.id.name);
         textView.setGravity(Gravity.CENTER);
         textView.setText(item.getName());
