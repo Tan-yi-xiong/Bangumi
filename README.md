@@ -38,19 +38,19 @@
 
 # 应用截图  
 
-<img src="readmeImage/demo1.gif" width="25" height="300"/>  
+<img src="readmeImage/demo1.gif" width="30%" />  
 <br/>
 <br/>
-<img src="readmeImage/demo2.gif" width="25%" height="300"/> 
+<img src="readmeImage/demo2.gif" width="30%" /> 
 <br/>
 <br/>
-<img src="readmeImage/demo3.gif" width="25%" height="300"/>  
+<img src="readmeImage/demo3.gif" width="30%" />  
 <br/>
 <br/>
-<img src="readmeImage/demo4.jpg" width="25%" height="300"/>  
+<img src="readmeImage/demo4.jpg" width="30%" />  
 <br/>
 <br/>
-<img src="readmeImage/demo5.jpg" width="25%" height="300"/>  
+<img src="readmeImage/demo5.jpg" width="30%" />  
 <br/>
 <br/>
-<img src="readmeImage/demo6.jpg" width="25%" height="300"/>
+<img src="readmeImage/demo6.jpg" width="30%" />
