@@ -270,7 +270,9 @@ public class PlayerActivity extends BaseMvpActivity implements PlayContract.View
                     if (bundle.getBoolean(VideoPlayerEvent.Key.CONTROL_VIEW_SHOW)) {
                         gradualToolbar.setVisibility(View.VISIBLE);
                     } else {
-                        gradualToolbar.setVisibility(View.GONE);
+                        if (mVideoview.getState() != IPlayer.STATE_PAUSED) {
+                            gradualToolbar.setVisibility(View.GONE);
+                        }
                     }
                 }
                 break;
@@ -336,7 +338,6 @@ public class PlayerActivity extends BaseMvpActivity implements PlayContract.View
                 mBangumi.setFavorite(true);
             }
             mPresenter.setFavorite(mBangumi);
-            v.setSelected(!v.isSelected());
         });
     }
 
@@ -502,7 +503,9 @@ public class PlayerActivity extends BaseMvpActivity implements PlayContract.View
     @Override
     protected void onPause() {
         super.onPause();
-        mVideoview.pause();
+        if (mVideoview.isInPlaybackState()) {
+            mVideoview.pause();
+        }
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
@@ -657,20 +660,19 @@ public class PlayerActivity extends BaseMvpActivity implements PlayContract.View
     @Override
     public void showFavoriteButton(boolean isFavourite) {
         Button button = mInfoViewGroup.findViewById(R.id.like_button);
+        if (button.isSelected() != isFavourite) {
+            AnimationUtil.popAnima(button);
+        }
         button.setSelected(isFavourite);
         if (isFavourite) {
             button.setText("已追番");
         }
-        AnimationUtil.popAnima(button);
     }
 
     public static void startPlayerActivity(Context context, Bangumi bangumi) {
         if (!NetworkUtils.isNetConnected(context)) {
-            String brand = android.os.Build.BRAND;
-            if (brand.equals("samsung")) {
-                Toast.makeText(context, "无网情况下三星手机进入此页面会闪退, 所以请联网重试", Toast.LENGTH_SHORT).show();
-                return;
-            }
+            Toast.makeText(context, "无网情况下个别手机进入此页面会闪退, 所以请联网重试", Toast.LENGTH_SHORT).show();
+            return;
         }
         Intent intent = new Intent(context, PlayerActivity.class);
         intent.putExtra(INTENT_KEY, bangumi);

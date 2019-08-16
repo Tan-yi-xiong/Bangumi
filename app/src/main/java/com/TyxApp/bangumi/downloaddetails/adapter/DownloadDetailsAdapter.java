@@ -19,6 +19,8 @@ import com.TyxApp.bangumi.R;
 import com.TyxApp.bangumi.base.BaseAdapter;
 import com.TyxApp.bangumi.base.BaseViewHolder;
 import com.TyxApp.bangumi.data.bean.VideoDownloadTask;
+import com.TyxApp.bangumi.player.LocalPlayerActivity;
+import com.TyxApp.bangumi.player.PlayerActivity;
 import com.TyxApp.bangumi.server.DownloadBinder;
 import com.TyxApp.bangumi.server.DownloadServer;
 
@@ -73,7 +75,7 @@ public class DownloadDetailsAdapter extends BaseAdapter<VideoDownloadTask, BaseV
                 if (!new File(task.getPath()).exists()) {
                     Toast.makeText(getContext(), getContext().getString(R.string.toast_file_already_delete), Toast.LENGTH_SHORT).show();
                 } else {
-//                    PlayerActivity.startPlayerActivity(getContext(), task.getPath());
+                    LocalPlayerActivity.startLocalPlayerActivity(getContext(), task.getPath());
                 }
             });
 

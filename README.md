@@ -4,8 +4,8 @@
 一个追番和看番的Android应用  
 
 # 说明  
-这是一个自学Android新手用来练习, 然后明知代码比屎还烂还发到github的项目。 
-打包好的apk放在release文件夹下, 感兴趣的朋友可以下载体验一下。  
+这是一个自学Android新手用来练习; 
+打包好的apk已放在release文件夹下, 感兴趣的朋友可以下载体验一下。  
 
 # 功能
 - 视频本地缓存
@@ -37,15 +37,20 @@
 - 多任务下载
 
 # 应用截图  
+
+<div align=center>![image center](https://github.com/Tan-yi-xiong/Bangumi/tree/master/readmeImage/demo1.gif)</div>
+  
+<div align=center>![image](https://github.com/Tan-yi-xiong/Bangumi/tree/master/readmeImage/demo2.gif)</div>
+  
+  
+<div align=center>![image](https://github.com/Tan-yi-xiong/Bangumi/tree/master/readmeImage/demo3.gif)</div>
+
 <div align="center">
-<img src="./readmeImage/demo1.jpg" width="350" >
-<br/>
-<br/>
-<img src="./readmeImage/demo2.jpg" width="350">
-<br/>
-<br/>
 <img src="./readmeImage/demo4.jpg" width="350">
-<br/> 
+<br/>
 <br/>
 <img src="./readmeImage/demo5.jpg" width="350">
+<br/> 
+<br/>
+<img src="./readmeImage/demo6.jpg" width="350">
 </div>

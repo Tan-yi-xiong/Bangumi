@@ -21,6 +21,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import butterknife.Unbinder;
 
 public class DetailBottomSheet extends BottomSheetDialogFragment {
@@ -65,6 +66,11 @@ public class DetailBottomSheet extends BottomSheetDialogFragment {
         Glide.with(this).load(bangumi.getCover())
                 .transform(new CenterCrop(), new RoundedCorners(AnimationUtil.dp2px(requireContext(), 3)))
                 .into(cover);
+    }
+
+    @OnClick(R.id.close)
+    public void onClick(View view) {
+        dismiss();
     }
 
     public static DetailBottomSheet newInstance(Bangumi bangumi) {

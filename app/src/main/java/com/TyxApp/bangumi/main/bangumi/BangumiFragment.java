@@ -83,7 +83,9 @@ public class BangumiFragment extends RecyclerViewFragment implements BangumiCont
     public void showResultError(Throwable throwable) {
         getRefreshLayout().setRefreshing(false);
         int netState = NetworkUtils.getNetworkState(requireContext());
-        showErrorPage();
+        if (mHomeAdapter.getItemCount() == 0) {
+            showErrorPage();
+        }
         String snackBarText = "解析发生错误";
         if (netState < 0) {
             snackBarText = "朋友, 你好像没联网";

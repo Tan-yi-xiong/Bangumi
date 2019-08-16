@@ -1,6 +1,7 @@
 package com.TyxApp.bangumi.data.bean;
 
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
@@ -13,6 +14,9 @@ public class SearchWord {
     private long time;
 
     private String word;
+
+    @Ignore
+    private boolean isFromNet;
 
     public SearchWord(long time, String word) {
         this.time = time;
@@ -41,5 +45,13 @@ public class SearchWord {
 
     public void setWord(String word) {
         this.word = word;
+    }
+
+    public boolean isFromNet() {
+        return isFromNet;
+    }
+
+    public void setFromNet(boolean fromNet) {
+        isFromNet = fromNet;
     }
 }

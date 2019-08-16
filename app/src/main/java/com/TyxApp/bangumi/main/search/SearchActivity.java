@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.transition.ChangeBounds;
 import android.transition.Fade;
 import android.transition.Transition;
 import android.transition.TransitionSet;
@@ -29,7 +28,7 @@ import com.TyxApp.bangumi.base.BaseMvpActivity;
 import com.TyxApp.bangumi.base.BasePresenter;
 import com.TyxApp.bangumi.data.bean.SearchWord;
 import com.TyxApp.bangumi.main.search.SearchResult.SearchResultFragmetnAdministrator;
-import com.TyxApp.bangumi.main.search.adapter.SearchHistoryAdapter;
+import com.TyxApp.bangumi.main.search.adapter.SearchAdapter;
 import com.TyxApp.bangumi.main.search.transitions.CircularReveal;
 import com.TyxApp.bangumi.util.ActivityUtil;
 import com.TyxApp.bangumi.util.AnimationUtil;
@@ -40,7 +39,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.OnClick;
 
-public class SearchActivity extends BaseMvpActivity implements SearchHistoryContract.View {
+public class SearchActivity extends BaseMvpActivity implements SearchContract.View {
 
     @BindView(R.id.searchView)
     SearchView searchView;
@@ -51,15 +50,15 @@ public class SearchActivity extends BaseMvpActivity implements SearchHistoryCont
     @BindView(R.id.searchBar_line)
     View line;
 
-    private SearchHistoryPresenter mPresenter;
-    private SearchHistoryAdapter mAdapter;
+    private SearchPresenter mPresenter;
+    private SearchAdapter mAdapter;
     private EditText searchEditText;
     private static final int FADE_ANIMATION_DURATION = 150;
     public static final String CENTRE_X_KEY = "CENTER_X_KEY";
     public static final String CENTRE_Y_KEY = "CENTER_Y_KEY";
 
     public BasePresenter getPresenter() {
-        mPresenter = new SearchHistoryPresenter(this);
+        mPresenter = new SearchPresenter(this);
         return mPresenter;
     }
 
@@ -85,7 +84,7 @@ public class SearchActivity extends BaseMvpActivity implements SearchHistoryCont
     }
 
     private void initRecyclerView() {
-        mAdapter = new SearchHistoryAdapter(this);
+        mAdapter = new SearchAdapter(this);
         mAdapter.setOnItemClickListener(position -> {
             creatSearchResultFragmetn();
             String word = mAdapter.getData(position).getWord();

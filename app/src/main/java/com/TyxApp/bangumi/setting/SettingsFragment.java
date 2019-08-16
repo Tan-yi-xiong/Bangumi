@@ -11,6 +11,7 @@ import androidx.preference.PreferenceFragmentCompat;
 import com.TyxApp.bangumi.R;
 import com.TyxApp.bangumi.player.VideoPlayerEvent;
 import com.TyxApp.bangumi.util.PreferenceUtil;
+import com.kk.taurus.ijkplayer.IjkPlayer;
 import com.kk.taurus.playerbase.config.PlayerConfig;
 
 public class SettingsFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -44,7 +45,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
             DecodePianPreference.setSummary(planName);
             int planId = PlayerConfig.DEFAULT_PLAN_ID;
             if (planName.equals(VideoPlayerEvent.DECODE_PLAN.PLAN_NAME_IJK)) {
-                planId = VideoPlayerEvent.DECODE_PLAN.PLAN_ID_IJK;
+                planId = IjkPlayer.PLAN_ID;
             }
             if (PlayerConfig.getDefaultPlanId() != planId) {
                 PlayerConfig.setDefaultPlanId(planId);

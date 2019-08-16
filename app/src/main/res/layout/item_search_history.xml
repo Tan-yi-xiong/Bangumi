@@ -9,6 +9,8 @@
 
     <ImageView
         android:id="@+id/hint_imageView"
+        android:maxHeight="24dp"
+        android:maxWidth="24dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"

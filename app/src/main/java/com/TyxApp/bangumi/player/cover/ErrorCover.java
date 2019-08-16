@@ -77,7 +77,7 @@ public class ErrorCover extends BaseCover {
     @Override
     public void onProducerData(String key, Object data) {
         if (key.equals(InterKey.KEY_NETWORK_STATE)) {
-            Toast.makeText(getContext(), "您正在使用移动网络", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "您正在使用移动网络喔~", Toast.LENGTH_SHORT).show();
         }
         super.onProducerData(key, data);
     }

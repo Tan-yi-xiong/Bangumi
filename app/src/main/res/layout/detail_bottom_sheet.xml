@@ -28,6 +28,7 @@
                 android:layout_height="wrap_content" />
 
             <ImageButton
+                android:id="@+id/close"
                 android:background="@android:color/transparent"
                 android:tint="@android:color/darker_gray"
                 android:src="@drawable/ic_close"

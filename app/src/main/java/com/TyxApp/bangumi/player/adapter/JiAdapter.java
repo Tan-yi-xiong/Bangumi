@@ -1,9 +1,12 @@
 package com.TyxApp.bangumi.player.adapter;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.Rect;
+import android.util.SparseIntArray;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.TyxApp.bangumi.R;
 import com.TyxApp.bangumi.base.BaseAdapter;
@@ -12,14 +15,17 @@ import com.TyxApp.bangumi.data.bean.TextItemSelectBean;
 import com.TyxApp.bangumi.util.AnimationUtil;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class JiAdapter extends BaseAdapter<TextItemSelectBean, BaseViewHolder> {
+    private RecyclerView mRecyclerView;
+
     public JiAdapter(Context context) {
         super(context);
     }
-    private RecyclerView mRecyclerView;
+
 
     @NonNull
     @Override
