@@ -47,7 +47,7 @@
 <img src="readmeImage/demo3.gif" width="25%" height="300"/>  
 <br/>
 <br/>
-<img src="readmeImage/demo4.jpg" width="30%" height="300"/>  
+<img src="readmeImage/demo4.jpg" width="25%" height="300"/>  
 <br/>
 <br/>
 <img src="readmeImage/demo5.jpg" width="25%" height="300"/>  
