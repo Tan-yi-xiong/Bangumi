@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item android:icon="@drawable/ic_more_24dp"
+    <item android:icon="@drawable/ic_player_control_more_vert"
         android:id="@+id/player_more"
         android:orderInCategory="100"
         app:showAsAction="always"

@@ -46,7 +46,7 @@
             android:entries="@array/home_sourch"
             android:entryValues="@array/home_sourch"
             android:key="@string/key_home_sourch"
-            android:defaultValue="Zzzfun"
+            android:defaultValue="dilidili"
             android:layout="@layout/coustom_preference_widget_checkbox"
             android:title="@string/title_home_sourch" />
     </PreferenceCategory>
