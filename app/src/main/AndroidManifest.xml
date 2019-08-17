@@ -18,24 +18,32 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
+
         <activity
             android:launchMode="singleTask"
             android:name=".player.LocalPlayerActivity"
             android:configChanges="orientation|screenSize|keyboardHidden" />
+
         <activity
             android:name=".player.PlayerActivity"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|keyboardHidden" />
+
         <activity
+            android:screenOrientation="portrait"
             android:name=".main.search.SearchActivity"
             android:theme="@style/SearchActivity" />
+
         <activity
             android:name=".setting.SettingsActivity"
             android:launchMode="singleTask"
             android:theme="@style/SettingStyle" />
         <activity android:name=".downloaddetails.DownloadDetailsActivity" />
+
         <activity
             android:name=".categoryresult.CategoryResultActivity"
             android:screenOrientation="portrait" />
+
         <activity
             android:name=".main.MainActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"

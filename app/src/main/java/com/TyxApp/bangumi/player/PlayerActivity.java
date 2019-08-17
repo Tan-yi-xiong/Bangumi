@@ -1,8 +1,6 @@
 package com.TyxApp.bangumi.player;
 
 import android.Manifest;
-import android.app.Activity;
-import android.app.ActivityOptions;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -10,16 +8,17 @@ import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PersistableBundle;
 import android.provider.Settings;
 import android.text.TextUtils;
-import android.transition.Slide;
-import android.util.Pair;
 import android.util.SparseArray;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -63,7 +62,6 @@ import com.TyxApp.bangumi.player.adapter.PlayerAdapter;
 import com.TyxApp.bangumi.server.DownloadBinder;
 import com.TyxApp.bangumi.server.DownloadServer;
 import com.TyxApp.bangumi.util.AnimationUtil;
-import com.TyxApp.bangumi.util.LogUtil;
 import com.TyxApp.bangumi.util.PreferenceUtil;
 import com.TyxApp.bangumi.view.ParallaxBaseVideoView;
 import com.bumptech.glide.Glide;
@@ -111,6 +109,7 @@ public class PlayerActivity extends BaseMvpActivity implements PlayContract.View
     private PlayerAdapter mAdapter;
     private Bangumi mBangumi;
     private PlayContract.Presenter mPresenter;
+    private SensorEventListener mSensorEventListener;
     private OnVideoViewEventHandler mEventHandler = new OnVideoViewEventHandler() {
         @Override
         public void requestPause(BaseVideoView videoView, Bundle bundle) {
@@ -407,13 +406,13 @@ public class PlayerActivity extends BaseMvpActivity implements PlayContract.View
             mainBottomSheet.dismiss();
             switch (pos) {
                 case 0://重播
-                    mVideoview.rePlay(mVideoview.getCurrentPosition());
+                    mVideoview.rePlay(0);
                     break;
                 case 1://调速
                     showVideoSpeedBottomSheet();
                     break;
                 case 2://下载
-                    String url = mPlayerurls.get(mCurrentJi).getUrl();
+                    String url = mPlayerurls.get(mCurrentJi) == null ? "" : mPlayerurls.get(mCurrentJi).getUrl();
                     if (TextUtils.isEmpty(url) || url.contains(".html")
                             || url.contains(".m3u8")) {
 
@@ -483,6 +482,7 @@ public class PlayerActivity extends BaseMvpActivity implements PlayContract.View
     @Override
     protected void onResume() {
         super.onResume();
+        registerSensor();
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         if (mVideoview.isInPlaybackState()) {
             if (!isUserPause) {
@@ -500,13 +500,47 @@ public class PlayerActivity extends BaseMvpActivity implements PlayContract.View
         }
     }
 
+    private void registerSensor() {
+        SensorManager sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        Sensor gravitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY);
+        if (gravitySensor != null) {
+            mSensorEventListener = new SensorEventListener() {
+                @Override
+                public void onSensorChanged(SensorEvent event) {
+                    if (isFullScreen()) {
+                        if (event.values[0] >= 8.5f) {
+                            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                        } else if (event.values[0] <= -8.5f) {
+                            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
+                        }
+                    }
+                }
+
+                @Override
+                public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+                }
+            };
+            sensorManager.registerListener(mSensorEventListener, gravitySensor, SensorManager.SENSOR_DELAY_NORMAL);
+        }
+    }
+
     @Override
     protected void onPause() {
         super.onPause();
         if (mVideoview.isInPlaybackState()) {
             mVideoview.pause();
         }
+        unRegisterSensor();
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    }
+
+
+    private void unRegisterSensor() {
+        if (mSensorEventListener != null) {
+            SensorManager sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+            sensorManager.unregisterListener(mSensorEventListener);
+        }
     }
 
     /**
@@ -548,6 +582,10 @@ public class PlayerActivity extends BaseMvpActivity implements PlayContract.View
      * 开启服务下载视频
      */
     private void downLoadVideo() {
+        if (jiCount == 0) {
+            Toast.makeText(this, "没有视频可以下载", Toast.LENGTH_SHORT).show();
+            return;
+        }
         mBangumi.setDownLoad(true);
         mPresenter.setDownload(mBangumi);
         if (mDownloadBinder != null) {
@@ -603,17 +641,17 @@ public class PlayerActivity extends BaseMvpActivity implements PlayContract.View
      */
     @Override
     public void showBangumiJiList(List<TextItemSelectBean> jiList) {
-        if (jiList != null) {
+        if (jiList != null && !jiList.isEmpty()) {
             jiCount = jiList.size();
             mPresenter.getRecommendBangumis(mBangumi.getVideoId());
+            jiList.get(mCurrentJi).setSelect(true);
             mPresenter.getPlayerUrl(mBangumi.getVideoId(), mCurrentJi);
-            if (!jiList.isEmpty()) {
-                jiList.get(mCurrentJi).setSelect(true);
-            }
         }
+        //显示追番按钮
         View view = mInfoViewGroup.findViewById(R.id.like_button);
         view.setVisibility(View.VISIBLE);
         AnimationUtil.popAnima(view);
+
         mAdapter.setJiList(jiList);
     }
 

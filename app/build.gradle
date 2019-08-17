@@ -6,8 +6,8 @@ android {
         applicationId "com.TyxApp.bangumi"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 3
-        versionName "2.0.1"
+        versionCode 4
+        versionName "2.1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     compileOptions {
@@ -47,7 +47,7 @@ dependencies {
 
     implementation 'com.github.bumptech.glide:glide:4.9.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'
-    "com.github.bumptech.glide:okhttp3-integration:4.9.0"
+    implementation 'com.github.bumptech.glide:okhttp3-integration:4.9.0'
 
     api 'cn.jiajunhui:ijkplayer:335_088_007'
     api 'tv.danmaku.ijk.media:ijkplayer-java:0.8.8'

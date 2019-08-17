@@ -9,6 +9,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -33,6 +37,7 @@ public class LocalPlayerActivity extends AppCompatActivity {
     private BaseVideoView mBaseVideoView;
     public static final String INTENT_KEY = "I_K";
     private boolean isUserPause;
+    private SensorEventListener mSensorEventListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,6 +125,7 @@ public class LocalPlayerActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        registerSensor();
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         if (!mBaseVideoView.isInPlaybackState()) {
             String path = getIntent().getStringExtra(INTENT_KEY);
@@ -131,6 +137,30 @@ public class LocalPlayerActivity extends AppCompatActivity {
             mBaseVideoView.resume();
         }
     }
+
+    private void registerSensor() {
+        SensorManager sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        Sensor gravitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY);
+        if (gravitySensor != null) {
+            mSensorEventListener = new SensorEventListener() {
+                @Override
+                public void onSensorChanged(SensorEvent event) {
+                    if (event.values[0] >= 8.5f) {
+                        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                    } else if (event.values[0] <= -8.5f) {
+                        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
+                    }
+                }
+
+                @Override
+                public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+                }
+            };
+            sensorManager.registerListener(mSensorEventListener, gravitySensor, SensorManager.SENSOR_DELAY_NORMAL);
+        }
+    }
+
 
     private void hindStateBar() {
         int uiFlage = View.SYSTEM_UI_FLAG_LOW_PROFILE
@@ -146,11 +176,19 @@ public class LocalPlayerActivity extends AppCompatActivity {
 
     @Override
     protected void onPause() {
+        unRegisterSensor();
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         if (mBaseVideoView.isInPlaybackState()) {
             mBaseVideoView.pause();
         }
         super.onPause();
+    }
+
+    private void unRegisterSensor() {
+        if (mSensorEventListener != null) {
+            SensorManager sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+            sensorManager.unregisterListener(mSensorEventListener);
+        }
     }
 
     @Override

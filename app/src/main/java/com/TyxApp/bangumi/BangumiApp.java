@@ -40,8 +40,9 @@ public class BangumiApp extends Application {
         PlayerLibrary.init(this);
         PlayerConfig.setUseDefaultNetworkEventProducer(true);
         String decodePlanName = PreferenceUtil.getString(getString(R.string.key_decoder_plan), VideoPlayerEvent.DECODE_PLAN.PLAN_NAME_MEDIA);
-        if (decodePlanName.equals(VideoPlayerEvent.DECODE_PLAN.PLAN_NAME_IJK)) {
-            IjkPlayer.init(this);
+        IjkPlayer.init(this);
+        if (decodePlanName.equals(VideoPlayerEvent.DECODE_PLAN.PLAN_NAME_MEDIA)) {
+           PlayerConfig.setDefaultPlanId(PlayerConfig.DEFAULT_PLAN_ID);
         }
         checkDownLoadTask();
 

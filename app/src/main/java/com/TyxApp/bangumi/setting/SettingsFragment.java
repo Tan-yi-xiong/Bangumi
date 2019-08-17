@@ -47,9 +47,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
             if (planName.equals(VideoPlayerEvent.DECODE_PLAN.PLAN_NAME_IJK)) {
                 planId = IjkPlayer.PLAN_ID;
             }
-            if (PlayerConfig.getDefaultPlanId() != planId) {
-                PlayerConfig.setDefaultPlanId(planId);
-            }
+            PlayerConfig.setDefaultPlanId(planId);
         }
 
     }
