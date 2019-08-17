@@ -43,8 +43,6 @@ public class BangumiFragment extends RecyclerViewFragment implements BangumiCont
             getRefreshLayout().setRefreshing(true);
             mPresenter.populaterBangumi();
         });
-
-        mPresenter.populaterBangumi();
     }
 
     @Override
@@ -68,7 +66,7 @@ public class BangumiFragment extends RecyclerViewFragment implements BangumiCont
 
     @Override
     public void FristLoading() {
-
+        mPresenter.populaterBangumi();
     }
 
     @Override
