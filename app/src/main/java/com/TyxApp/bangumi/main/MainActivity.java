@@ -89,7 +89,7 @@ public class MainActivity extends BaseMvpActivity implements NavigationView.OnNa
     @Override
     protected void onResume() {
         super.onResume();
-        String currentSourch = PreferenceUtil.getString(getString(R.string.key_home_sourch), BangumiPresistenceContract.BangumiSource.ZZZFUN);
+        String currentSourch = PreferenceUtil.getString(getString(R.string.key_home_sourch), BangumiPresistenceContract.BangumiSource.DILIDLI);
         if (!currentSourch.equals(homeSourch)) {
             homeSourch = currentSourch;
             replaceFragment(BangumiFragment.class.getName());

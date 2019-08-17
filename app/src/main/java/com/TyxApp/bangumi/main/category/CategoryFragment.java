@@ -8,13 +8,18 @@ import com.TyxApp.bangumi.base.BasePresenter;
 import com.TyxApp.bangumi.base.RecyclerViewFragment;
 import com.TyxApp.bangumi.data.bean.CategorItem;
 import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
-import com.TyxApp.bangumi.data.source.remote.IBangumiParser;
 import com.TyxApp.bangumi.data.source.remote.Dilidili;
+import com.TyxApp.bangumi.data.source.remote.IBangumiParser;
 import com.TyxApp.bangumi.data.source.remote.ZzzFun;
 import com.TyxApp.bangumi.main.category.adapter.CategoryAdapter;
 import com.TyxApp.bangumi.util.PreferenceUtil;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import io.reactivex.Observable;
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 
 public class CategoryFragment extends RecyclerViewFragment implements CategoryContract.View {
     private String currentHomeSource;
@@ -62,10 +67,18 @@ public class CategoryFragment extends RecyclerViewFragment implements CategoryCo
 
     @Override
     public void FristLoading() {
-        mPresenter.getCategoryItems();
+        Observable.empty()
+                .delay(100, TimeUnit.MILLISECONDS)
+                .doOnComplete(() -> mPresenter.getCategoryItems())
+                .subscribe();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
     }
 
     public static CategoryFragment newInstance() {
-       return new CategoryFragment();
+        return new CategoryFragment();
     }
 }
