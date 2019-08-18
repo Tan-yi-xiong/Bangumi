@@ -22,16 +22,22 @@ import com.kk.taurus.playerbase.utils.NetworkUtils;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.recyclerview.widget.LinearSnapHelper;
 
+import io.reactivex.Observable;
+import io.reactivex.Single;
+
 public class BangumiFragment extends RecyclerViewFragment implements BangumiContract.View {
     private BangumiPresenter mPresenter;
+
     public static BangumiFragment newInstance() {
         return new BangumiFragment();
     }
+
     private BaseHomeAdapter mHomeAdapter;
 
     @Override
@@ -86,7 +92,9 @@ public class BangumiFragment extends RecyclerViewFragment implements BangumiCont
 
     @Override
     public void showResultError(Throwable throwable) {
-        getRefreshLayout().setRefreshing(false);
+        if (getRefreshLayout() != null) {
+            getRefreshLayout().setRefreshing(false);
+        }
         int netState = NetworkUtils.getNetworkState(requireContext());
         if (mHomeAdapter.getItemCount() == 0) {
             showErrorPage();

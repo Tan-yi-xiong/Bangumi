@@ -1,18 +1,16 @@
 package com.TyxApp.bangumi.categoryresult;
 
-import android.app.Activity;
-import android.app.ActivityOptions;
-import android.app.SharedElementCallback;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.transition.Fade;
-import android.transition.Slide;
-import android.transition.Transition;
-import android.util.Pair;
-import android.view.Gravity;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.TyxApp.bangumi.R;
 import com.TyxApp.bangumi.base.BaseMvpActivity;
@@ -24,16 +22,8 @@ import com.TyxApp.bangumi.data.source.remote.IBangumiParser;
 import com.TyxApp.bangumi.data.source.remote.Silisili;
 import com.TyxApp.bangumi.data.source.remote.ZzzFun;
 import com.TyxApp.bangumi.player.adapter.TranslationAnimation;
-import com.TyxApp.bangumi.util.ActivityUtil;
-import com.TyxApp.bangumi.util.LogUtil;
 import com.TyxApp.bangumi.util.PreferenceUtil;
-import com.TyxApp.bangumi.util.TransitionUtils;
 import com.google.android.material.snackbar.Snackbar;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
@@ -45,6 +35,8 @@ public class CategoryResultActivity extends BaseMvpActivity implements CategoryR
     Toolbar toolbar;
     @BindView(R.id.recyclerView)
     RecyclerView mRecyclerView;
+    @BindView(R.id.progressBar)
+    ProgressBar mProgressBar;
 
     private CategoryResultAdapter mAdapter;
     private CategoryResultContract.Presenter mPresenter;
@@ -56,7 +48,7 @@ public class CategoryResultActivity extends BaseMvpActivity implements CategoryR
         Fade fade = new Fade();
         fade.excludeTarget(android.R.id.statusBarBackground, true);
         getWindow().setEnterTransition(fade);
-        String currentHomeSoure = PreferenceUtil.getString(getString(R.string.key_home_sourch), BangumiPresistenceContract.BangumiSource.ZZZFUN);
+        String currentHomeSoure = PreferenceUtil.getString(getString(R.string.key_home_sourch), BangumiPresistenceContract.BangumiSource.DILIDLI);
         IBangumiParser parser = null;
         switch (currentHomeSoure) {
             case BangumiPresistenceContract.BangumiSource.ZZZFUN:
@@ -115,6 +107,7 @@ public class CategoryResultActivity extends BaseMvpActivity implements CategoryR
         }
     }
 
+
     @Override
     protected int getLayoutId() {
         return R.layout.activity_categoryresult;
@@ -136,6 +129,8 @@ public class CategoryResultActivity extends BaseMvpActivity implements CategoryR
 
     @Override
     public void showResult(List<Bangumi> results) {
+        mProgressBar.setVisibility(View.GONE);
+        mRecyclerView.setVisibility(View.VISIBLE);
         mAdapter.clearAddAll(results);
         isLoading = false;
     }
@@ -148,6 +143,7 @@ public class CategoryResultActivity extends BaseMvpActivity implements CategoryR
 
     @Override
     public void showResultError(Throwable throwable) {
+        mProgressBar.setVisibility(View.GONE);
         Snackbar.make(mRecyclerView, "解析出错", Snackbar.LENGTH_SHORT).show();
     }
 

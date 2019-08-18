@@ -88,7 +88,7 @@ public class Dilidili implements IBangumiParser {
                                     return bangumi;
                                 })
                                 .toList()
-                                .doOnError(throwable -> LogUtil.i(throwable.toString()))
+                                .doOnError(throwable -> LogUtil.i(throwable.toString() + "dili home"))
                                 .subscribe(
                                         bangumis -> homeGroups.put("最近更新", bangumis),
                                         throwable -> returnObservable.set(Observable.error(throwable)));
@@ -318,6 +318,7 @@ public class Dilidili implements IBangumiParser {
                     .toObservable()
                     .subscribeOn(Schedulers.io());
         } else {
+            LogUtil.i("dsfasdf");
             return Observable.just(BASE_URL + "/fenlei.html")
                     .compose(ParseUtil.html2Transformer())
                     .flatMap(document -> Observable.fromIterable(document.getElementsByClass("w").get(1).child(0).children()))
@@ -327,6 +328,7 @@ public class Dilidili implements IBangumiParser {
                     .flatMap(document -> Observable.fromIterable(document.getElementById("episode_list").children()))
                     .map(this::parshCategoryBangumi)
                     .toList()
+                    .doOnError(throwable -> LogUtil.i(throwable.toString() + "  dilica"))
                     .toObservable()
                     .subscribeOn(Schedulers.io());
         }

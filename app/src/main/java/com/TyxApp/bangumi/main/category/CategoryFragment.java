@@ -62,6 +62,7 @@ public class CategoryFragment extends RecyclerViewFragment implements CategoryCo
 
     @Override
     public void showResultError(Throwable throwable) {
+
         showErrorPage();
     }
 
