@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.TyxApp.bangumi.R;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
@@ -55,17 +56,17 @@ public class BaseViewHolder extends RecyclerView.ViewHolder {
 
     public void setImageRes(int viewId, Object res) {
         ImageView imageView = getView(viewId);
-        Glide.with(mContext).load(res).into(imageView);
+        Glide.with(mContext).load(res).error(R.drawable.image_error).into(imageView);
     }
 
     public void setRoundedImage(int viewId, Object res, int angle) {
         ImageView imageView = getView(viewId);
-        Glide.with(mContext).load(res).transform(new CenterCrop(), new RoundedCorners(angle)).into(imageView);
+        Glide.with(mContext).load(res).error(R.drawable.image_error).transform(new CenterCrop(), new RoundedCorners(angle)).into(imageView);
     }
 
     public void setCircleImage(int viewId, Object res) {
         ImageView imageView = getView(viewId);
-        Glide.with(mContext).load(res).transform(new CircleCrop()).into(imageView);
+        Glide.with(mContext).load(res).error(R.drawable.image_error).transform(new CircleCrop()).into(imageView);
     }
 
 }

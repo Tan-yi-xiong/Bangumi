@@ -77,7 +77,10 @@ public class ErrorCover extends BaseCover {
     @Override
     public void onProducerData(String key, Object data) {
         if (key.equals(InterKey.KEY_NETWORK_STATE)) {
-            Toast.makeText(getContext(), "您正在使用移动网络喔~", Toast.LENGTH_SHORT).show();
+            if (NetworkUtils.isMobile(NetworkUtils.getNetworkState(getContext()))) {
+                Toast.makeText(getContext(), "您正在使用移动网络喔~", Toast.LENGTH_SHORT).show();
+            }
+
         }
         super.onProducerData(key, data);
     }
@@ -103,7 +106,7 @@ public class ErrorCover extends BaseCover {
         String errorText;
         String buttonText;
         if (mState == STATE_ERROR) {
-            errorText = "出错了!!!";
+            errorText = "视频加载失败!";
             buttonText = "重试";
         } else {
             errorText = "您正在使用移动网络!";

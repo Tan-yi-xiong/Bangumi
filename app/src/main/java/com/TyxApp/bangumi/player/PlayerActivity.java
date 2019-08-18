@@ -50,6 +50,7 @@ import com.TyxApp.bangumi.data.source.remote.Dilidili;
 import com.TyxApp.bangumi.data.source.remote.IBangumiParser;
 import com.TyxApp.bangumi.data.source.remote.Nico;
 import com.TyxApp.bangumi.data.source.remote.Sakura;
+import com.TyxApp.bangumi.data.source.remote.Silisili;
 import com.TyxApp.bangumi.data.source.remote.ZzzFun;
 import com.TyxApp.bangumi.player.bottomsheet.DetailBottomSheet;
 import com.TyxApp.bangumi.player.bottomsheet.MainBottomSheet;
@@ -215,6 +216,10 @@ public class PlayerActivity extends BaseMvpActivity implements PlayContract.View
             case BangumiPresistenceContract.BangumiSource.DILIDLI:
                 parser = Dilidili.getInstance();
                 break;
+
+            case BangumiPresistenceContract.BangumiSource.SILISILI:
+                parser = Silisili.newInstance();
+                break;
         }
         mPresenter = new PlayerPresenter(parser, this);
         return mPresenter;
@@ -315,7 +320,12 @@ public class PlayerActivity extends BaseMvpActivity implements PlayContract.View
         mAdapter.setOnItemClckListemer(new PlayerAdapter.OnItemClckListemer() {
             @Override
             public void onJiClick(int position) {
-                mPresenter.getPlayerUrl(mBangumi.getVideoId(), position);
+                if (mPlayerurls.get(position) == null) {
+
+                    mPresenter.getPlayerUrl(mBangumi.getVideoId(), position);
+                } else {
+                    setPlayerUrl(mPlayerurls.get(position));
+                }
                 mCurrentJi = position;
             }
 
@@ -347,15 +357,15 @@ public class PlayerActivity extends BaseMvpActivity implements PlayContract.View
         mToolbar.setNavigationOnClickListener(v -> finish());
 
         //获取状态栏高度
-        int height = 0;
+        int stateBarheight = 0;
         int resourceId = getApplicationContext().getResources().getIdentifier("status_bar_height", "dimen", "android");
         if (resourceId > 0) {
-            height = getApplicationContext().getResources().getDimensionPixelSize(resourceId);
+            stateBarheight = getApplicationContext().getResources().getDimensionPixelSize(resourceId);
         }
-        if (height == 0) {
-            height = 96;
+        if (stateBarheight == 0) {
+            stateBarheight = 96;
         }
-        findViewById(R.id.stateBar).getLayoutParams().height = height;
+        findViewById(R.id.stateBar).getLayoutParams().height = stateBarheight;
 
         gradualToolbar.getBackground().setAlpha(0);
     }
@@ -551,7 +561,7 @@ public class PlayerActivity extends BaseMvpActivity implements PlayContract.View
         if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             downLoadVideo();
         } else {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(this)
                         .setTitle("提示")
                         .setMessage("如果不授权储存权限, 将无法下载视频喔")
@@ -632,6 +642,7 @@ public class PlayerActivity extends BaseMvpActivity implements PlayContract.View
         ji.setText(mBangumi.getLatestJi());
         intro.setText(mBangumi.getIntro());
         Glide.with(this).load(mBangumi.getCover())
+                .error(R.drawable.image_error)
                 .transform(new CenterCrop(), new RoundedCorners(AnimationUtil.dp2px(this, 3)))
                 .into(cover);
     }
@@ -660,7 +671,9 @@ public class PlayerActivity extends BaseMvpActivity implements PlayContract.View
      */
     @Override
     public void setPlayerUrl(VideoUrl videoUrl) {
-        if (videoUrl.isHtml()) {
+        if (videoUrl == null) {
+            Toast.makeText(this, "视频解析失败", Toast.LENGTH_SHORT).show();
+        } else if (videoUrl.isHtml()) {
             showSkipDialo(videoUrl.getUrl());
         } else {
             DataSource dataSource = new DataSource(videoUrl.getUrl());

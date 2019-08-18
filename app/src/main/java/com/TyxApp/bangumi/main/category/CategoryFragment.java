@@ -10,6 +10,7 @@ import com.TyxApp.bangumi.data.bean.CategorItem;
 import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
 import com.TyxApp.bangumi.data.source.remote.Dilidili;
 import com.TyxApp.bangumi.data.source.remote.IBangumiParser;
+import com.TyxApp.bangumi.data.source.remote.Silisili;
 import com.TyxApp.bangumi.data.source.remote.ZzzFun;
 import com.TyxApp.bangumi.main.category.adapter.CategoryAdapter;
 import com.TyxApp.bangumi.util.PreferenceUtil;
@@ -44,6 +45,10 @@ public class CategoryFragment extends RecyclerViewFragment implements CategoryCo
 
             case BangumiPresistenceContract.BangumiSource.DILIDLI:
                 parser = Dilidili.getInstance();
+                break;
+
+            case BangumiPresistenceContract.BangumiSource.SILISILI:
+                parser = Silisili.newInstance();
                 break;
         }
         mPresenter = new CategoryPresenter(this, parser);

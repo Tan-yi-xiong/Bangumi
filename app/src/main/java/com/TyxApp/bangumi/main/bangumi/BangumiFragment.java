@@ -9,10 +9,12 @@ import com.TyxApp.bangumi.base.RecyclerViewFragment;
 import com.TyxApp.bangumi.data.bean.Bangumi;
 import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
 import com.TyxApp.bangumi.data.source.remote.Dilidili;
+import com.TyxApp.bangumi.data.source.remote.Silisili;
 import com.TyxApp.bangumi.data.source.remote.ZzzFun;
 import com.TyxApp.bangumi.main.bangumi.adapter.DefaultHomeAdapter;
 import com.TyxApp.bangumi.main.bangumi.adapter.BaseHomeAdapter;
 import com.TyxApp.bangumi.main.bangumi.adapter.Dilidili.DilidiliHomeAdapter;
+import com.TyxApp.bangumi.main.bangumi.adapter.silisili.SilisiliAdapter;
 import com.TyxApp.bangumi.util.LogUtil;
 import com.TyxApp.bangumi.util.PreferenceUtil;
 import com.google.android.material.snackbar.Snackbar;
@@ -59,6 +61,11 @@ public class BangumiFragment extends RecyclerViewFragment implements BangumiCont
             case BangumiPresistenceContract.BangumiSource.DILIDLI:
                 mPresenter = new BangumiPresenter(Dilidili.getInstance(), this);
                 mHomeAdapter = new DilidiliHomeAdapter(requireActivity());
+                break;
+
+            case BangumiPresistenceContract.BangumiSource.SILISILI:
+                mPresenter = new BangumiPresenter(Silisili.newInstance(), this);
+                mHomeAdapter = new SilisiliAdapter(requireActivity());
                 break;
         }
         return mPresenter;

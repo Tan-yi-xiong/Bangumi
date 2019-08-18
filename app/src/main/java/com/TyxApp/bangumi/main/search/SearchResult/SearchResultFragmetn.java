@@ -21,6 +21,7 @@ import com.TyxApp.bangumi.data.source.remote.Dilidili;
 import com.TyxApp.bangumi.data.source.remote.IBangumiParser;
 import com.TyxApp.bangumi.data.source.remote.Nico;
 import com.TyxApp.bangumi.data.source.remote.Sakura;
+import com.TyxApp.bangumi.data.source.remote.Silisili;
 import com.TyxApp.bangumi.data.source.remote.ZzzFun;
 import com.TyxApp.bangumi.main.search.SearchResult.adapter.SearchResultRVAdapter;
 import com.TyxApp.bangumi.util.ExceptionUtil;
@@ -85,6 +86,11 @@ public class SearchResultFragmetn extends RecyclerViewFragment implements Search
             case BangumiPresistenceContract
                     .BangumiSource.DILIDLI:
                 parser = Dilidili.getInstance();
+            break;
+
+            case BangumiPresistenceContract
+                    .BangumiSource.SILISILI:
+                parser = Silisili.newInstance();
             break;
         }
         mPresenter = new SearchResultPresenter(parser, this);

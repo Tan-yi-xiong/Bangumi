@@ -53,7 +53,7 @@ public class PlayerPresenter implements PlayContract.Presenter {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         videoUrl -> mView.setPlayerUrl(videoUrl),
-                        throwable -> LogUtil.i(throwable.toString())));
+                        throwable -> mView.setPlayerUrl(null)));
     }
 
     @Override

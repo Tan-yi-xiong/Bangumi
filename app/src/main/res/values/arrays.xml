@@ -19,7 +19,7 @@
         <item>Zzzfun</item>
         <item>nico</item>
         <item>樱花动漫</item>
-        <!--<item>dilidili</item>-->
+        <item>silisili</item>
     </array>
 
     <array name="main_bottomsheet_item">
@@ -62,6 +62,7 @@
     <array name="home_sourch">
         <item>Zzzfun</item>
         <item>dilidili</item>
+        <item>silisili</item>
     </array>
 
     <array name="decoder_plan_name">

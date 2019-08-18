@@ -4,6 +4,7 @@ import android.content.ContentValues;
 
 import java.io.IOException;
 
+import okhttp3.FormBody;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -42,6 +43,15 @@ public class HttpRequestUtil {
                 .execute()
                 .body();
         return new String(responseBody.bytes(), charsetName);
+    }
+
+    public static String postFromResult(String url, RequestBody requestBody) throws IOException {
+        checkNull(client);
+        Request request = new Request.Builder()
+                .url(url)
+                .post(requestBody)
+                .build();
+        return client.newCall(request).execute().body().string();
     }
 
     public static String postJosonResult(String url, ContentValues values) throws IOException {

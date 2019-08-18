@@ -19,6 +19,7 @@
 - [dilidili](http://www.dilidili.name/)
 - [樱花动漫](http://www.imomoe.io/)
 - [nico动漫](http://www.nicotv.me/dongman)  
+- [silisili](http://www.silisili.me/)
 
 # 使用了&感谢以下开源项目
 - [playerbase](https://github.com/jiajunhui/PlayerBase)
@@ -35,6 +36,7 @@
 - [x] 重力感应旋转屏幕
 - [ ] 自定义下载目录
 - [ ] 多任务下载
+- [ ] 加入弹幕
 
 # 应用截图  
 

@@ -6,5 +6,6 @@ public final class BangumiPresistenceContract {
         public static final String NiICO = "nico";
         public static final String SAKURA = "樱花动漫";
         public static final String DILIDLI = "dilidili";
+        public static final String SILISILI = "silisili";
     }
 }
