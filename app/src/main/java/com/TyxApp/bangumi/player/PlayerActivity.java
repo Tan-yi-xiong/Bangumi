@@ -71,6 +71,7 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.kk.taurus.playerbase.assist.OnVideoViewEventHandler;
 import com.kk.taurus.playerbase.entity.DataSource;
 import com.kk.taurus.playerbase.event.EventKey;
+import com.kk.taurus.playerbase.event.OnPlayerEventListener;
 import com.kk.taurus.playerbase.player.IPlayer;
 import com.kk.taurus.playerbase.receiver.ReceiverGroup;
 import com.kk.taurus.playerbase.utils.NetworkUtils;
@@ -193,6 +194,7 @@ public class PlayerActivity extends BaseMvpActivity implements PlayContract.View
             }
         }
     };
+    private boolean isActive;
 
     @Override
     public BasePresenter getPresenter() {
@@ -251,6 +253,13 @@ public class PlayerActivity extends BaseMvpActivity implements PlayContract.View
                 Configuration configuration = new Configuration();
                 configuration.orientation = Configuration.ORIENTATION_LANDSCAPE;
                 onConfigurationChanged(configuration);
+            }
+        });
+        mVideoview.setOnPlayerEventListener((eventCode, bundle) -> {
+            if (eventCode == OnPlayerEventListener.PLAYER_EVENT_ON_START) {
+                if (!isActive) {
+                    mVideoview.pause();
+                }
             }
         });
     }
@@ -492,6 +501,7 @@ public class PlayerActivity extends BaseMvpActivity implements PlayContract.View
     @Override
     protected void onResume() {
         super.onResume();
+        isActive = true;
         registerSensor();
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         if (mVideoview.isInPlaybackState()) {
@@ -538,6 +548,7 @@ public class PlayerActivity extends BaseMvpActivity implements PlayContract.View
     @Override
     protected void onPause() {
         super.onPause();
+        isActive = false;
         if (mVideoview.isInPlaybackState()) {
             mVideoview.pause();
         }

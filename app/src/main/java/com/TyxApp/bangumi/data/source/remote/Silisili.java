@@ -214,8 +214,17 @@ public class Silisili implements IBangumiParser {
                     Elements elements = document.getElementsByTag("source");
                     VideoUrl videoUrl = new VideoUrl();
                     if (elements.size() == 0) {
-                        videoUrl.setUrl(BASE_URL_PHONE + "/play/" + id + "-" + ji + 1 + ".html");
-                        videoUrl.setHtml(true);
+                        String url;
+                        try {
+                            Element element = document.getElementsByTag("script").get(2);
+                            url = element.toString().split(";")[0];
+                            url = url.substring(url.indexOf("'") + 1, url.lastIndexOf("'"));
+                            videoUrl.setUrl(url);
+                        } catch (Exception e) {
+                            url = BASE_URL_PHONE + "/play/" + id + "-1.html";
+                            videoUrl.setUrl(url);
+                            videoUrl.setHtml(true);
+                        }
                     } else {
                         videoUrl.setUrl(elements.attr("src"));
                     }
