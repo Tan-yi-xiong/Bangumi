@@ -20,6 +20,7 @@ import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
 import com.TyxApp.bangumi.data.source.remote.Dilidili;
 import com.TyxApp.bangumi.data.source.remote.IBangumiParser;
 import com.TyxApp.bangumi.data.source.remote.Nico;
+import com.TyxApp.bangumi.data.source.remote.Qimiqimi;
 import com.TyxApp.bangumi.data.source.remote.Sakura;
 import com.TyxApp.bangumi.data.source.remote.Silisili;
 import com.TyxApp.bangumi.data.source.remote.ZzzFun;
@@ -79,6 +80,11 @@ public class SearchResultFragmetn extends RecyclerViewFragment implements Search
                 break;
 
             case BangumiPresistenceContract
+                    .BangumiSource.QIMIQIMI:
+                parser = Qimiqimi.newInstance();
+                break;
+
+            case BangumiPresistenceContract
                     .BangumiSource.SAKURA:
                 parser = Sakura.getInstance();
                 break;
@@ -86,12 +92,12 @@ public class SearchResultFragmetn extends RecyclerViewFragment implements Search
             case BangumiPresistenceContract
                     .BangumiSource.DILIDLI:
                 parser = Dilidili.getInstance();
-            break;
+                break;
 
             case BangumiPresistenceContract
                     .BangumiSource.SILISILI:
                 parser = Silisili.newInstance();
-            break;
+                break;
         }
         mPresenter = new SearchResultPresenter(parser, this);
         return mPresenter;

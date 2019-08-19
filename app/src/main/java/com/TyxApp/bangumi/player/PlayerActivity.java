@@ -49,6 +49,7 @@ import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
 import com.TyxApp.bangumi.data.source.remote.Dilidili;
 import com.TyxApp.bangumi.data.source.remote.IBangumiParser;
 import com.TyxApp.bangumi.data.source.remote.Nico;
+import com.TyxApp.bangumi.data.source.remote.Qimiqimi;
 import com.TyxApp.bangumi.data.source.remote.Sakura;
 import com.TyxApp.bangumi.data.source.remote.Silisili;
 import com.TyxApp.bangumi.data.source.remote.ZzzFun;
@@ -221,6 +222,10 @@ public class PlayerActivity extends BaseMvpActivity implements PlayContract.View
 
             case BangumiPresistenceContract.BangumiSource.SILISILI:
                 parser = Silisili.newInstance();
+                break;
+
+            case BangumiPresistenceContract.BangumiSource.QIMIQIMI:
+                parser = Qimiqimi.newInstance();
                 break;
         }
         mPresenter = new PlayerPresenter(parser, this);

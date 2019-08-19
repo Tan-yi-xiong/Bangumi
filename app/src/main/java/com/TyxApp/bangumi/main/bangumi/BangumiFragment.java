@@ -56,7 +56,7 @@ public class BangumiFragment extends RecyclerViewFragment implements BangumiCont
     @Override
     public BasePresenter getPresenter() {
         String homeSourch = PreferenceUtil.getString(getString(R.string.key_home_sourch),
-                BangumiPresistenceContract.BangumiSource.DILIDLI);
+                BangumiPresistenceContract.BangumiSource.ZZZFUN);
 
         switch (homeSourch) {
             case BangumiPresistenceContract.BangumiSource.ZZZFUN:

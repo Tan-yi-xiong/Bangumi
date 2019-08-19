@@ -20,6 +20,7 @@
 - [樱花动漫](http://www.imomoe.io/)
 - [nico动漫](http://www.nicotv.me/dongman)  
 - [silisili](http://www.silisili.me/)
+- [奇米奇米](http://www.qimiqimi.co/)
 
 # 使用了&感谢以下开源项目
 - [playerbase](https://github.com/jiajunhui/PlayerBase)

@@ -57,7 +57,7 @@ public class SearchPresenter implements SearchContract.Presenter {
             }
             searchDisposable = Observable.just(word)
                     .map(URLEncoder::encode)
-                    .map(encodeWord -> "http://www.zzzfun.com/index.php/ajax/suggest?mid=1&wd=" + encodeWord + "&limit=6")
+                    .map(encodeWord -> "http://www.qimiqimi.co/index.php/ajax/suggest?mid=1&wd=" + encodeWord + "&limit=6")
                     .map(HttpRequestUtil::getResponseBodyString)
                     .flatMap(jsonData -> {
                         JsonArray jsonArray = new JsonParser().parse(jsonData)

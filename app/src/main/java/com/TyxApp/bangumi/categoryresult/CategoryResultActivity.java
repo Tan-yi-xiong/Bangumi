@@ -48,7 +48,7 @@ public class CategoryResultActivity extends BaseMvpActivity implements CategoryR
         Fade fade = new Fade();
         fade.excludeTarget(android.R.id.statusBarBackground, true);
         getWindow().setEnterTransition(fade);
-        String currentHomeSoure = PreferenceUtil.getString(getString(R.string.key_home_sourch), BangumiPresistenceContract.BangumiSource.DILIDLI);
+        String currentHomeSoure = PreferenceUtil.getString(getString(R.string.key_home_sourch), BangumiPresistenceContract.BangumiSource.ZZZFUN);
         IBangumiParser parser = null;
         switch (currentHomeSoure) {
             case BangumiPresistenceContract.BangumiSource.ZZZFUN:
