@@ -88,7 +88,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
 
     @Override
     public boolean onPreferenceTreeClick(Preference preference) {
-        if (preference.getKey().equals(getString(R.string.key_clear_cache))) {
+        if (getString(R.string.key_clear_cache).equals(preference.getKey())) {
             mDisposable = Single.just(0)
                     .map(integer -> {
                         Glide.get(requireContext()).clearDiskCache();

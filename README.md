@@ -1,4 +1,4 @@
-<img src="./readmeImage/icon.png">  
+<img src="./Screenshots/icon.png">  
 
 # Bangumi
 一个追番和看番的Android应用  
@@ -41,14 +41,14 @@
 
 # 应用截图  
 <div align=center>
-<img src="readmeImage/demo1.gif" width="40%" />  
+<img src="Screenshots/demo1.gif" width="40%" />  
 <br/>
 <br/>
-<img src="readmeImage/demo2.gif" width="40%" /> 
+<img src="Screenshots/demo2.gif" width="40%" /> 
 <br/>
 <br/>
-<img src="readmeImage/demo3.gif" width="40%" />  
+<img src="Screenshots/demo3.gif" width="40%" />  
 <br/>
 <br/>
-<img src="readmeImage/demo4.jpg" width="40%" />
+<img src="Screenshots/demo4.jpg" width="40%" />
 </div>
