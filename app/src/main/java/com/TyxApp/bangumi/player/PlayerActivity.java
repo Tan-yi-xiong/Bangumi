@@ -5,6 +5,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -16,6 +17,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PersistableBundle;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.SparseArray;
@@ -53,9 +55,11 @@ import com.TyxApp.bangumi.data.source.remote.Qimiqimi;
 import com.TyxApp.bangumi.data.source.remote.Sakura;
 import com.TyxApp.bangumi.data.source.remote.Silisili;
 import com.TyxApp.bangumi.data.source.remote.ZzzFun;
+import com.TyxApp.bangumi.player.bottomsheet.DanmakuSetingBottomSheet;
 import com.TyxApp.bangumi.player.bottomsheet.DetailBottomSheet;
 import com.TyxApp.bangumi.player.bottomsheet.MainBottomSheet;
 import com.TyxApp.bangumi.player.bottomsheet.VideoSpeedBottomSheet;
+import com.TyxApp.bangumi.player.cover.DanmakuCover;
 import com.TyxApp.bangumi.player.cover.ErrorCover;
 import com.TyxApp.bangumi.player.cover.GestureCover;
 import com.TyxApp.bangumi.player.cover.LoadingCover;
@@ -64,6 +68,7 @@ import com.TyxApp.bangumi.player.adapter.PlayerAdapter;
 import com.TyxApp.bangumi.server.DownloadBinder;
 import com.TyxApp.bangumi.server.DownloadServer;
 import com.TyxApp.bangumi.util.AnimationUtil;
+import com.TyxApp.bangumi.util.LogUtil;
 import com.TyxApp.bangumi.util.PreferenceUtil;
 import com.TyxApp.bangumi.view.ParallaxBaseVideoView;
 import com.bumptech.glide.Glide;
@@ -81,6 +86,7 @@ import com.kk.taurus.playerbase.widget.BaseVideoView;
 import java.util.List;
 
 import butterknife.BindView;
+import master.flame.danmaku.danmaku.parser.BaseDanmakuParser;
 
 public class PlayerActivity extends BaseMvpActivity implements PlayContract.View {
     @BindView(R.id.transparentToolbar)
@@ -106,6 +112,7 @@ public class PlayerActivity extends BaseMvpActivity implements PlayContract.View
     private int mCurrentJi;//当前播放的集数
     private SparseArray<VideoUrl> mPlayerurls = new SparseArray<>();//播放过的视频url
     private int jiCount;//解析到的集数
+    private boolean hasDanmaku;//是否有弹幕
 
 
     private ViewGroup mInfoViewGroup;
@@ -143,6 +150,8 @@ public class PlayerActivity extends BaseMvpActivity implements PlayContract.View
                     gradualToolbar.setVisibility(View.GONE);
                     hindStateBar();
                 }
+            } else {
+                videoView.start();
             }
         }
 
@@ -246,6 +255,7 @@ public class PlayerActivity extends BaseMvpActivity implements PlayContract.View
 
     private void initVideoView() {
         mReceiverGroup = new ReceiverGroup();
+        mReceiverGroup.addReceiver(DanmakuCover.class.getName(), new DanmakuCover(this));
         mReceiverGroup.addReceiver(PlayerControlCover.class.getName(), new PlayerControlCover(this));
         mReceiverGroup.addReceiver(LoadingCover.class.getName(), new LoadingCover(this));
         mReceiverGroup.addReceiver(GestureCover.class.getName(), new GestureCover(this));
@@ -320,6 +330,12 @@ public class PlayerActivity extends BaseMvpActivity implements PlayContract.View
 
             case VideoPlayerEvent.Code.CODE_PLAYER_MORE_CLICK:
                 showMainBottomSheet();
+                break;
+
+            case VideoPlayerEvent.Code.CODE_DANMAKU_PREPARED:
+                if (!mVideoview.isInPlaybackState() && !mReceiverGroup.getGroupValue().getBoolean(VideoPlayerEvent.Key.ERROR_COVER_SHOW)) {
+                    mVideoview.start();
+                }
                 break;
         }
     }
@@ -447,6 +463,16 @@ public class PlayerActivity extends BaseMvpActivity implements PlayContract.View
                         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
                     } else {
                         downLoadVideo();
+                    }
+                    break;
+                case 3://弹幕设置
+                    if (hasDanmaku) {
+                        boolean isShow = mReceiverGroup.getGroupValue().getBoolean(VideoPlayerEvent.Key.DANMAKU_VISIBLE);
+                        DanmakuSetingBottomSheet bottomSheet = DanmakuSetingBottomSheet.newInstance(isShow);
+                        bottomSheet.setOnCheckedChangeListener(isCheck -> mReceiverGroup.getGroupValue().putBoolean(VideoPlayerEvent.Key.DANMAKU_VISIBLE, isCheck, true));
+                        bottomSheet.show(getSupportFragmentManager(), DanmakuSetingBottomSheet.class.getName());
+                    } else {
+                        Toast.makeText(this, R.string.toast_no_danmaku, Toast.LENGTH_SHORT).show();
                     }
                     break;
             }
@@ -644,7 +670,9 @@ public class PlayerActivity extends BaseMvpActivity implements PlayContract.View
      */
     @Override
     public void showBangumiInfo(BangumiInfo info) {
-        mBangumi.setBangumiInfo(info);
+        if (info != null) {
+            mBangumi.setBangumiInfo(info);
+        }
         setInfoView();
         mPresenter.getBangumiJiList(mBangumi.getVideoId());
     }
@@ -698,10 +726,27 @@ public class PlayerActivity extends BaseMvpActivity implements PlayContract.View
             mPlayerurls.append(mCurrentJi, videoUrl);
             //WiFi情况下才开始播放, 不是Wifi情况下通知相应Cover显示
             boolean playInMobileNet = PreferenceUtil.getBollean(getString(R.string.key_play_no_wifi), false);
-            if (NetworkUtils.isWifiConnected(this) || playInMobileNet) {
-                mVideoview.start();
-            } else {
+            mPresenter.getDanmaku(mBangumi.getVideoId(), mCurrentJi);
+            if (!NetworkUtils.isWifiConnected(this) || !playInMobileNet) {
                 mReceiverGroup.getGroupValue().putBoolean(VideoPlayerEvent.Key.NOTIFI_ERROR_COVER_SHOW, true, true);
+            }
+        }
+    }
+
+    /**
+     * 设置弹幕
+     */
+    @Override
+    public void setDanmaku(BaseDanmakuParser danmakuParser) {
+        //有弹幕就等弹幕准备完成通知视频一起开始
+        if (danmakuParser != null) {
+            hasDanmaku = true;
+            DanmakuCover danmakuCover = mReceiverGroup.getReceiver(DanmakuCover.class.getName());
+            danmakuCover.setParser(danmakuParser);
+        } else {
+            hasDanmaku = false;
+            if (!mVideoview.isInPlaybackState() && !mReceiverGroup.getGroupValue().getBoolean(VideoPlayerEvent.Key.ERROR_COVER_SHOW)) {
+                mVideoview.start();
             }
         }
     }

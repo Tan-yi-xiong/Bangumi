@@ -3,7 +3,7 @@ package com.TyxApp.bangumi.data.source.remote;
 import com.TyxApp.bangumi.data.bean.Bangumi;
 import com.TyxApp.bangumi.data.bean.BangumiInfo;
 import com.TyxApp.bangumi.data.bean.CategorItem;
-import com.TyxApp.bangumi.data.bean.Results;
+import com.TyxApp.bangumi.data.bean.Result;
 import com.TyxApp.bangumi.data.bean.TextItemSelectBean;
 import com.TyxApp.bangumi.data.bean.VideoUrl;
 
@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.reactivex.Observable;
+import master.flame.danmaku.danmaku.parser.BaseDanmakuParser;
 
 public interface IBangumiParser {
     /**
@@ -33,7 +34,7 @@ public interface IBangumiParser {
      * 然后按顺序取出加载返回包装好的数据。
      *
      */
-    Observable<Results> nextSearchResult();
+    Observable<Result<List<Bangumi>>> nextSearchResult();
 
     /**
      * 根据id获取番剧的简介, 播放页面使用。
@@ -64,10 +65,19 @@ public interface IBangumiParser {
      */
     Observable<List<Bangumi>> getCategoryBangumis(String category);
 
-    Observable<Results> getNextCategoryBangumis();
+    Observable<Result<List<Bangumi>>> getNextCategoryBangumis();
 
     Observable<List<CategorItem>> getCategorItems();
 
     Observable<List<List<Bangumi>>> getBangumiTimeTable();
+
+    /**
+     * 获取弹幕
+     *
+     * @param id
+     * @param ji
+     * @return
+     */
+    Observable<Result<BaseDanmakuParser>> getDanmakuParser(String id, int ji);
 
 }

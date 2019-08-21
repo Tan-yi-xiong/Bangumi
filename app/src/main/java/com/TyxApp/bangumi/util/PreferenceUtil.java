@@ -26,4 +26,14 @@ public class PreferenceUtil {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(BangumiApp.appContext);
         preferences.edit().putBoolean(key, value).apply();
     }
+
+    public static int getInt(String key, int defaultValue) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(BangumiApp.appContext);
+        return preferences.getInt(key, defaultValue);
+    }
+
+    public static void setInt(String key, int value) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(BangumiApp.appContext);
+        preferences.edit().putInt(key, value).apply();
+    }
 }

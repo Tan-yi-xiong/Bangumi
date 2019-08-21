@@ -1,9 +1,14 @@
 package com.TyxApp.bangumi.player;
 
+import android.net.Uri;
+import android.widget.Toast;
+
+import com.TyxApp.bangumi.BangumiApp;
 import com.TyxApp.bangumi.data.bean.Bangumi;
 import com.TyxApp.bangumi.data.source.local.AppDatabase;
 import com.TyxApp.bangumi.data.source.local.BangumiDao;
 import com.TyxApp.bangumi.data.source.remote.IBangumiParser;
+import com.TyxApp.bangumi.player.cover.DanmakuCover;
 import com.TyxApp.bangumi.util.ExceptionUtil;
 import com.TyxApp.bangumi.util.LogUtil;
 
@@ -54,6 +59,19 @@ public class PlayerPresenter implements PlayContract.Presenter {
                 .subscribe(
                         videoUrl -> mView.setPlayerUrl(videoUrl),
                         throwable -> mView.setPlayerUrl(null)));
+    }
+
+    @Override
+    public void getDanmaku(String id, int ji) {
+        mDisposable.add(mParser.getDanmakuParser(id, ji)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        result -> mView.setDanmaku(result.getResult()),
+                        throwable -> {
+                            mView.setDanmaku(null);
+                            Toast.makeText(BangumiApp.appContext, "获取弹幕失败", Toast.LENGTH_SHORT).show();
+                        }));
+
     }
 
     @Override

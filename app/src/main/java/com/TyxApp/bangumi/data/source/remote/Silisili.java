@@ -5,17 +5,17 @@ import android.text.TextUtils;
 import com.TyxApp.bangumi.data.bean.Bangumi;
 import com.TyxApp.bangumi.data.bean.BangumiInfo;
 import com.TyxApp.bangumi.data.bean.CategorItem;
-import com.TyxApp.bangumi.data.bean.Results;
+import com.TyxApp.bangumi.data.bean.Result;
 import com.TyxApp.bangumi.data.bean.TextItemSelectBean;
 import com.TyxApp.bangumi.data.bean.VideoUrl;
 import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
 import com.TyxApp.bangumi.main.bangumi.adapter.BannerHomeAdapter;
+import com.TyxApp.bangumi.player.danmaku.BiliDanmukuParser;
 import com.TyxApp.bangumi.util.HttpRequestUtil;
 import com.TyxApp.bangumi.util.LogUtil;
 import com.TyxApp.bangumi.util.ParseUtil;
 
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
@@ -30,8 +30,10 @@ import java.util.regex.Pattern;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableTransformer;
-import io.reactivex.Observer;
 import io.reactivex.schedulers.Schedulers;
+import master.flame.danmaku.danmaku.loader.ILoader;
+import master.flame.danmaku.danmaku.loader.android.DanmakuLoaderFactory;
+import master.flame.danmaku.danmaku.parser.BaseDanmakuParser;
 import okhttp3.FormBody;
 
 public class Silisili implements IBangumiParser {
@@ -123,7 +125,7 @@ public class Silisili implements IBangumiParser {
     }
 
     @Override
-    public Observable<Results> nextSearchResult() {
+    public Observable<Result<List<Bangumi>>> nextSearchResult() {
         if (TextUtils.isEmpty(nextSearchUrl)) {
             return Observable.empty();
         }
@@ -142,7 +144,7 @@ public class Silisili implements IBangumiParser {
                 .flatMap(document -> Observable.fromIterable(document.getElementsByClass("search_result")))
                 .compose(parseSearchBangumi())
                 .toList()
-                .map(bangumis -> new Results(false, bangumis))
+                .map(bangumis -> new Result<>(false, bangumis))
                 .toObservable()
                 .doOnError(throwable -> LogUtil.i(throwable.toString() + "  sili nextsearch"))
                 .subscribeOn(Schedulers.io());
@@ -279,7 +281,7 @@ public class Silisili implements IBangumiParser {
     }
 
     @Override
-    public Observable<Results> getNextCategoryBangumis() {
+    public Observable<Result<List<Bangumi>>> getNextCategoryBangumis() {
         if (TextUtils.isEmpty(nextCategorUrl)) {
             return Observable.empty();
         }
@@ -298,7 +300,7 @@ public class Silisili implements IBangumiParser {
                 .flatMap(document -> Observable.fromIterable(document.getElementsByClass("plist02").get(0).children()))
                 .compose(parseCategoryBangumis())
                 .toList()
-                .map(bangumis -> new Results(false, bangumis))
+                .map(bangumis -> new Result<>(false, bangumis))
                 .toObservable()
                 .subscribeOn(Schedulers.io());
     }
@@ -350,6 +352,21 @@ public class Silisili implements IBangumiParser {
                 })
                 .toList()
                 .toObservable()
+                .subscribeOn(Schedulers.io());
+    }
+
+    @Override
+    public Observable<Result<BaseDanmakuParser>> getDanmakuParser(String id, int ji) {
+        ji++;
+        return Observable.just("http://103.19.2.6/danmu/dm/" + id + "/" + id + "-" + ji + ".php")
+                .map(HttpRequestUtil::getRespondBody)
+                .map(responseBody -> {
+                    ILoader loader = DanmakuLoaderFactory.create(DanmakuLoaderFactory.TAG_BILI);
+                    loader.load(responseBody.byteStream());
+                    BaseDanmakuParser parser = new BiliDanmukuParser();
+                    parser.load(loader.getDataSource());
+                    return new Result<>(false, parser);
+                })
                 .subscribeOn(Schedulers.io());
     }
 }

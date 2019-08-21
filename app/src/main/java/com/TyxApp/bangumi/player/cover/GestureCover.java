@@ -47,15 +47,15 @@ public class GestureCover extends ImpTouchListenerCover {
     LinearLayout brightnessProgressView;
     private static final int MAX_BRIGHTNESS = 255;
     private int mBrightness;
-    private int brightnessStepValue;
+    private int brightnessStepValue;//每次增加亮度值
     private Bundle mBundle;
 
     private float screenWidth;
 
-    private static final int SEEK_SCOPE = 30;
+    private static final int SEEK_SCOPE = 32;
 
     private float stateBarHeight;
-    private boolean isDownOnStateBarRegion;
+    private boolean isDownOnStateBarRegion;//起点是否为statetbar
 
     private int adjustState = -1;
     private static final int STATE_VIDEO_FAST_FORWARD = 0;

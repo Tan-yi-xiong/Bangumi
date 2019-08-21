@@ -46,6 +46,8 @@ public class MainBottomSheet extends BasePlayerBottomSheet {
                     imageResId = R.drawable.ic_bottomsheet_motion_video;
                 } else if (position == 2) {
                     imageResId = R.drawable.ic_bottom_sheet_download;
+                } else if (position == 3) {
+                    imageResId = R.drawable.ic_danmaku;
                 }
                 ImageView hintImage = holder.getView(R.id.hint_imageView);
                 hintImage.setImageResource(imageResId);

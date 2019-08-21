@@ -1,15 +1,19 @@
 package com.TyxApp.bangumi.player.cover;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewStub;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.TyxApp.bangumi.R;
 import com.TyxApp.bangumi.player.VideoPlayerEvent;
+import com.TyxApp.bangumi.util.LogUtil;
 import com.TyxApp.bangumi.util.PreferenceUtil;
 import com.kk.taurus.playerbase.assist.InterKey;
 import com.kk.taurus.playerbase.config.PConst;
@@ -24,13 +28,11 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
 
-public class ErrorCover extends BaseCover {
+public class ErrorCover extends BaseCover implements View.OnClickListener {
+    private TextView errorTextView;
+    private Button retryButton;
+    private ViewStub mViewStub;
 
-    @BindView(R.id.error_tips)
-    TextView errorTextView;
-    @BindView(R.id.btn_retry)
-    Button retryButton;
-    private Unbinder mUnbinder;
 
     private static final int STATE_ERROR = -1;
     private static final int STATE_MOBILE = 1;
@@ -40,7 +42,7 @@ public class ErrorCover extends BaseCover {
             new IReceiverGroup.OnGroupValueUpdateListener() {
                 @Override
                 public String[] filterKeys() {
-                    return new String[] {
+                    return new String[]{
                             VideoPlayerEvent.Key.NOTIFI_ERROR_COVER_SHOW};
                 }
 
@@ -57,14 +59,12 @@ public class ErrorCover extends BaseCover {
     @Override
     public void onReceiverUnBind() {
         super.onReceiverUnBind();
-        mUnbinder.unbind();
         getGroupValue().unregisterOnGroupValueUpdateListener(mOnGroupValueUpdateListener);
     }
 
     @Override
     public void onReceiverBind() {
         super.onReceiverBind();
-        mUnbinder = ButterKnife.bind(this, getView());
         getGroupValue().registerOnGroupValueUpdateListener(mOnGroupValueUpdateListener);
     }
 
@@ -97,12 +97,19 @@ public class ErrorCover extends BaseCover {
             boolean playInMobile = PreferenceUtil.getBollean(getContext().getString(R.string.key_play_no_wifi), false);
             mState = STATE_MOBILE;
             if (!playInMobile) {
-               showUI();
+                showUI();
             }
         }
     }
 
     private void showUI() {
+        if (retryButton == null || errorTextView == null) {
+            mViewStub.setLayoutResource(R.layout.layout_cover_error);
+            View view = mViewStub.inflate();
+            retryButton = view.findViewById(R.id.btn_retry);
+            retryButton.setOnClickListener(this);
+            errorTextView = view.findViewById(R.id.error_tips);
+        }
         String errorText;
         String buttonText;
         if (mState == STATE_ERROR) {
@@ -118,9 +125,10 @@ public class ErrorCover extends BaseCover {
         Bundle bundle = new Bundle();
         bundle.putBoolean(EventKey.BOOL_DATA, true);
         notifyReceiverEvent(VideoPlayerEvent.Code.CODE_ERROR_COVER_SHOW, bundle);
+        getGroupValue().putBoolean(VideoPlayerEvent.Key.ERROR_COVER_SHOW, true);
     }
 
-    @OnClick(R.id.btn_retry)
+    @Override
     public void onClick(View view) {
         if (mState == STATE_ERROR) {
             requestRetry(null);
@@ -135,11 +143,15 @@ public class ErrorCover extends BaseCover {
         Bundle bundle = new Bundle();
         bundle.putBoolean(EventKey.BOOL_DATA, false);
         notifyReceiverEvent(VideoPlayerEvent.Code.CODE_ERROR_COVER_SHOW, bundle);
+        getGroupValue().putBoolean(VideoPlayerEvent.Key.ERROR_COVER_SHOW, false);
     }
 
     @Override
     protected View onCreateCoverView(Context context) {
-        return LayoutInflater.from(context).inflate(R.layout.layout_cover_error, null);
+        View view = LayoutInflater.from(context).inflate(R.layout.layout_viewstub, null);
+        mViewStub = view.findViewById(R.id.ViewStub);
+        view.setBackgroundColor(Color.BLACK);
+        return view;
     }
 
     @Override
@@ -151,6 +163,7 @@ public class ErrorCover extends BaseCover {
 
     @Override
     public void onErrorEvent(int eventCode, Bundle bundle) {
+        LogUtil.i(eventCode + "haah");
         mState = STATE_ERROR;
         showUI();
     }

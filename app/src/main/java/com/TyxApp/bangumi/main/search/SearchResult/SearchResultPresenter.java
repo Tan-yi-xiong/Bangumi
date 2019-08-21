@@ -40,10 +40,10 @@ public class SearchResultPresenter implements SearchResultContract.Presenter {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         results -> {
-                            if (results.isFinalTag()) {
+                            if (results.isNull()) {
                                 mView.noNextSearchResult();
                             } else {
-                                mView.showMoreSearchResult(results.getBangumis());
+                                mView.showMoreSearchResult(results.getResult());
                             }
                         },
                         throwable -> mView.showResultError(throwable)));

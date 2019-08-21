@@ -23,6 +23,7 @@ import com.TyxApp.bangumi.player.LocalPlayerActivity;
 import com.TyxApp.bangumi.player.PlayerActivity;
 import com.TyxApp.bangumi.server.DownloadBinder;
 import com.TyxApp.bangumi.server.DownloadServer;
+import com.TyxApp.bangumi.util.FormatUtil;
 
 import java.io.File;
 import java.util.List;
@@ -46,7 +47,7 @@ public class DownloadDetailsAdapter extends BaseAdapter<VideoDownloadTask, BaseV
     public void onBindViewHolder(@NonNull BaseViewHolder holder, int position) {
         VideoDownloadTask task = getData(position);
         holder.setText(R.id.file_name, task.getFileName());
-        holder.setText(R.id.file_total, byteToMB(task.getTotal()));
+        holder.setText(R.id.file_total, FormatUtil.byteToMB(task.getTotal()));
         ImageButton stateButton = holder.getView(R.id.stateButton);
         ProgressBar progressBar = holder.getView(R.id.progressBar);
 
@@ -125,22 +126,6 @@ public class DownloadDetailsAdapter extends BaseAdapter<VideoDownloadTask, BaseV
         }
     }
 
-    private String byteToMB(long size) {
-        long kb = 1024;
-        long mb = kb * 1024;
-        long gb = mb * 1024;
-        if (size >= gb) {
-            return String.format("%.1f GB", (float) size / gb);
-        } else if (size >= mb) {
-            float f = (float) size / mb;
-            return String.format(f > 100 ? "%.0f MB" : "%.1f MB", f);
-        } else if (size > kb) {
-            float f = (float) size / kb;
-            return String.format(f > 100 ? "%.0f KB" : "%.1f KB", f);
-        } else {
-            return String.format("%d B", size);
-        }
-    }
 
     @Override
     public void remove(int position) {

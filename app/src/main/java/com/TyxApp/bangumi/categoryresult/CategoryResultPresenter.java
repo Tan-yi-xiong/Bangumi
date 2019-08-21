@@ -35,10 +35,10 @@ public class CategoryResultPresenter implements CategoryResultContract.Presenter
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         results -> {
-                            if (results.isFinalTag()) {
+                            if (results.isNull()) {
                                 mView.showResultEmpty();
                             } else {
-                                mView.showNextResult(results.getBangumis());
+                                mView.showNextResult(results.getResult());
                             }
                         },
                         throwable -> mView.showResultError(throwable)));

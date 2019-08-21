@@ -1,5 +1,7 @@
 package com.TyxApp.bangumi.player;
 
+import androidx.annotation.Nullable;
+
 import com.TyxApp.bangumi.base.BasePresenter;
 import com.TyxApp.bangumi.data.bean.Bangumi;
 import com.TyxApp.bangumi.data.bean.BangumiInfo;
@@ -8,6 +10,8 @@ import com.TyxApp.bangumi.data.bean.VideoUrl;
 
 import java.util.List;
 
+import master.flame.danmaku.danmaku.parser.BaseDanmakuParser;
+
 public interface PlayContract {
     interface Presenter extends BasePresenter {
         void getBangumiInfo(String bangumiId);
@@ -15,6 +19,8 @@ public interface PlayContract {
         void getBangumiJiList(String bangumiId);
 
         void getPlayerUrl(String id, int ji);
+
+        void getDanmaku(String id, int ji);
 
         void getRecommendBangumis(String id);
 
@@ -28,15 +34,17 @@ public interface PlayContract {
     }
 
     interface View {
-        void showBangumiInfo(BangumiInfo info);
+        void showBangumiInfo(@Nullable BangumiInfo info);
 
-        void showBangumiJiList(List<TextItemSelectBean> jiList);
+        void showBangumiJiList(@Nullable List<TextItemSelectBean> jiList);
 
-        void setPlayerUrl(VideoUrl url);
+        void setPlayerUrl(@Nullable VideoUrl url);
 
-        void showRecommendBangumis(List<Bangumi> recommendBangumis);
+        void showRecommendBangumis(@Nullable List<Bangumi> recommendBangumis);
 
         void showFavoriteButton(boolean isFavourite);
+
+        void setDanmaku(@Nullable BaseDanmakuParser danmakuParser);
 
     }
 }

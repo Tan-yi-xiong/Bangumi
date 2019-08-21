@@ -22,6 +22,12 @@
             android:layout="@layout/coustom_preference_widget_checkbox"
             android:summary="@string/summary_play_no_wifi"
             android:title="@string/title_play_no_wifi" />
+        <SwitchPreference
+            android:key="@string/key_danmaku_switch"
+            android:defaultValue="true"
+            android:title="@string/title_danmaku_switch"
+            android:summary="@string/summary_danmaku_switch"
+            android:layout="@layout/coustom_preference_widget_checkbox"/>
 
     </PreferenceCategory>
 
@@ -46,9 +52,14 @@
             android:entries="@array/home_sourch"
             android:entryValues="@array/home_sourch"
             android:key="@string/key_home_sourch"
-            android:defaultValue="dilidili"
+            android:defaultValue="Zzzfun"
             android:layout="@layout/coustom_preference_widget_checkbox"
             android:title="@string/title_home_sourch" />
+        <Preference
+            android:key="@string/key_clear_cache"
+            android:layout="@layout/coustom_preference_widget_checkbox"
+            android:title="@string/title_clear_cache" />
+
     </PreferenceCategory>
 
     <PreferenceCategory
@@ -57,7 +68,6 @@
         <Preference
             android:key="versions"
             android:layout="@layout/coustom_preference_widget_checkbox"
-            android:summary="1.0.0"
             android:title="@string/title_versions" />
 
         <Preference

@@ -38,5 +38,17 @@
     <string name="title_decoder_plan">解码方式</string>
 
     <string name="search_transition_name">search_transition_name</string>
+    <string name="key_danmaku_switch">swit_danmuku</string>
+    <string name="title_danmaku_switch">自动打开弹幕</string>
+    <string name="summary_danmaku_switch">有弹幕的视频源自动打开弹幕</string>
+    <string name="text_danmaku_switch">弹幕开关</string>
+    <string name="text_danmaku_textsize">弹幕字号</string>
+    <string name="text_danmaku_max_line">最大行数</string>
+    <string name="toast_no_danmaku">当前视频源没有弹幕哦~</string>
+    <string name="key_danmaku_textsize">danmaku_text_size</string>
+    <string name="key_danmaku_maxline">danmaku_max_line</string>
+    <string name="title_clear_cache">清除缓存</string>
+    <string name="summary_clear_cache">清除图片缓存</string>
+    <string name="key_clear_cache">clear_cache</string>
 
 </resources>

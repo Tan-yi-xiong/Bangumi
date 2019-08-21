@@ -27,6 +27,7 @@
         <item>重播</item>
         <item>视频速度</item>
         <item>下载这个视频</item>
+        <item>弹幕设置</item>
     </array>
 
     <array name="video_speed_bottomsheet_item">

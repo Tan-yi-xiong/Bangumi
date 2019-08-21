@@ -3,7 +3,7 @@ package com.TyxApp.bangumi.data.source.remote;
 import com.TyxApp.bangumi.data.bean.Bangumi;
 import com.TyxApp.bangumi.data.bean.BangumiInfo;
 import com.TyxApp.bangumi.data.bean.CategorItem;
-import com.TyxApp.bangumi.data.bean.Results;
+import com.TyxApp.bangumi.data.bean.Result;
 import com.TyxApp.bangumi.data.bean.TextItemSelectBean;
 import com.TyxApp.bangumi.data.bean.VideoUrl;
 import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 import io.reactivex.Observable;
 import io.reactivex.ObservableTransformer;
 import io.reactivex.schedulers.Schedulers;
+import master.flame.danmaku.danmaku.parser.BaseDanmakuParser;
 
 public class Sakura implements IBangumiParser {
     private static String baseUrl = "http://m.imomoe.io";
@@ -84,14 +85,14 @@ public class Sakura implements IBangumiParser {
     }
 
     @Override
-    public Observable<Results> nextSearchResult() {
-        Observable<Results> observable = null;
+    public Observable<Result<List<Bangumi>>> nextSearchResult() {
+        Observable<Result<List<Bangumi>>> observable = null;
         if (nextSearchPageUrl == null) {
-            observable = Observable.just(new Results(true, null));//已经没有更多了
+            observable = Observable.just(new Result<>(true, null));//已经没有更多了
         } else {
             observable = Observable.just(nextSearchPageUrl)
                     .compose(searchLogicObservable())
-                    .map(bangumis -> new Results(false, bangumis));
+                    .map(bangumis -> new Result<>(false, bangumis));
         }
         return observable;
     }
@@ -192,7 +193,7 @@ public class Sakura implements IBangumiParser {
     }
 
     @Override
-    public Observable<Results> getNextCategoryBangumis() {
+    public Observable<Result<List<Bangumi>>> getNextCategoryBangumis() {
         return null;
     }
 
@@ -204,6 +205,11 @@ public class Sakura implements IBangumiParser {
     @Override
     public Observable<List<List<Bangumi>>> getBangumiTimeTable() {
         return null;
+    }
+
+    @Override
+    public Observable<Result<BaseDanmakuParser>> getDanmakuParser(String id, int ji) {
+        return Observable.just(new Result<>(true, null));
     }
 
 }

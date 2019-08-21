@@ -5,7 +5,7 @@ import androidx.annotation.Nullable;
 import com.TyxApp.bangumi.data.bean.Bangumi;
 import com.TyxApp.bangumi.data.bean.BangumiInfo;
 import com.TyxApp.bangumi.data.bean.CategorItem;
-import com.TyxApp.bangumi.data.bean.Results;
+import com.TyxApp.bangumi.data.bean.Result;
 import com.TyxApp.bangumi.data.bean.TextItemSelectBean;
 import com.TyxApp.bangumi.data.bean.VideoUrl;
 import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
@@ -25,7 +25,6 @@ import org.jsoup.select.Elements;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +32,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
+import master.flame.danmaku.danmaku.parser.BaseDanmakuParser;
 
 public class Dilidili implements IBangumiParser {
     private static final String BASE_URL = "http://m.dilidili.name";
@@ -196,7 +196,7 @@ public class Dilidili implements IBangumiParser {
     }
 
     @Override
-    public Observable<Results> nextSearchResult() {
+    public Observable<Result<List<Bangumi>>> nextSearchResult() {
         return null;
     }
 
@@ -318,7 +318,6 @@ public class Dilidili implements IBangumiParser {
                     .toObservable()
                     .subscribeOn(Schedulers.io());
         } else {
-            LogUtil.i("dsfasdf");
             return Observable.just(BASE_URL + "/fenlei.html")
                     .compose(ParseUtil.html2Transformer())
                     .flatMap(document -> Observable.fromIterable(document.getElementsByClass("w").get(1).child(0).children()))
@@ -335,8 +334,8 @@ public class Dilidili implements IBangumiParser {
     }
 
     @Override
-    public Observable<Results> getNextCategoryBangumis() {
-        return Observable.just(new Results(true, null));
+    public Observable<Result<List<Bangumi>>> getNextCategoryBangumis() {
+        return Observable.just(new Result(true, null));
     }
 
 
@@ -381,6 +380,11 @@ public class Dilidili implements IBangumiParser {
 
                 .toObservable()
                 .subscribeOn(Schedulers.io());
+    }
+
+    @Override
+    public Observable<Result<BaseDanmakuParser>> getDanmakuParser(String id, int ji) {
+        return Observable.just(new Result<>(true, null));
     }
 
     class JsonResult<T> {

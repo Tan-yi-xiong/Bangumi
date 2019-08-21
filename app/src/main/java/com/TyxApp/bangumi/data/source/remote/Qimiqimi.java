@@ -1,18 +1,16 @@
 package com.TyxApp.bangumi.data.source.remote;
 
-import android.os.Bundle;
 import android.util.Base64;
 
 import com.TyxApp.bangumi.data.bean.Bangumi;
 import com.TyxApp.bangumi.data.bean.BangumiInfo;
 import com.TyxApp.bangumi.data.bean.CategorItem;
-import com.TyxApp.bangumi.data.bean.Results;
+import com.TyxApp.bangumi.data.bean.Result;
 import com.TyxApp.bangumi.data.bean.TextItemSelectBean;
 import com.TyxApp.bangumi.data.bean.VideoUrl;
 import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
 import com.TyxApp.bangumi.util.LogUtil;
 import com.TyxApp.bangumi.util.ParseUtil;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import org.jsoup.nodes.Element;
@@ -27,6 +25,7 @@ import java.util.Map;
 import io.reactivex.Observable;
 import io.reactivex.ObservableTransformer;
 import io.reactivex.schedulers.Schedulers;
+import master.flame.danmaku.danmaku.parser.BaseDanmakuParser;
 
 public class Qimiqimi implements IBangumiParser {
     private static final String BASE_URL = "http://www.qimiqimi.co";
@@ -77,7 +76,7 @@ public class Qimiqimi implements IBangumiParser {
     }
 
     @Override
-    public Observable<Results> nextSearchResult() {
+    public Observable<Result<List<Bangumi>>> nextSearchResult() {
         page++;
         return Observable.just(searchWord)
                 .map(URLEncoder::encode)
@@ -86,12 +85,12 @@ public class Qimiqimi implements IBangumiParser {
                 .flatMap(document -> {
                     Elements bangumiElements = document.getElementsByClass("show-list").get(0).children();
                     if (bangumiElements.size() == 0) {
-                        return Observable.just(new Results(true, null));
+                        return Observable.just(new Result<List<Bangumi>>(true, null));
                     } else {
                         return Observable.fromIterable(bangumiElements)
                                 .compose(parseSearchElement())
                                 .toList()
-                                .map(bangumis -> new Results(false, bangumis))
+                                .map(bangumis -> new Result<>(false, bangumis))
                                 .toObservable()
                                 .doOnError(throwable -> LogUtil.i(throwable.toString() + " qimi nextsearch"));
 
@@ -205,7 +204,7 @@ public class Qimiqimi implements IBangumiParser {
     }
 
     @Override
-    public Observable<Results> getNextCategoryBangumis() {
+    public Observable<Result<List<Bangumi>>> getNextCategoryBangumis() {
         return null;
     }
 
@@ -217,5 +216,10 @@ public class Qimiqimi implements IBangumiParser {
     @Override
     public Observable<List<List<Bangumi>>> getBangumiTimeTable() {
         return null;
+    }
+
+    @Override
+    public Observable<Result<BaseDanmakuParser>> getDanmakuParser(String id, int ji) {
+        return Observable.just(new Result<>(true, null));
     }
 }

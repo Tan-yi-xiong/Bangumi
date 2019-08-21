@@ -5,12 +5,11 @@ import android.os.Build;
 import com.TyxApp.bangumi.data.bean.Bangumi;
 import com.TyxApp.bangumi.data.bean.BangumiInfo;
 import com.TyxApp.bangumi.data.bean.CategorItem;
-import com.TyxApp.bangumi.data.bean.Results;
+import com.TyxApp.bangumi.data.bean.Result;
 import com.TyxApp.bangumi.data.bean.TextItemSelectBean;
 import com.TyxApp.bangumi.data.bean.VideoUrl;
 import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
 import com.TyxApp.bangumi.util.HttpRequestUtil;
-import com.TyxApp.bangumi.util.LogUtil;
 import com.TyxApp.bangumi.util.ParseUtil;
 import com.google.gson.Gson;
 
@@ -27,6 +26,7 @@ import java.util.Map;
 import androidx.annotation.RequiresApi;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
+import master.flame.danmaku.danmaku.parser.BaseDanmakuParser;
 
 public class Nico implements IBangumiParser {
     private String baseUrl = "http://www.nicotv.me";
@@ -98,14 +98,14 @@ public class Nico implements IBangumiParser {
     }
 
     @Override
-    public Observable<Results> nextSearchResult() {
+    public Observable<Result<List<Bangumi>>> nextSearchResult() {
         if (searchMoreHtml.isEmpty()) {
-            return Observable.just(new Results(true, null));
+            return Observable.just(new Result<>(true, null));
         }
         String nextUrl = searchMoreHtml.remove(0);
         return Observable.just(nextUrl)
                 .compose(ParseUtil.html2Transformer())
-                .map(document -> new Results(false, parseSearchPageBangumis(document)))
+                .map(document -> new Result<>(false, parseSearchPageBangumis(document)))
                 .subscribeOn(Schedulers.io());
     }
 
@@ -238,7 +238,7 @@ public class Nico implements IBangumiParser {
     }
 
     @Override
-    public Observable<Results> getNextCategoryBangumis() {
+    public Observable<Result<List<Bangumi>>> getNextCategoryBangumis() {
         return null;
     }
 
@@ -250,6 +250,11 @@ public class Nico implements IBangumiParser {
     @Override
     public Observable<List<List<Bangumi>>> getBangumiTimeTable() {
         return null;
+    }
+
+    @Override
+    public Observable<Result<BaseDanmakuParser>> getDanmakuParser(String id, int ji) {
+        return Observable.just(new Result<>(true, null));
     }
 
     class NicoPlayerUrlBean {

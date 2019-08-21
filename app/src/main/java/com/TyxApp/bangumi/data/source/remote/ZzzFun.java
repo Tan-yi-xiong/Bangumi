@@ -10,11 +10,13 @@ import com.TyxApp.bangumi.R;
 import com.TyxApp.bangumi.data.bean.Bangumi;
 import com.TyxApp.bangumi.data.bean.BangumiInfo;
 import com.TyxApp.bangumi.data.bean.CategorItem;
-import com.TyxApp.bangumi.data.bean.Results;
+import com.TyxApp.bangumi.data.bean.Result;
 import com.TyxApp.bangumi.data.bean.TextItemSelectBean;
 import com.TyxApp.bangumi.data.bean.VideoUrl;
 import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
+import com.TyxApp.bangumi.player.danmaku.ZzzfunDannukuParser;
 import com.TyxApp.bangumi.util.HttpRequestUtil;
+import com.TyxApp.bangumi.util.LogUtil;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -32,6 +34,9 @@ import java.util.Map;
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.schedulers.Schedulers;
+import master.flame.danmaku.danmaku.loader.ILoader;
+import master.flame.danmaku.danmaku.loader.android.DanmakuLoaderFactory;
+import master.flame.danmaku.danmaku.parser.BaseDanmakuParser;
 
 public class ZzzFun implements IBangumiParser {
     private String baseUrl = "http://111.230.89.165:8089/zapi";
@@ -127,8 +132,8 @@ public class ZzzFun implements IBangumiParser {
     }
 
     @Override
-    public Observable<Results> nextSearchResult() {
-        return Observable.just(new Results(true, null));
+    public Observable<Result<List<Bangumi>>> nextSearchResult() {
+        return Observable.just(new Result(true, null));
     }
 
     @Override
@@ -221,16 +226,16 @@ public class ZzzFun implements IBangumiParser {
     }
 
     @Override
-    public Observable<Results> getNextCategoryBangumis() {
+    public Observable<Result<List<Bangumi>>> getNextCategoryBangumis() {
         categoryPage++;
         String url = baseUrl + "/type/list.php";
         return Observable.just(url)
                 .map(this::parseCategoryBangumi)
                 .map(jsonData -> {
                     List<Bangumi> bangumis = getBangumis(jsonData);
-                    Results results = new Results(false, bangumis);
+                    Result<List<Bangumi> > results = new Result(false, bangumis);
                     if (bangumis == null) {
-                        results.setFinalTag(true);
+                        results.setNull(true);
                     }
                     return results;
                 })
@@ -270,6 +275,21 @@ public class ZzzFun implements IBangumiParser {
                 })
                 .toList()
                 .toObservable()
+                .subscribeOn(Schedulers.io());
+    }
+
+    @Override
+    public Observable<Result<BaseDanmakuParser>> getDanmakuParser(String id, int ji) {
+        ji++;
+        return Observable.just("http://111.230.89.165:8089/zapi/dm.php?id%5B%5D=" + id + "&id%5B%5D=" + ji)
+                .map(HttpRequestUtil::getRespondBody)
+                .map(responseBody -> {
+                    ILoader loader = DanmakuLoaderFactory.create(DanmakuLoaderFactory.TAG_BILI);
+                    loader.load(responseBody.byteStream());
+                    BaseDanmakuParser parser = new ZzzfunDannukuParser();
+                    parser.load(loader.getDataSource());
+                    return new Result<>(false, parser);
+                })
                 .subscribeOn(Schedulers.io());
     }
 

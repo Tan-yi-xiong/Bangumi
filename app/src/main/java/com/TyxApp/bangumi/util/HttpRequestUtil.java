@@ -30,6 +30,16 @@ public class HttpRequestUtil {
         return client;
     }
 
+    public static ResponseBody getRespondBody(String url) throws IOException {
+        checkNull(client);
+        Request request = new Request.Builder()
+                .url(url)
+                .build();
+        return client.newCall(request)
+                .execute()
+                .body();
+    }
+
     public static String getResponseBodyString(String url) throws IOException {
         return getResponseBodyString(url, "UTF-8");
     }
