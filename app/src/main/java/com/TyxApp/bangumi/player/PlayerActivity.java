@@ -306,7 +306,7 @@ public class PlayerActivity extends BaseMvpActivity implements PlayContract.View
                 break;
 
             case VideoPlayerEvent.Code.CODE_NEXT://下一集
-                if (mCurrentJi == jiCount) {
+                if (mCurrentJi == jiCount - 1) {
                     Toast.makeText(this, "已经是最后一集啦", Toast.LENGTH_SHORT).show();
                 } else {
                     mCurrentJi++;
