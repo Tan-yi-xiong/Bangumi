@@ -50,5 +50,5 @@
 <img src="Screenshots/demo3.gif" width="40%" />  
 <br/>
 <br/>
-<img src="Screenshots/demo4.jpg" width="40%" />
+<img src="Screenshots/demo4.gif" width="40%" />
 </div>
