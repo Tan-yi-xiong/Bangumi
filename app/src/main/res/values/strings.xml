@@ -50,5 +50,9 @@
     <string name="title_clear_cache">清除缓存</string>
     <string name="summary_clear_cache">清除图片缓存</string>
     <string name="key_clear_cache">clear_cache</string>
+    <string name="text_style">风格</string>
+    <string name="text_cast">角色声优</string>
+    <string name="text_staff">制作</string>
+    <string name="text_intro">简介</string>
 
 </resources>

@@ -56,6 +56,12 @@ public class SearchResultRVAdapter extends BaseAdapter<Bangumi, BaseViewHolder> 
     }
 
     @Override
+    public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
+        getDataList().clear();
+        super.onDetachedFromRecyclerView(recyclerView);
+    }
+
+    @Override
     public int getItemCount() {
         return getDataList().size();
     }

@@ -14,9 +14,11 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PersistableBundle;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -40,6 +42,7 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.TyxApp.bangumi.BangumiApp;
 import com.TyxApp.bangumi.R;
 import com.TyxApp.bangumi.base.BaseMvpActivity;
 import com.TyxApp.bangumi.base.BasePresenter;
@@ -793,7 +796,10 @@ public class PlayerActivity extends BaseMvpActivity implements PlayContract.View
 
     @Override
     protected void onDestroy() {
+        mReceiverGroup.clearReceivers();
         mVideoview.stopPlayback();
+        mReceiverGroup = null;
+        mVideoview = null;
         if (mServiceConnection != null) {
             unbindService(mServiceConnection);
         }

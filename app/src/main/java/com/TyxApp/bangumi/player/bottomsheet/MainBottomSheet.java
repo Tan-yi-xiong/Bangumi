@@ -3,10 +3,13 @@ package com.TyxApp.bangumi.player.bottomsheet;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.TyxApp.bangumi.BangumiApp;
 import com.TyxApp.bangumi.R;
 import com.TyxApp.bangumi.base.BaseAdapter;
 import com.TyxApp.bangumi.base.BaseViewHolder;
@@ -31,16 +34,16 @@ public class MainBottomSheet extends BasePlayerBottomSheet {
     @Override
     RecyclerView.Adapter getAdapter() {
         List<String> itemTexts = Arrays.asList(getArguments().getStringArray(ARGUMENT_TAG));
-        return new BaseAdapter<String, BaseViewHolder>(itemTexts, requireActivity()) {
-
+        return new RecyclerView.Adapter() {
             @NonNull
             @Override
-            public BaseViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                return BaseViewHolder.get(getContext(), parent, R.layout.item_search_history);
+            public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_search_history, parent, false);
+                return new RecyclerView.ViewHolder(view) {};
             }
 
             @Override
-            public void onBindViewHolder(@NonNull BaseViewHolder holder, int position) {
+            public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
                 int imageResId = R.drawable.ic_bottom_sheet_replay;
                 if (position == 1) {
                     imageResId = R.drawable.ic_bottomsheet_motion_video;
@@ -49,14 +52,14 @@ public class MainBottomSheet extends BasePlayerBottomSheet {
                 } else if (position == 3) {
                     imageResId = R.drawable.ic_danmaku;
                 }
-                ImageView hintImage = holder.getView(R.id.hint_imageView);
+                ImageView hintImage = holder.itemView.findViewById(R.id.hint_imageView);
                 hintImage.setImageResource(imageResId);
                 hintImage.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(
                         getContext(), R.color.grey_500)));
 
-                TextView textView = holder.getView(R.id.tv_history_word);
+                TextView textView = holder.itemView.findViewById(R.id.tv_history_word);
                 textView.setTextColor(Color.BLACK);
-                textView.setText(getData(position));
+                textView.setText(itemTexts.get(position));
 
                 holder.itemView.setOnClickListener(v -> {
                     if (mClickListener != null) {
@@ -64,11 +67,11 @@ public class MainBottomSheet extends BasePlayerBottomSheet {
                     }
                 });
             }
-
             @Override
             public int getItemCount() {
-                return getDataList().size();
+                return itemTexts.size();
             }
         };
+
     }
 }

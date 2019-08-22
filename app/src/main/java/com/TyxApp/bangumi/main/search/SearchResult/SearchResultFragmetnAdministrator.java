@@ -31,7 +31,7 @@ public class SearchResultFragmetnAdministrator extends Fragment {
     @BindView(R.id.vp_search_result)
     ViewPager searchResultViewPager;
 
-    private List<SearchResultFragmetn> searchResultFragmetns;
+    private List<SearchResultFragment> searchResultFragmetns;
     private Unbinder mUnbinder;
     private String[] tabTexts;
 
@@ -49,12 +49,12 @@ public class SearchResultFragmetnAdministrator extends Fragment {
     private void initView() {
         searchResultFragmetns = new ArrayList<>();
         for (String tabText : tabTexts) {
-            SearchResultFragmetn searchResultFragmetn = SearchResultFragmetn.newInstance(tabText);
+            SearchResultFragment searchResultFragmetn = SearchResultFragment.newInstance(tabText);
             searchResultFragmetns.add(searchResultFragmetn);
         }
 
         SearchResultVPAdapter adapter = new SearchResultVPAdapter(
-                requireFragmentManager(),
+                getChildFragmentManager(),
                 FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT,
                 Arrays.asList(tabTexts),
                 searchResultFragmetns);
@@ -72,11 +72,11 @@ public class SearchResultFragmetnAdministrator extends Fragment {
 
     private void setCurrentSelectFragmentState(Lifecycle.State state) {
         int currentSelectFragment = searchResultTabLayout.getSelectedTabPosition();
-        SearchResultFragmetn fragmetn = searchResultFragmetns.get(currentSelectFragment);
+        SearchResultFragment fragmetn = searchResultFragmetns.get(currentSelectFragment);
         if (!fragmetn.isAdded()) {
             return;
         }
-        requireFragmentManager().beginTransaction()
+        getChildFragmentManager().beginTransaction()
                 .setMaxLifecycle(fragmetn, state)
                 .commit();
     }
@@ -90,6 +90,7 @@ public class SearchResultFragmetnAdministrator extends Fragment {
     @Override
     public void onDestroyView() {
         mUnbinder.unbind();
+        searchResultFragmetns.clear();
         super.onDestroyView();
     }
 

@@ -42,7 +42,7 @@ public class BangumiApp extends Application {
         String decodePlanName = PreferenceUtil.getString(getString(R.string.key_decoder_plan), VideoPlayerEvent.DECODE_PLAN.PLAN_NAME_MEDIA);
         IjkPlayer.init(this);
         if (decodePlanName.equals(VideoPlayerEvent.DECODE_PLAN.PLAN_NAME_MEDIA)) {
-           PlayerConfig.setDefaultPlanId(PlayerConfig.DEFAULT_PLAN_ID);
+            PlayerConfig.setDefaultPlanId(PlayerConfig.DEFAULT_PLAN_ID);
         }
         checkDownLoadTask();
 
@@ -67,7 +67,6 @@ public class BangumiApp extends Application {
 
     /**
      * 把用户手动删除的视频移除出数据库
-     *
      */
     private void checkDownLoadTask() {
         VideoDownloadTaskDao taskDao = AppDatabase.getInstance().getVideoDownloadStackDao();

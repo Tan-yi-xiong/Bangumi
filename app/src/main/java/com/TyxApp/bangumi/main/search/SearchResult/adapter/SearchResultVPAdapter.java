@@ -6,17 +6,17 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 
-import com.TyxApp.bangumi.main.search.SearchResult.SearchResultFragmetn;
+import com.TyxApp.bangumi.main.search.SearchResult.SearchResultFragment;
 
 import java.util.List;
 
 public class SearchResultVPAdapter extends FragmentPagerAdapter {
-    private List<SearchResultFragmetn> mSearchResultFragmetns;
+    private List<SearchResultFragment> mSearchResultFragmetns;
     private List<String> tabTexts;
 
     public SearchResultVPAdapter(@NonNull FragmentManager fm, int behavior,
                                  List<String> tabTexts,
-                                 List<SearchResultFragmetn> searchResultFragmetns) {
+                                 List<SearchResultFragment> searchResultFragmetns) {
 
         super(fm, behavior);
         this.tabTexts = tabTexts;
@@ -39,4 +39,6 @@ public class SearchResultVPAdapter extends FragmentPagerAdapter {
     public int getCount() {
         return mSearchResultFragmetns == null ? 0 : mSearchResultFragmetns.size();
     }
+
+
 }

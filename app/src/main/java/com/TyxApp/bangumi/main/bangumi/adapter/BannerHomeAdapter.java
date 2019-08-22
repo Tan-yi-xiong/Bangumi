@@ -102,7 +102,7 @@ public abstract class BannerHomeAdapter<VH extends BaseViewHolder> extends BaseH
                 }
             });
             mBannerView.setAdapter(adapter);
-            mBannerView.startLunbo(2500);
+            mBannerView.startLunbo(1500);
         } else {
             adapter.addAll(bannerBangumis);
         }

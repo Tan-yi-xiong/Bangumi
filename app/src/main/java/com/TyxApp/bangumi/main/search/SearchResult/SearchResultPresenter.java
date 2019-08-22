@@ -58,5 +58,6 @@ public class SearchResultPresenter implements SearchResultContract.Presenter {
     public void onDestory() {
         mCompositeDisposable.dispose();
         mView = null;
+        bangumiParser = null;
     }
 }

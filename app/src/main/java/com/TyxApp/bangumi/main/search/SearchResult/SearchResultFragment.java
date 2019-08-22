@@ -9,7 +9,6 @@ import android.widget.SearchView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.TyxApp.bangumi.R;
@@ -30,7 +29,7 @@ import com.google.android.material.snackbar.Snackbar;
 
 import java.util.List;
 
-public class SearchResultFragmetn extends RecyclerViewFragment implements SearchResultContract.View {
+public class SearchResultFragment extends RecyclerViewFragment implements SearchResultContract.View {
     public static final String ARG_KEY = "P_TYPE";
     private String lastSearchWord;
     private EditText mEditText;
@@ -148,10 +147,10 @@ public class SearchResultFragmetn extends RecyclerViewFragment implements Search
         super.onDestroyView();
     }
 
-    public static SearchResultFragmetn newInstance(String presenterType) {
+    public static SearchResultFragment newInstance(String presenterType) {
         Bundle args = new Bundle();
         args.putString(ARG_KEY, presenterType);
-        SearchResultFragmetn fragment = new SearchResultFragmetn();
+        SearchResultFragment fragment = new SearchResultFragment();
         fragment.setArguments(args);
         return fragment;
     }

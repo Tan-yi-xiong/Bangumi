@@ -93,7 +93,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="风格"
+                android:text="@string/text_style"
                 android:textColor="@android:color/black"
                 app:layout_constraintStart_toStartOf="@+id/cover"
                 app:layout_constraintTop_toBottomOf="@+id/cover" />
@@ -113,7 +113,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
-                android:text="角色声优"
+                android:text="@string/text_cast"
                 android:textColor="@android:color/black"
                 app:layout_constraintStart_toStartOf="@+id/textView6"
                 app:layout_constraintTop_toBottomOf="@+id/textView6" />
@@ -133,7 +133,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:text="制作"
+                android:text="@string/text_staff"
                 android:textColor="@android:color/black"
                 app:layout_constraintStart_toStartOf="@+id/cast"
                 app:layout_constraintTop_toBottomOf="@+id/cast" />
@@ -153,7 +153,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:text="简介"
+                android:text="@string/text_intro"
                 android:textColor="@android:color/black"
                 app:layout_constraintStart_toStartOf="@+id/staff"
                 app:layout_constraintTop_toBottomOf="@+id/staff" />

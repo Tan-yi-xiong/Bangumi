@@ -14,6 +14,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.viewpager.widget.ViewPager;
 
+import com.TyxApp.bangumi.BangumiApp;
+import com.TyxApp.bangumi.util.LogUtil;
+
 public class BannerView extends ViewPager {
     private long mDuration;
     private boolean bannerSwitch;
@@ -26,7 +29,7 @@ public class BannerView extends ViewPager {
 
     public BannerView(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        CoustomViewPagerScroller mScroller = new CoustomViewPagerScroller(context);
+        CoustomViewPagerScroller mScroller = new CoustomViewPagerScroller(BangumiApp.appContext);
         try {
             Field field = ViewPager.class.getDeclaredField("mScroller");
             field.setAccessible(true);
@@ -85,9 +88,9 @@ public class BannerView extends ViewPager {
             setCurrentItem(1);
             bannerHandler = new Handler() {
                 public void handleMessage(Message mess) {
-                    mDuration = 200;
+                    mDuration = 4000;
                     setCurrentItem(getCurrentItem() + 1);
-                    sendEmptyMessageDelayed(0, bannerTime);
+                    sendEmptyMessageDelayed(0, mDuration);
                 }
             };
         }
@@ -98,7 +101,7 @@ public class BannerView extends ViewPager {
     public void startLunbo() {
         int time;
         if (bannerTime == 0) {
-            time = 2000;
+            time = 1000;
         } else {
             time = bannerTime;
         }
@@ -145,12 +148,12 @@ public class BannerView extends ViewPager {
 
         @Override
         public void startScroll(int startX, int startY, int dx, int dy) {
-            super.startScroll(startX, startY, dx, dy, (int) mDuration);
+            super.startScroll(startX, startY, dx, dy, bannerTime);
         }
 
         @Override
         public void startScroll(int startX, int startY, int dx, int dy, int duration) {
-            super.startScroll(startX, startY, dx, dy, (int) mDuration);
+            super.startScroll(startX, startY, dx, dy, bannerTime);
         }
     }
 }

@@ -91,12 +91,17 @@ public class DanmakuCover extends BaseCover {
     }
 
     @Override
-    public void onReceiverUnBind() {
-        super.onReceiverUnBind();
+    protected void onCoverDetachedToWindow() {
         if (mDanmakuView != null) {
             mDanmakuView.release();
             mDanmakuView = null;
         }
+        super.onCoverDetachedToWindow();
+    }
+
+    @Override
+    public void onReceiverUnBind() {
+        super.onReceiverUnBind();
         getGroupValue().unregisterOnGroupValueUpdateListener(mGroupValueUpdateListener);
         PreferenceManager.getDefaultSharedPreferences(getContext()).unregisterOnSharedPreferenceChangeListener(mListener);
     }

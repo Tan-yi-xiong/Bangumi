@@ -191,4 +191,12 @@ public class PlayerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         recyclerView.setItemAnimator(translationAnimation);
         super.onAttachedToRecyclerView(recyclerView);
     }
+
+    @Override
+    public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
+        mJiAdapter.clear();
+        recommenBangumis.clear();
+        recyclerView.clearAnimation();
+        super.onDetachedFromRecyclerView(recyclerView);
+    }
 }

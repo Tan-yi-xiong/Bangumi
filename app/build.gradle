@@ -53,6 +53,7 @@ dependencies {
     implementation 'com.github.ctiao:DanmakuFlameMaster:0.9.25'
 
     implementation 'androidx.recyclerview:recyclerview:1.0.0'
+//    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.0-alpha-1'
 }
 repositories {
     mavenCentral()

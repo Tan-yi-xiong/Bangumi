@@ -11,6 +11,7 @@ import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
 import com.TyxApp.bangumi.data.source.remote.Dilidili;
 import com.TyxApp.bangumi.data.source.remote.Silisili;
 import com.TyxApp.bangumi.data.source.remote.ZzzFun;
+import com.TyxApp.bangumi.main.bangumi.adapter.BannerHomeAdapter;
 import com.TyxApp.bangumi.main.bangumi.adapter.DefaultHomeAdapter;
 import com.TyxApp.bangumi.main.bangumi.adapter.BaseHomeAdapter;
 import com.TyxApp.bangumi.main.bangumi.adapter.Dilidili.DilidiliHomeAdapter;
@@ -46,6 +47,10 @@ public class BangumiFragment extends RecyclerViewFragment implements BangumiCont
         getRefreshLayout().setRefreshing(true);
         getRefreshLayout().setColorSchemeColors(ContextCompat.getColor(getContext(), R.color.colorPrimary));
         getRefreshLayout().setOnRefreshListener(() -> mPresenter.refreshHomeData());
+
+        if (mHomeAdapter instanceof BannerHomeAdapter) {
+            getLifecycle().addObserver((BannerHomeAdapter) mHomeAdapter);
+        }
 
         getErrorPageView().setOnClickListener(v -> {
             getRefreshLayout().setRefreshing(true);
