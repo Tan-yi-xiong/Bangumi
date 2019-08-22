@@ -145,7 +145,7 @@ public class Qimiqimi implements IBangumiParser {
                     }
                     return document;
                 })
-                .map(document -> {
+                .map(document -> {//解析简介
                     Elements castElements = document.getElementsByClass("nyzhuy").get(0).getElementsByTag("a");
                     StringBuilder builder = new StringBuilder();
                     for (Element castElement : castElements) {
@@ -153,7 +153,7 @@ public class Qimiqimi implements IBangumiParser {
                         builder.append(" ");
                     }
                     builder.deleteCharAt(builder.length() - 1);
-                    String cast = builder.toString();
+                    String cast = builder.toString().replaceAll(" ", "\n");
 
                     Elements leixingElements = document.getElementsByClass("fn-left").get(5).getElementsByTag("a");
                     builder.delete(0, builder.length() - 1);

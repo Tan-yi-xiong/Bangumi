@@ -40,6 +40,14 @@ public class HttpRequestUtil {
                 .body();
     }
 
+    public static String getResponseBodyString(Request request) throws IOException {
+        checkNull(client);
+        ResponseBody responseBody = client.newCall(request)
+                .execute()
+                .body();
+        return responseBody.string();
+    }
+
     public static String getResponseBodyString(String url) throws IOException {
         return getResponseBodyString(url, "UTF-8");
     }

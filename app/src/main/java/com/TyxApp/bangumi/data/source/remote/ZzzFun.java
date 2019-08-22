@@ -17,11 +17,14 @@ import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
 import com.TyxApp.bangumi.player.danmaku.ZzzfunDannukuParser;
 import com.TyxApp.bangumi.util.HttpRequestUtil;
 import com.TyxApp.bangumi.util.LogUtil;
+import com.TyxApp.bangumi.util.ParseUtil;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
+
+import org.jsoup.Jsoup;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -37,6 +40,7 @@ import io.reactivex.schedulers.Schedulers;
 import master.flame.danmaku.danmaku.loader.ILoader;
 import master.flame.danmaku.danmaku.loader.android.DanmakuLoaderFactory;
 import master.flame.danmaku.danmaku.parser.BaseDanmakuParser;
+import okhttp3.Request;
 
 public class ZzzFun implements IBangumiParser {
     private String baseUrl = "http://111.230.89.165:8089/zapi";
@@ -138,16 +142,23 @@ public class ZzzFun implements IBangumiParser {
 
     @Override
     public Observable<BangumiInfo> getInfo(String id) {
-        return Observable.just(baseUrl + "/video.php?pp=" + id)
-                .map(HttpRequestUtil::getResponseBodyString)
-                .map(jsonData -> {
-                    String intro = new JsonParser().parse(jsonData)
-                            .getAsJsonObject()
-                            .get("neirong")
-                            .getAsString()
-                            .replaceAll("<.*?>", "");
-                    return new BangumiInfo("暂无信息", "暂无信息", "暂无信息", "暂无信息", intro, "");
+        return Observable.just("http://www.zzzfun.com/vod-detail-id-"+ id +".html")
+                .map(url -> {
+                    return new Request.Builder().url(url)
+                            .addHeader("User-Agent", "Mozilla/5.0 (Linux; Android 4.4.4; HTC D820u Build/KTU84P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.89 Mobile Safari/537.36")
+                            .build();
                 })
+                .map(HttpRequestUtil::getResponseBodyString)
+                .map(Jsoup::parse)
+                .map(document -> {
+                    String niandai = document.getElementsByAttributeValue("itemprop", "uploadDate").get(0).attr("content");
+                    String cast = document.getElementsByAttributeValue("itemprop", "actor").get(0).attr("content").replaceAll(",", "\n");
+                    String intro = document.getElementsByAttributeValue("itemprop", "description").get(0).attr("content");
+                    String jiTotal = document.getElementsByClass("leo-color-a leo-fs-l leo-ellipsis-1").get(0).text().split("\\|")[1].trim();
+                    String staff = document.getElementsByClass("leo-ellipsis-1 leo-fs-s leo-lh-ss").get(0).text();
+                    return new BangumiInfo(niandai, cast, staff, "", intro, jiTotal);
+                })
+                .doOnError(throwable -> LogUtil.i(throwable.toString() + "  zzinfo"))
                 .subscribeOn(Schedulers.io());
     }
 
