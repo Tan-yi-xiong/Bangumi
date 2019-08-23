@@ -292,4 +292,13 @@ public class SearchActivity extends BaseMvpActivity implements SearchContract.Vi
         }
         super.onBackPressed();
     }
+
+    @Override
+    protected void onDestroy() {
+        Fragment fragment = ActivityUtil.findFragment(getSupportFragmentManager(), SearchResultFragmetnAdministrator.class.getName());
+        if (fragment != null) {
+            getSupportFragmentManager().beginTransaction().remove(fragment);
+        }
+        super.onDestroy();
+    }
 }

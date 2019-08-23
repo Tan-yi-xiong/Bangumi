@@ -15,6 +15,7 @@ import com.TyxApp.bangumi.base.BaseViewHolder;
 import com.TyxApp.bangumi.data.bean.Bangumi;
 import com.TyxApp.bangumi.data.bean.TextItemSelectBean;
 import com.TyxApp.bangumi.player.PlayerActivity;
+import com.TyxApp.bangumi.util.LogUtil;
 
 import java.util.List;
 
@@ -194,9 +195,12 @@ public class PlayerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     @Override
     public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
-        mJiAdapter.clear();
-        recommenBangumis.clear();
-        recyclerView.clearAnimation();
+        if (mJiAdapter != null) {
+            mJiAdapter.clear();
+        }
+        if (recommenBangumis != null) {
+            recommenBangumis.clear();
+        }
         super.onDetachedFromRecyclerView(recyclerView);
     }
 }

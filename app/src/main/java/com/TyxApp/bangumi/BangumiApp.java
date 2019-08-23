@@ -39,8 +39,8 @@ public class BangumiApp extends Application {
         //playerbaseInit
         PlayerLibrary.init(this);
         PlayerConfig.setUseDefaultNetworkEventProducer(true);
-        String decodePlanName = PreferenceUtil.getString(getString(R.string.key_decoder_plan), VideoPlayerEvent.DECODE_PLAN.PLAN_NAME_MEDIA);
         IjkPlayer.init(this);
+        String decodePlanName = PreferenceUtil.getString(getString(R.string.key_decoder_plan), VideoPlayerEvent.DECODE_PLAN.PLAN_NAME_MEDIA);
         if (decodePlanName.equals(VideoPlayerEvent.DECODE_PLAN.PLAN_NAME_MEDIA)) {
             PlayerConfig.setDefaultPlanId(PlayerConfig.DEFAULT_PLAN_ID);
         }
@@ -74,7 +74,7 @@ public class BangumiApp extends Application {
                 .toFlowable()
                 .flatMap(tasks -> Flowable.fromIterable(tasks))
                 .filter(task -> {
-                    if (task.getState() == DownloadServer.STATE_DOWNLOADING) {//有为下载中状态的任务一般为服务被杀死并且没有调用onDestroy, 要手动置为暂停。
+                    if (task.getState() == DownloadServer.STATE_DOWNLOADING) {//下载中状态的任务一般为服务被杀死并且没有调用onDestroy, 要手动置为暂停。
                         task.setState(DownloadServer.STATE_PAUSE);
                         taskDao.update(task);
                     }
@@ -84,6 +84,6 @@ public class BangumiApp extends Application {
                 .subscribe(
                         task -> taskDao.delete(task),
                         throwable -> LogUtil.i(throwable.toString()),
-                        () -> autoRecoverTask());//检查完判断是否启动下载服务
+                        () -> autoRecoverTask());//检查完恢复下载服务
     }
 }

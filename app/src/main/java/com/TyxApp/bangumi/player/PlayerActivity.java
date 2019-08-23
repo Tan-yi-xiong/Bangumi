@@ -5,7 +5,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -14,12 +13,9 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PersistableBundle;
-import android.os.SystemClock;
-import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.SparseArray;
@@ -39,10 +35,10 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.TyxApp.bangumi.BangumiApp;
 import com.TyxApp.bangumi.R;
 import com.TyxApp.bangumi.base.BaseMvpActivity;
 import com.TyxApp.bangumi.base.BasePresenter;
@@ -58,6 +54,7 @@ import com.TyxApp.bangumi.data.source.remote.Qimiqimi;
 import com.TyxApp.bangumi.data.source.remote.Sakura;
 import com.TyxApp.bangumi.data.source.remote.Silisili;
 import com.TyxApp.bangumi.data.source.remote.ZzzFun;
+import com.TyxApp.bangumi.player.adapter.PlayerAdapter;
 import com.TyxApp.bangumi.player.bottomsheet.DanmakuSetingBottomSheet;
 import com.TyxApp.bangumi.player.bottomsheet.DetailBottomSheet;
 import com.TyxApp.bangumi.player.bottomsheet.MainBottomSheet;
@@ -67,11 +64,9 @@ import com.TyxApp.bangumi.player.cover.ErrorCover;
 import com.TyxApp.bangumi.player.cover.GestureCover;
 import com.TyxApp.bangumi.player.cover.LoadingCover;
 import com.TyxApp.bangumi.player.cover.PlayerControlCover;
-import com.TyxApp.bangumi.player.adapter.PlayerAdapter;
 import com.TyxApp.bangumi.server.DownloadBinder;
 import com.TyxApp.bangumi.server.DownloadServer;
 import com.TyxApp.bangumi.util.AnimationUtil;
-import com.TyxApp.bangumi.util.LogUtil;
 import com.TyxApp.bangumi.util.PreferenceUtil;
 import com.TyxApp.bangumi.view.ParallaxBaseVideoView;
 import com.bumptech.glide.Glide;
@@ -795,11 +790,27 @@ public class PlayerActivity extends BaseMvpActivity implements PlayContract.View
     }
 
     @Override
+    public void onBackPressed() {
+        if (isFullScreen()) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
     protected void onDestroy() {
         mReceiverGroup.clearReceivers();
         mVideoview.stopPlayback();
         mReceiverGroup = null;
         mVideoview = null;
+        mRecyclerView.setAdapter(null);
+        mRecyclerView.setItemAnimator(null);
+        for (Fragment fragment : getSupportFragmentManager().getFragments()) {
+            getSupportFragmentManager().beginTransaction()
+                    .remove(fragment)
+                    .commitNowAllowingStateLoss();
+        }
         if (mServiceConnection != null) {
             unbindService(mServiceConnection);
         }

@@ -144,6 +144,12 @@ public class SearchResultFragment extends RecyclerViewFragment implements Search
 
     @Override
     public void onDestroyView() {
+        getRecyclerview().setAdapter(null);
+        getRecyclerview().setAnimation(null);
+        getRecyclerview().setItemAnimator(null);
+        getRecyclerview().clearOnScrollListeners();
+        mAdapter.clear();
+        mEditText = null;
         super.onDestroyView();
     }
 

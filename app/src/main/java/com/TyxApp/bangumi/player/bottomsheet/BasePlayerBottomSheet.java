@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.TyxApp.bangumi.base.BaseAdapter;
 import com.TyxApp.bangumi.util.ExceptionUtil;
+import com.TyxApp.bangumi.util.LogUtil;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
@@ -21,18 +22,18 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 public abstract class BasePlayerBottomSheet extends BottomSheetDialogFragment {
     public static final String ARGUMENT_TAG = "a_t";
     BaseAdapter.OnItemClickListener mClickListener;
-    private RecyclerView.Adapter mAdapter;
+    private RecyclerView mRecyclerView;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        RecyclerView recyclerView = new RecyclerView(requireContext());
-        recyclerView.setBackgroundColor(Color.WHITE);
-        mAdapter = getAdapter();
-        ExceptionUtil.checkNull(mAdapter, "继承BasePlayerBottomSheet必须传进一个Adapter");
-        recyclerView.setAdapter(mAdapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext(), RecyclerView.VERTICAL,false));
-        return recyclerView;
+        mRecyclerView = new RecyclerView(inflater.getContext());
+        mRecyclerView.setBackgroundColor(Color.WHITE);
+        RecyclerView.Adapter adapter = getAdapter();
+        ExceptionUtil.checkNull(adapter, "继承BasePlayerBottomSheet必须传进一个Adapter");
+        mRecyclerView.setAdapter(adapter);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext(), RecyclerView.VERTICAL,false));
+        return mRecyclerView;
     }
 
     abstract RecyclerView.Adapter getAdapter();
@@ -47,22 +48,20 @@ public abstract class BasePlayerBottomSheet extends BottomSheetDialogFragment {
                 .setState(BottomSheetBehavior.STATE_EXPANDED);
     }
 
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        getDialog().setOnShowListener(null);
-        getDialog().setOnCancelListener(null);
-        getDialog().setOnDismissListener(null);
-    }
-
     public void setOnItemClickListener(BaseAdapter.OnItemClickListener onItemClickListener) {
         mClickListener = onItemClickListener;
     }
 
     @Override
     public void onDestroyView() {
-        RecyclerView recyclerView = (RecyclerView) getView();
-        recyclerView.removeAllViews();
+        mRecyclerView.setLayoutManager(null);
+        mRecyclerView.setAdapter(null);
+        mRecyclerView.setAnimation(null);
         super.onDestroyView();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
     }
 }

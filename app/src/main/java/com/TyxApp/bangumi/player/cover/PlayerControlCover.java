@@ -208,6 +208,12 @@ public class PlayerControlCover extends ImpTimeAndTouchListenerCover {
     }
 
     @Override
+    protected void onCoverDetachedToWindow() {
+        tapEventHandle.removeCallbacksAndMessages(null);
+        super.onCoverDetachedToWindow();
+    }
+
+    @Override
     public void onTimerUpdate(int curr, int duration, int bufferPercentage) {
         setSeekBar(curr, duration, bufferPercentage);
         setTimeText(curr, duration);
@@ -216,7 +222,6 @@ public class PlayerControlCover extends ImpTimeAndTouchListenerCover {
     @Override
     public void onReceiverUnBind() {
         mUnbinder.unbind();
-        tapEventHandle.removeCallbacksAndMessages(null);
         super.onReceiverUnBind();
     }
 
