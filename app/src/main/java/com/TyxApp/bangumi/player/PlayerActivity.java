@@ -183,7 +183,8 @@ public class PlayerActivity extends BaseMvpActivity implements PlayContract.View
 
         @Override
         public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-            if (mVideoview.getState() != IPlayer.STATE_STARTED || mVideoview.getTranslationY() < 0) {
+            int state = mVideoview.getState();
+            if ((state != IPlayer.STATE_STARTED && state != IPlayer.STATE_INITIALIZED) || mVideoview.getTranslationY() < 0) {
                 int scrollY = mInfoViewGroup.getTop();
                 if (topPoint != 0) {
                     scrollY = scrollY - topPoint;
