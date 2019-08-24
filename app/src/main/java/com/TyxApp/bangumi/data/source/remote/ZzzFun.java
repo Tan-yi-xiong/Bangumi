@@ -155,7 +155,7 @@ public class ZzzFun implements IHomePageParse, ISearchParser {
                 .map(document -> {
                     String niandai = document.getElementsByAttributeValue("itemprop", "uploadDate").get(0).attr("content");
                     String cast = document.getElementsByAttributeValue("itemprop", "actor").get(0).attr("content").replaceAll(",", "\n");
-                    String intro = document.getElementsByAttributeValue("itemprop", "description").get(0).attr("content");
+                    String intro = document.getElementsByClass("leo-color-e leo-fs-s leo-ellipsis-2").get(0).text();
                     String jiTotal = document.getElementsByClass("leo-color-a leo-fs-l leo-ellipsis-1").get(0).text().split("\\|")[1].trim();
                     String staff = document.getElementsByClass("leo-ellipsis-1 leo-fs-s leo-lh-ss").get(0).text();
                     return new BangumiInfo(niandai, cast, staff, "", intro, jiTotal);

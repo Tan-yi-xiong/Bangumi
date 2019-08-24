@@ -293,13 +293,20 @@ public class PlayerActivity extends BaseMvpActivity implements PlayContract.View
                 break;
 
             case VideoPlayerEvent.Code.CODE_CONTROL_VIEW_SHOW://进度控制显示和消失
+                boolean isViewShow = bundle.getBoolean(VideoPlayerEvent.Key.CONTROL_VIEW_SHOW);
                 if (!isFullScreen()) {
-                    if (bundle.getBoolean(VideoPlayerEvent.Key.CONTROL_VIEW_SHOW)) {
+                    if (isViewShow) {
                         gradualToolbar.setVisibility(View.VISIBLE);
                     } else {
                         if (mVideoview.getState() != IPlayer.STATE_PAUSED) {
                             gradualToolbar.setVisibility(View.GONE);
                         }
+                    }
+                } else {
+                    if (isViewShow) {
+                        showStateBar();
+                    } else {
+                        hindStateBar();
                     }
                 }
                 break;
@@ -331,7 +338,7 @@ public class PlayerActivity extends BaseMvpActivity implements PlayContract.View
                 showMainBottomSheet();
                 break;
 
-            case VideoPlayerEvent.Code.CODE_DANMAKU_PREPARED:
+            case VideoPlayerEvent.Code.CODE_DANMAKU_PREPARED://弹幕准备完成
                 if (!mVideoview.isInPlaybackState() && !mReceiverGroup.getGroupValue().getBoolean(VideoPlayerEvent.Key.ERROR_COVER_SHOW)) {
                     mVideoview.start();
                 }
@@ -510,7 +517,9 @@ public class PlayerActivity extends BaseMvpActivity implements PlayContract.View
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
 
         Window window = getWindow();
-        window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        if (!isFullScreen()) {
+            window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        }
         window.getDecorView().setSystemUiVisibility(UI_STATE);
     }
 
