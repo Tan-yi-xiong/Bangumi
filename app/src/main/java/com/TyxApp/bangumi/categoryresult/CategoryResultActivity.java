@@ -130,9 +130,8 @@ public class CategoryResultActivity extends BaseMvpActivity implements CategoryR
     @Override
     public void showResult(List<Bangumi> results) {
         mProgressBar.setVisibility(View.GONE);
-        mRecyclerView.setVisibility(View.VISIBLE);
-        mAdapter.clearAddAll(results);
         isLoading = false;
+        mAdapter.clearAddAll(results);
     }
 
     @Override

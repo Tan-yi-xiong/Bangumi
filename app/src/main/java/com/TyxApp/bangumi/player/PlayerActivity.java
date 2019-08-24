@@ -67,6 +67,7 @@ import com.TyxApp.bangumi.player.cover.PlayerControlCover;
 import com.TyxApp.bangumi.server.DownloadBinder;
 import com.TyxApp.bangumi.server.DownloadServer;
 import com.TyxApp.bangumi.util.AnimationUtil;
+import com.TyxApp.bangumi.util.LogUtil;
 import com.TyxApp.bangumi.util.PreferenceUtil;
 import com.TyxApp.bangumi.view.ParallaxBaseVideoView;
 import com.bumptech.glide.Glide;
@@ -182,7 +183,7 @@ public class PlayerActivity extends BaseMvpActivity implements PlayContract.View
 
         @Override
         public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-            if (mVideoview.isInPlaybackState() && mVideoview.getState() == IPlayer.STATE_PAUSED) {
+            if (mVideoview.getState() != IPlayer.STATE_STARTED || mVideoview.getTranslationY() < 0) {
                 int scrollY = mInfoViewGroup.getTop();
                 if (topPoint != 0) {
                     scrollY = scrollY - topPoint;
@@ -273,6 +274,9 @@ public class PlayerActivity extends BaseMvpActivity implements PlayContract.View
                 if (!isActive) {
                     mVideoview.pause();
                 }
+                if (isUserPause) {
+                    mVideoview.pause();
+                }
             }
         });
     }
@@ -284,11 +288,7 @@ public class PlayerActivity extends BaseMvpActivity implements PlayContract.View
                 break;
 
             case VideoPlayerEvent.Code.CODE_BACK://返回图标按下
-                if (isFullScreen()) {
-                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-                } else {
-                    finish();
-                }
+                onBackPressed();
                 break;
 
             case VideoPlayerEvent.Code.CODE_CONTROL_VIEW_SHOW://进度控制显示和消失
@@ -395,6 +395,7 @@ public class PlayerActivity extends BaseMvpActivity implements PlayContract.View
         }
         findViewById(R.id.stateBar).getLayoutParams().height = stateBarheight;
 
+        gradualToolbar.setBackgroundColor(ContextCompat.getColor(this, R.color.colorPrimary));//xml设置有bug
         gradualToolbar.getBackground().setAlpha(0);
     }
 
