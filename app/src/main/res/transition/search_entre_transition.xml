@@ -3,14 +3,14 @@
     <transition
         class="com.TyxApp.bangumi.main.search.transitions.CircularReveal"
         android:interpolator="@android:interpolator/accelerate_decelerate"
-        android:duration="200">
+        android:duration="300">
         <targets>
             <target android:targetId="@id/searchBar"/>
         </targets>
     </transition>
 
     <fade
-        android:duration="200">
+        android:duration="300">
         <targets>
             <target android:targetId="@+id/searchBar_background"/>
         </targets>

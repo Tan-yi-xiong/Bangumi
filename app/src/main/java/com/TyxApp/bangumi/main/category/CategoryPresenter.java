@@ -1,6 +1,6 @@
 package com.TyxApp.bangumi.main.category;
 
-import com.TyxApp.bangumi.data.source.remote.IBangumiParser;
+import com.TyxApp.bangumi.parse.IHomePageParse;
 import com.TyxApp.bangumi.util.ExceptionUtil;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -8,20 +8,20 @@ import io.reactivex.disposables.CompositeDisposable;
 
 public class CategoryPresenter implements CategoryContract.Presenter {
     private CategoryContract.View mView;
-    private IBangumiParser mBangumiParser;
+    private IHomePageParse mHomePageParse;
     private CompositeDisposable mDisposable;
 
-    public CategoryPresenter(CategoryContract.View view, IBangumiParser parser) {
+    public CategoryPresenter(CategoryContract.View view, IHomePageParse parser) {
         ExceptionUtil.checkNull(view, "view不能为空, CategoryPresenter");
         ExceptionUtil.checkNull(parser, "parser不能为空, CategoryPresenter");
-        mBangumiParser = parser;
+        mHomePageParse = parser;
         mView = view;
         mDisposable = new CompositeDisposable();
     }
 
     @Override
     public void getCategoryItems() {
-        mDisposable.add(mBangumiParser.getCategorItems()
+        mDisposable.add(mHomePageParse.getCategorItems()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         categorItems -> mView.showCategoryItems(categorItems),

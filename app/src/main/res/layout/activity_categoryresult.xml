@@ -30,7 +30,6 @@
 
 
     <androidx.recyclerview.widget.RecyclerView
-        android:visibility="gone"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"

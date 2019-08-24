@@ -10,6 +10,8 @@ import com.TyxApp.bangumi.data.bean.TextItemSelectBean;
 import com.TyxApp.bangumi.data.bean.VideoUrl;
 import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
 import com.TyxApp.bangumi.main.bangumi.adapter.BannerHomeAdapter;
+import com.TyxApp.bangumi.parse.IHomePageParse;
+import com.TyxApp.bangumi.parse.ISearchParser;
 import com.TyxApp.bangumi.util.HttpRequestUtil;
 import com.TyxApp.bangumi.util.LogUtil;
 import com.TyxApp.bangumi.util.ParseUtil;
@@ -34,7 +36,7 @@ import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
 import master.flame.danmaku.danmaku.parser.BaseDanmakuParser;
 
-public class Dilidili implements IBangumiParser {
+public class Dilidili implements IHomePageParse, ISearchParser {
     private static final String BASE_URL = "http://m.dilidili.name";
     private static final String BASE_URL_PC = "http://www.dilidili.name";
     private List<String> mPlayerUrls;

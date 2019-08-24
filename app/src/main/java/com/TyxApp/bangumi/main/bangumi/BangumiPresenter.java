@@ -1,27 +1,22 @@
 package com.TyxApp.bangumi.main.bangumi;
 
 
-import com.TyxApp.bangumi.data.bean.Bangumi;
-import com.TyxApp.bangumi.data.source.remote.IBangumiParser;
+import com.TyxApp.bangumi.parse.IHomePageParse;
 import com.TyxApp.bangumi.util.ExceptionUtil;
-import com.TyxApp.bangumi.util.LogUtil;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 
 public class BangumiPresenter implements BangumiContract.Presenter {
-    private IBangumiParser banghumiParser;
+    private IHomePageParse mHomePageParse;
     private BangumiContract.View mView;
     private CompositeDisposable mCompositeDisposable;
 
-    public BangumiPresenter(IBangumiParser banghumiParser, BangumiContract.View view) {
-        ExceptionUtil.checkNull(banghumiParser, "BangumiPresenter modle解析不能为空");
+    public BangumiPresenter(IHomePageParse homePageParse, BangumiContract.View view) {
+        ExceptionUtil.checkNull(homePageParse, "mHomePageParse modle解析不能为空");
         ExceptionUtil.checkNull(view, "BangumiPresenter view不能为空");
 
-        this.banghumiParser = banghumiParser;
+        this.mHomePageParse = homePageParse;
         mView = view;
         mCompositeDisposable = new CompositeDisposable();
     }
@@ -40,7 +35,7 @@ public class BangumiPresenter implements BangumiContract.Presenter {
     @Override
     public void populaterBangumi() {
         //加载主页数据
-        mCompositeDisposable.add(banghumiParser.getHomePageBangumiData()
+        mCompositeDisposable.add(mHomePageParse.getHomePageBangumiData()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         groupBangumis -> mView.showHomeBangumis(groupBangumis),

@@ -14,6 +14,8 @@ import com.TyxApp.bangumi.data.bean.Result;
 import com.TyxApp.bangumi.data.bean.TextItemSelectBean;
 import com.TyxApp.bangumi.data.bean.VideoUrl;
 import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
+import com.TyxApp.bangumi.parse.IHomePageParse;
+import com.TyxApp.bangumi.parse.ISearchParser;
 import com.TyxApp.bangumi.player.danmaku.ZzzfunDannukuParser;
 import com.TyxApp.bangumi.util.HttpRequestUtil;
 import com.TyxApp.bangumi.util.LogUtil;
@@ -42,7 +44,7 @@ import master.flame.danmaku.danmaku.loader.android.DanmakuLoaderFactory;
 import master.flame.danmaku.danmaku.parser.BaseDanmakuParser;
 import okhttp3.Request;
 
-public class ZzzFun implements IBangumiParser {
+public class ZzzFun implements IHomePageParse, ISearchParser {
     private String baseUrl = "http://111.230.89.165:8089/zapi";
     private int categoryPage;
     private String mCategoryWord;

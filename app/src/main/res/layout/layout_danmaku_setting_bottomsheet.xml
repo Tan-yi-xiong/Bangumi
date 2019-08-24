@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
@@ -20,6 +21,7 @@
             android:layout_height="wrap_content" />
 
         <androidx.appcompat.widget.SwitchCompat
+            app:theme="@style/AppTheme"
             android:id="@+id/switchDanmaku"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
@@ -41,6 +43,7 @@
             android:layout_height="wrap_content" />
 
         <androidx.appcompat.widget.AppCompatSeekBar
+            app:theme="@style/AppTheme"
             android:id="@+id/danmakuTextSizeSeekBar"
             android:max="200"
             android:layout_weight="1"
@@ -70,6 +73,7 @@
             android:layout_height="wrap_content" />
 
         <androidx.appcompat.widget.AppCompatSeekBar
+            app:theme="@style/AppTheme"
             android:id="@+id/danmakuMaxLineSeekBar"
             android:max="8"
             android:layout_weight="1"

@@ -48,12 +48,12 @@ import com.TyxApp.bangumi.data.bean.TextItemSelectBean;
 import com.TyxApp.bangumi.data.bean.VideoUrl;
 import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
 import com.TyxApp.bangumi.data.source.remote.Dilidili;
-import com.TyxApp.bangumi.data.source.remote.IBangumiParser;
 import com.TyxApp.bangumi.data.source.remote.Nico;
 import com.TyxApp.bangumi.data.source.remote.Qimiqimi;
 import com.TyxApp.bangumi.data.source.remote.Sakura;
 import com.TyxApp.bangumi.data.source.remote.Silisili;
 import com.TyxApp.bangumi.data.source.remote.ZzzFun;
+import com.TyxApp.bangumi.parse.IVideoParse;
 import com.TyxApp.bangumi.player.adapter.PlayerAdapter;
 import com.TyxApp.bangumi.player.bottomsheet.DanmakuSetingBottomSheet;
 import com.TyxApp.bangumi.player.bottomsheet.DetailBottomSheet;
@@ -210,7 +210,7 @@ public class PlayerActivity extends BaseMvpActivity implements PlayContract.View
         Intent intent = getIntent();
         intent.setExtrasClassLoader(Bangumi.class.getClassLoader());
         mBangumi = intent.getParcelableExtra(INTENT_KEY);
-        IBangumiParser parser = null;
+        IVideoParse parser = null;
         switch (mBangumi.getVideoSoure()) {
             case BangumiPresistenceContract.BangumiSource.NiICO:
                 parser = Nico.getInstance();

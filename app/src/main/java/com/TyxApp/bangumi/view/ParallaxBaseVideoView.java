@@ -27,7 +27,7 @@ public class ParallaxBaseVideoView extends BaseVideoView {
 
     public void setOfferSet(int offset) {
         offset = Math.max(minOffset, offset);
-        if (offset != getTranslationY() && offset <= 0) {
+        if (offset != getTranslationY()) {
             setTranslationY(offset);
             videoOffset = (int) (offset * 0.6);
             postInvalidateOnAnimation();

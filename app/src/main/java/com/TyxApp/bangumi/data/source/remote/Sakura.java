@@ -7,6 +7,7 @@ import com.TyxApp.bangumi.data.bean.Result;
 import com.TyxApp.bangumi.data.bean.TextItemSelectBean;
 import com.TyxApp.bangumi.data.bean.VideoUrl;
 import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
+import com.TyxApp.bangumi.parse.ISearchParser;
 import com.TyxApp.bangumi.util.HttpRequestUtil;
 import com.TyxApp.bangumi.util.ParseUtil;
 
@@ -24,7 +25,7 @@ import io.reactivex.ObservableTransformer;
 import io.reactivex.schedulers.Schedulers;
 import master.flame.danmaku.danmaku.parser.BaseDanmakuParser;
 
-public class Sakura implements IBangumiParser {
+public class Sakura implements ISearchParser {
     private static String baseUrl = "http://m.imomoe.io";
     private String nextSearchPageUrl;
     private List<String> mVideoPlayerUrls;
@@ -33,11 +34,6 @@ public class Sakura implements IBangumiParser {
         return new Sakura();
     }
 
-
-    @Override
-    public Observable<Map<String, List<Bangumi>>> getHomePageBangumiData() {
-        return null;
-    }
 
     @Override
     public Observable<List<Bangumi>> getSearchResult(String word) {
@@ -185,26 +181,6 @@ public class Sakura implements IBangumiParser {
                 .toList()
                 .toObservable()
                 .subscribeOn(Schedulers.io());
-    }
-
-    @Override
-    public Observable<List<Bangumi>> getCategoryBangumis(String category) {
-        return null;
-    }
-
-    @Override
-    public Observable<Result<List<Bangumi>>> getNextCategoryBangumis() {
-        return null;
-    }
-
-    @Override
-    public Observable<List<CategorItem>> getCategorItems() {
-        return null;
-    }
-
-    @Override
-    public Observable<List<List<Bangumi>>> getBangumiTimeTable() {
-        return null;
     }
 
     @Override

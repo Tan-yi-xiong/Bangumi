@@ -18,9 +18,9 @@ import com.TyxApp.bangumi.categoryresult.adapter.CategoryResultAdapter;
 import com.TyxApp.bangumi.data.bean.Bangumi;
 import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
 import com.TyxApp.bangumi.data.source.remote.Dilidili;
-import com.TyxApp.bangumi.data.source.remote.IBangumiParser;
 import com.TyxApp.bangumi.data.source.remote.Silisili;
 import com.TyxApp.bangumi.data.source.remote.ZzzFun;
+import com.TyxApp.bangumi.parse.IHomePageParse;
 import com.TyxApp.bangumi.player.adapter.TranslationAnimation;
 import com.TyxApp.bangumi.util.PreferenceUtil;
 import com.google.android.material.snackbar.Snackbar;
@@ -49,7 +49,7 @@ public class CategoryResultActivity extends BaseMvpActivity implements CategoryR
         fade.excludeTarget(android.R.id.statusBarBackground, true);
         getWindow().setEnterTransition(fade);
         String currentHomeSoure = PreferenceUtil.getString(getString(R.string.key_home_sourch), BangumiPresistenceContract.BangumiSource.ZZZFUN);
-        IBangumiParser parser = null;
+        IHomePageParse parser = null;
         switch (currentHomeSoure) {
             case BangumiPresistenceContract.BangumiSource.ZZZFUN:
                 parser = ZzzFun.getInstance();

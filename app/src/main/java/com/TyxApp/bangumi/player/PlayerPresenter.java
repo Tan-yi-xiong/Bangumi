@@ -6,7 +6,7 @@ import com.TyxApp.bangumi.BangumiApp;
 import com.TyxApp.bangumi.data.bean.Bangumi;
 import com.TyxApp.bangumi.data.source.local.AppDatabase;
 import com.TyxApp.bangumi.data.source.local.BangumiDao;
-import com.TyxApp.bangumi.data.source.remote.IBangumiParser;
+import com.TyxApp.bangumi.parse.IVideoParse;
 import com.TyxApp.bangumi.util.ExceptionUtil;
 import com.TyxApp.bangumi.util.LogUtil;
 
@@ -15,12 +15,12 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 
 public class PlayerPresenter implements PlayContract.Presenter {
-    private IBangumiParser mParser;
+    private IVideoParse mParser;
     private PlayContract.View mView;
     private CompositeDisposable mDisposable;
     private BangumiDao mBangumiDao;
 
-    public PlayerPresenter(IBangumiParser parser, PlayContract.View view) {
+    public PlayerPresenter(IVideoParse parser, PlayContract.View view) {
         ExceptionUtil.checkNull(view, "view不能为空  PlayContract");
         ExceptionUtil.checkNull(parser, "presenter不能为空  PlayContract");
         mParser = parser;

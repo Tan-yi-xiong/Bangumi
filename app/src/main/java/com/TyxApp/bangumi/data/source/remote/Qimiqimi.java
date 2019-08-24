@@ -9,6 +9,7 @@ import com.TyxApp.bangumi.data.bean.Result;
 import com.TyxApp.bangumi.data.bean.TextItemSelectBean;
 import com.TyxApp.bangumi.data.bean.VideoUrl;
 import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
+import com.TyxApp.bangumi.parse.ISearchParser;
 import com.TyxApp.bangumi.util.LogUtil;
 import com.TyxApp.bangumi.util.ParseUtil;
 import com.google.gson.JsonParser;
@@ -27,7 +28,7 @@ import io.reactivex.ObservableTransformer;
 import io.reactivex.schedulers.Schedulers;
 import master.flame.danmaku.danmaku.parser.BaseDanmakuParser;
 
-public class Qimiqimi implements IBangumiParser {
+public class Qimiqimi implements ISearchParser {
     private static final String BASE_URL = "http://www.qimiqimi.co";
     private int page;
     private String searchWord;
@@ -35,10 +36,6 @@ public class Qimiqimi implements IBangumiParser {
     private List<String> htmlPlayerUrls;
     private List<Bangumi> recommendBangumis;
 
-    @Override
-    public Observable<Map<String, List<Bangumi>>> getHomePageBangumiData() {
-        return null;
-    }
 
     public static Qimiqimi newInstance() {
         return new Qimiqimi();
@@ -196,26 +193,6 @@ public class Qimiqimi implements IBangumiParser {
     @Override
     public Observable<List<Bangumi>> getRecommendBangumis(String id) {
         return recommendBangumis == null ? Observable.error(new IllegalAccessError()) : Observable.just(recommendBangumis);
-    }
-
-    @Override
-    public Observable<List<Bangumi>> getCategoryBangumis(String category) {
-        return null;
-    }
-
-    @Override
-    public Observable<Result<List<Bangumi>>> getNextCategoryBangumis() {
-        return null;
-    }
-
-    @Override
-    public Observable<List<CategorItem>> getCategorItems() {
-        return null;
-    }
-
-    @Override
-    public Observable<List<List<Bangumi>>> getBangumiTimeTable() {
-        return null;
     }
 
     @Override

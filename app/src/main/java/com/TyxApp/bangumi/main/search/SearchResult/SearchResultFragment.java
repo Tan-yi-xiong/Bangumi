@@ -17,13 +17,13 @@ import com.TyxApp.bangumi.base.RecyclerViewFragment;
 import com.TyxApp.bangumi.data.bean.Bangumi;
 import com.TyxApp.bangumi.data.source.local.BangumiPresistenceContract;
 import com.TyxApp.bangumi.data.source.remote.Dilidili;
-import com.TyxApp.bangumi.data.source.remote.IBangumiParser;
 import com.TyxApp.bangumi.data.source.remote.Nico;
 import com.TyxApp.bangumi.data.source.remote.Qimiqimi;
 import com.TyxApp.bangumi.data.source.remote.Sakura;
 import com.TyxApp.bangumi.data.source.remote.Silisili;
 import com.TyxApp.bangumi.data.source.remote.ZzzFun;
 import com.TyxApp.bangumi.main.search.SearchResult.adapter.SearchResultRVAdapter;
+import com.TyxApp.bangumi.parse.ISearchParser;
 import com.TyxApp.bangumi.util.ExceptionUtil;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -66,7 +66,7 @@ public class SearchResultFragment extends RecyclerViewFragment implements Search
     public BasePresenter getPresenter() {
         ExceptionUtil.checkNull(getArguments(), "必须通过newInstance方法创建实例");
         String type = getArguments().getString(ARG_KEY);
-        IBangumiParser parser = null;
+        ISearchParser parser = null;
         switch (type) {
             case BangumiPresistenceContract
                     .BangumiSource.ZZZFUN:
