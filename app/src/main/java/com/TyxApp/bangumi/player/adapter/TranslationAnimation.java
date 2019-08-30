@@ -21,6 +21,7 @@ import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
+import android.view.animation.AccelerateDecelerateInterpolator;
 
 import androidx.annotation.NonNull;
 import androidx.core.view.ViewCompat;
@@ -236,6 +237,8 @@ public class TranslationAnimation extends SimpleItemAnimator {
         final ViewPropertyAnimator animation = view.animate();
         mAddAnimations.add(holder);
         animation.alpha(1).translationY(0).setDuration(getAddDuration())
+                .setInterpolator(new AccelerateDecelerateInterpolator())
+                .setStartDelay(holder.getAdapterPosition() * 100)
                 .setListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationStart(Animator animator) {

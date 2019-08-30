@@ -1,5 +1,7 @@
 package com.TyxApp.bangumi.data.source.remote;
 
+import android.text.TextUtils;
+
 import androidx.annotation.Nullable;
 
 import com.TyxApp.bangumi.data.bean.Bangumi;
@@ -75,10 +77,13 @@ public class Dilidili implements IHomePageParse, ISearchParser {
                     //解析更新
                     if (returnObservable.get() == null) {
                         Observable.fromIterable(document.getElementById("newId").child(0).children())
-                                .take(6)
+                                .take(7)
                                 .map(element -> {
                                     String url = element.getElementsByTag("a").attr("href");
                                     Document doc = Jsoup.parse(HttpRequestUtil.getResponseBodyString(url));
+                                    if (doc.getElementsByClass("chri_mis chri_404").size() > 0) {
+                                        return new Bangumi();//出现错误返回一个没数据的类然后过滤
+                                    }
                                     String id = parseId(doc.getElementsByTag("h4").get(0).child(0).attr("href"));
                                     String cover = element.getElementsByClass("coverImg").attr("style");
                                     cover = cover.substring(cover.indexOf("(") + 1, cover.lastIndexOf(")"));
@@ -86,9 +91,9 @@ public class Dilidili implements IHomePageParse, ISearchParser {
                                     String jiTotal = element.getElementsByTag("h4").text();
                                     Bangumi bangumi = new Bangumi(id, BangumiPresistenceContract.BangumiSource.DILIDLI, name, cover);
                                     bangumi.setRemarks(jiTotal);
-
                                     return bangumi;
                                 })
+                                .filter(bangumi -> !TextUtils.isEmpty(bangumi.getVideoId()))//过滤出错的
                                 .toList()
                                 .doOnError(throwable -> LogUtil.i(throwable.toString() + "dili home"))
                                 .subscribe(
