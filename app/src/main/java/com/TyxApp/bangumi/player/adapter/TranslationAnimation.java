@@ -55,6 +55,7 @@ public class TranslationAnimation extends SimpleItemAnimator {
     ArrayList<RecyclerView.ViewHolder> mChangeAnimations = new ArrayList<>();
 
     private int startTranslationY;
+    private boolean setstartDelay = true;
 
     private static class MoveInfo {
         public RecyclerView.ViewHolder holder;
@@ -101,6 +102,10 @@ public class TranslationAnimation extends SimpleItemAnimator {
 
     public void setStartTranslationY(int startTranslationY) {
         this.startTranslationY = startTranslationY;
+    }
+
+    public void setSetstartDelay(boolean b) {
+        setstartDelay = b;
     }
 
     @Override
@@ -237,8 +242,7 @@ public class TranslationAnimation extends SimpleItemAnimator {
         final ViewPropertyAnimator animation = view.animate();
         mAddAnimations.add(holder);
         animation.alpha(1).translationY(0).setDuration(getAddDuration())
-                .setInterpolator(new AccelerateDecelerateInterpolator())
-                .setStartDelay(holder.getAdapterPosition() * 100)
+                .setStartDelay(setstartDelay ? holder.getAdapterPosition() * 100 : 0)
                 .setListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationStart(Animator animator) {

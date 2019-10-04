@@ -188,7 +188,9 @@ public class ZzzFun implements IHomePageParse, ISearchParser {
             }
             videoUrls = playUrls;
             emitter.onNext(jiList);
-        }).subscribeOn(Schedulers.io());
+        })
+                .doOnError(throwable -> LogUtil.i(throwable.toString() + "  zzzzfunjilist"))
+                .subscribeOn(Schedulers.io());
     }
 
     @Override

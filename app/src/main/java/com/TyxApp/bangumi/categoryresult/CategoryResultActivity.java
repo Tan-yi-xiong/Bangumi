@@ -79,6 +79,7 @@ public class CategoryResultActivity extends BaseMvpActivity implements CategoryR
         TranslationAnimation animation = new TranslationAnimation();
         animation.setStartTranslationY(1000);
         animation.setAddDuration(250);
+        animation.setSetstartDelay(false);
         mRecyclerView.setItemAnimator(animation);
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
